@@ -2520,6 +2520,69 @@ async def can_join_team():
     return {"can_join": True, "reason": None}
 
 
+# ========== NOTIFICATION ENDPOINTS ==========
+
+@api_router.get("/notifications/{user_id}")
+async def get_user_notifications(user_id: str, unread_only: bool = False):
+    """Get notifications for a user"""
+    query = {"user_id": user_id}
+    if unread_only:
+        query["read"] = False
+    
+    notifications = await db.notifications.find(query, {"_id": 0}).sort("created_at", -1).limit(50).to_list(50)
+    return notifications
+
+
+@api_router.post("/notifications/{notification_id}/read")
+async def mark_notification_read(notification_id: str):
+    """Mark a notification as read"""
+    result = await db.notifications.update_one(
+        {"id": notification_id},
+        {"$set": {"read": True, "read_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    
+    return {"message": "Notification marked as read"}
+
+
+@api_router.post("/notifications/{user_id}/read-all")
+async def mark_all_notifications_read(user_id: str):
+    """Mark all notifications as read for a user"""
+    await db.notifications.update_many(
+        {"user_id": user_id, "read": False},
+        {"$set": {"read": True, "read_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"message": "All notifications marked as read"}
+
+
+@api_router.get("/notifications/{user_id}/unread-count")
+async def get_unread_count(user_id: str):
+    """Get count of unread notifications"""
+    count = await db.notifications.count_documents({"user_id": user_id, "read": False})
+    return {"count": count}
+
+
+async def create_notification(user_id: str, notification_type: str, title: str, message: str, data: dict = None):
+    """Helper function to create a notification"""
+    from uuid import uuid4
+    notification = {
+        "id": str(uuid4()),
+        "user_id": user_id,
+        "type": notification_type,  # 'winner', 'loser', 'tie', 'weekly_summary'
+        "title": title,
+        "message": message,
+        "data": data or {},
+        "read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.notifications.insert_one(notification)
+    return notification
+
+
 # ========== STRIPE PAYMENT ENDPOINTS ==========
 
 @api_router.post("/stripe/create-checkout")
