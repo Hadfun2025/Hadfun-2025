@@ -25,8 +25,15 @@ async def fetch_upcoming():
         try:
             print(f"\nFetching {league_name}...")
             
-            # Use get_upcoming_fixtures method
-            fixtures = await service.get_upcoming_fixtures(league_id, days=60, season=2025)
+            # Get fixtures for next 2 months
+            today = datetime.now().strftime('%Y-%m-%d')
+            end_date = (datetime.now() + timedelta(days=60)).strftime('%Y-%m-%d')
+            fixtures = await service.get_fixtures_by_league_and_season(
+                league_id, 
+                season=2025, 
+                from_date=today, 
+                to_date=end_date
+            )
             
             if fixtures:
                 print(f"  Found {len(fixtures)} upcoming fixtures")
