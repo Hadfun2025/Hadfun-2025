@@ -1,0 +1,17 @@
+date,time,home_team,away_team,home_score,away_score,league,matchday,status
+2025-08-15,19:00,Liverpool,Bournemouth,4,2,Premier League,1,FINISHED
+2025-08-16,11:30,Aston Villa,Newcastle,0,0,Premier League,1,FINISHED
+2025-08-16,14:00,Brighton,Fulham,1,1,Premier League,1,FINISHED
+2025-08-16,14:00,Tottenham,Burnley,3,0,Premier League,1,FINISHED
+2025-08-16,14:00,Sunderland,West Ham,3,0,Premier League,1,FINISHED
+2025-08-16,16:30,Wolves,Manchester City,0,4,Premier League,1,FINISHED
+2025-11-09,14:00,Manchester City,Liverpool,3,0,Premier League,11,FINISHED
+2025-11-09,14:00,Aston Villa,Bournemouth,4,0,Premier League,11,FINISHED
+2025-11-09,14:00,Brentford,Newcastle,3,1,Premier League,11,FINISHED
+2025-11-09,14:00,Crystal Palace,Brighton,0,0,Premier League,11,FINISHED
+2025-11-09,14:00,Nottingham Forest,Leeds,3,1,Premier League,11,FINISHED
+2025-11-23,12:30,Leicester,Chelsea,,,Premier League,12,SCHEDULED
+2025-11-23,15:00,Arsenal,Nottingham Forest,,,Premier League,12,SCHEDULED
+2025-11-23,15:00,Brighton,Bournemouth,,,Premier League,12,SCHEDULED
+2025-11-23,17:30,Manchester City,Tottenham,,,Premier League,12,SCHEDULED
+2025-11-24,14:00,Southampton,Liverpool,,,Premier League,12,SCHEDULED

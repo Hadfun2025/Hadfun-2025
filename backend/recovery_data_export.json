@@ -1,0 +1,141 @@
+{
+  "timestamp": "2025-11-22T00:03:02.737422",
+  "team": {
+    "id": "34b52ce5-dfd2-4e98-90da-2ad67b82a407",
+    "name": "CHESHUNT CREW",
+    "admin_user_id": "ff88ef75-1201-477a-91d4-1e896d3ef6fc",
+    "admin_username": "aysin",
+    "created_at": "2025-10-28T00:53:08.525257",
+    "member_count": 5,
+    "stake_amount": 5.0,
+    "play_mode": "fun",
+    "is_private": true,
+    "join_code": "256BFA9A",
+    "members": [
+      "ff88ef75-1201-477a-91d4-1e896d3ef6fc",
+      "pistachios-id-123",
+      "339292a9-13bf-4027-b4eb-dc73f070d368"
+    ]
+  },
+  "members": [
+    {
+      "id": "34b52ce5-dfd2-4e98-90da-2ad67b82a407-ff88ef75-1201-477a-91d4-1e896d3ef6fc",
+      "team_id": "34b52ce5-dfd2-4e98-90da-2ad67b82a407",
+      "user_id": "ff88ef75-1201-477a-91d4-1e896d3ef6fc",
+      "username": "aysin",
+      "joined_at": "2025-11-15T05:01:28.664329",
+      "role": "admin"
+    },
+    {
+      "id": "34b52ce5-dfd2-4e98-90da-2ad67b82a407-pistachios-id-123",
+      "team_id": "34b52ce5-dfd2-4e98-90da-2ad67b82a407",
+      "user_id": "pistachios-id-123",
+      "username": "pistachios",
+      "joined_at": "2025-11-15T05:01:28.664792",
+      "role": "member"
+    },
+    {
+      "id": "34b52ce5-dfd2-4e98-90da-2ad67b82a407-339292a9-13bf-4027-b4eb-dc73f070d368",
+      "team_id": "34b52ce5-dfd2-4e98-90da-2ad67b82a407",
+      "user_id": "339292a9-13bf-4027-b4eb-dc73f070d368",
+      "username": "aysindjemil",
+      "joined_at": "2025-11-15T05:01:28.665236",
+      "role": "member"
+    },
+    {
+      "id": "75ef120f-343e-4884-8f01-2e8662d0618a",
+      "team_id": "34b52ce5-dfd2-4e98-90da-2ad67b82a407",
+      "user_id": "501704cd-d4dd-4963-b5c0-eb28cad759fd",
+      "username": "Josh",
+      "joined_at": "2025-11-18T17:38:49.759288",
+      "role": "member"
+    },
+    {
+      "id": "959589d0-07f7-4458-b29c-48d2a173251c",
+      "team_id": "34b52ce5-dfd2-4e98-90da-2ad67b82a407",
+      "user_id": "4eafcccb-1aba-4bf6-8813-497707f567ae",
+      "username": "Remster",
+      "joined_at": "2025-11-21T18:57:53.458044+00:00",
+      "role": "member"
+    },
+    {
+      "id": "1c70dc0d-3cbf-4d2b-a561-0a43ac715a47",
+      "team_id": "34b52ce5-dfd2-4e98-90da-2ad67b82a407",
+      "user_id": "1a3e63d3-6463-485f-bbde-89f6edf5dcb7",
+      "username": "Ayhan",
+      "joined_at": "2025-11-21T23:29:20.767173+00:00",
+      "role": "member"
+    },
+    {
+      "id": "535ca2fe-9f96-4b64-8696-d899d330670a",
+      "team_id": "34b52ce5-dfd2-4e98-90da-2ad67b82a407",
+      "user_id": "2fc4b4b0-3cad-4111-8579-948ced24987e",
+      "username": "Leeanne",
+      "joined_at": "2025-11-21T23:29:20.774777+00:00",
+      "role": "member"
+    }
+  ],
+  "users": [
+    {
+      "id": "ff88ef75-1201-477a-91d4-1e896d3ef6fc",
+      "username": "aysin",
+      "email": "info@hadfun.co.uk",
+      "created_at": "2025-10-21T22:30:46.278189",
+      "total_points": 0,
+      "season_points": 0,
+      "weekly_wins": 0,
+      "weekly_points": 0,
+      "bio": "Updated bio: Arsenal supporter and charity advocate",
+      "birthdate": "1990-01-01",
+      "favorite_leagues": [
+        39,
+        140
+      ],
+      "favorite_team": "Arsenal",
+      "full_name": "Aysin Test",
+      "profile_completed": true,
+      "updated_at": "2025-11-15T02:01:01.601978+00:00"
+    },
+    {
+      "id": "pistachios-id-123",
+      "username": "pistachios",
+      "email": "pistachios@hadfun.co.uk",
+      "total_points": 0,
+      "season_points": 0,
+      "weekly_wins": 0,
+      "created_at": "2025-11-15T00:00:00Z",
+      "updated_at": "2025-11-15T00:00:00Z",
+      "profile_completed": false,
+      "full_name": null,
+      "bio": null,
+      "birthdate": null,
+      "avatar_url": null,
+      "location": null,
+      "favorite_team": null,
+      "favorite_leagues": [],
+      "interests": null
+    },
+    {
+      "id": "339292a9-13bf-4027-b4eb-dc73f070d368",
+      "username": "aysindjemil",
+      "email": "aysindjemil@yahoo.com",
+      "created_at": "2025-11-15T04:56:34.180439",
+      "updated_at": "2025-11-15T04:57:46.783063+00:00",
+      "total_points": 0,
+      "season_points": 0,
+      "weekly_wins": 0,
+      "full_name": "Aysin the master Djemil",
+      "bio": "Cool and refreshing",
+      "birthdate": "1966-12-08",
+      "avatar_url": null,
+      "location": null,
+      "favorite_team": "west Ham",
+      "favorite_leagues": [],
+      "interests": "football, cycling, swimming",
+      "profile_completed": true
+    },
+    {
+      "id": "4eafcccb-1aba-4bf6-8813-497707f567ae",
+      "username": "Remster",
+      "email": "Remie.djemil@gmail.com",
+      "created_at": 

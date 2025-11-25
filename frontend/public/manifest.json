@@ -1,0 +1,24 @@
+{
+  "short_name": "HadFun",
+  "name": "HadFun Predictor",
+  "description": "Football predictions with weekly pot prizes",
+  "icons": [
+    {
+      "src": "/hadfun-logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/hadfun-logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#6366f1",
+  "background_color": "#ffffff",
+  "orientation": "portrait"
+}

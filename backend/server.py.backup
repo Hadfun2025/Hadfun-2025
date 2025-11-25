@@ -1,5 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Request, File, UploadFile
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, APIRouter, HTTPException, Request
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -17,11 +16,7 @@ from matchweek_service import MatchweekService
 from stripe_service import StripePaymentService
 from email_service import EmailService
 from models import *
-from team_models import Team, TeamCreate, TeamMember, TeamJoin, TeamMessage, MessageCreate, TeamStats, TeamNomination, NominationCreate, WinnerDonation, TeamInvitation, InvitationCreate
-
-# Import new route modules
-from routes import posts as posts_router
-from routes import auth as auth_router
+from team_models import Team, TeamCreate, TeamMember, TeamJoin, TeamMessage, MessageCreate, TeamStats
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -79,21 +74,6 @@ def get_stripe_service(request: Request) -> StripePaymentService:
 # Create the main app
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
-
-# Add CORS middleware FIRST (before mounting static files)
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["*"],
-)
-
-# Mount static files for uploads
-UPLOAD_DIR = Path("/app/backend/uploads")
-UPLOAD_DIR.mkdir(exist_ok=True)
-app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
 # Configure logging
 logging.basicConfig(
@@ -229,14 +209,10 @@ SUPPORTED_LEAGUES = [
     {"id": 94, "name": "Primeira Liga", "country": "Portugal", "season": 2025},
     {"id": 88, "name": "Eredivisie", "country": "Netherlands", "season": 2025},
     {"id": 203, "name": "Süper Lig", "country": "Turkey", "season": 2025},
-    # Americas Leagues
+    # International Leagues
     {"id": 253, "name": "MLS", "country": "USA", "season": 2025},
     {"id": 71, "name": "Brasileirão", "country": "Brazil", "season": 2025},
     {"id": 239, "name": "Liga BetPlay", "country": "Colombia", "season": 2025},
-    # European Competitions (2025/26 Season)
-    {"id": 2, "name": "UEFA Champions League", "country": "Europe", "season": 2025},
-    {"id": 3, "name": "UEFA Europa League", "country": "Europe", "season": 2025},
-    {"id": 848, "name": "UEFA Conference League", "country": "Europe", "season": 2025},
 ]
 
 
@@ -495,6 +471,378 @@ async def score_all_pending_predictions():
         
         for pred in pending_predictions:
             fixture_id = pred.get('fixture_id')
+            fixture = await db.fixtures.find_one({"fixture_id": fixture_id})
+            
+            if not fixture:
+                return 'levante'
+            elif 'alav' in normalized or 'alavés' in normalized:
+                return 'alaves'
+            elif 'oviedo' in normalized:
+                return 'oviedo'
+            
+            # === ITALY (Serie A) ===
+            elif 'milan' in normalized and 'inter' not in normalized:
+                return 'milan'
+            elif 'inter' in normalized:
+                return 'inter'
+            elif 'juventus' in normalized:
+                return 'juventus'
+            elif 'roma' in normalized:
+                return 'roma'
+            elif 'napoli' in normalized:
+                return 'napoli'
+            elif 'lazio' in normalized:
+                return 'lazio'
+            elif 'atalanta' in normalized:
+                return 'atalanta'
+            elif 'fiorentina' in normalized:
+                return 'fiorentina'
+            elif 'bologna' in normalized:
+                return 'bologna'
+            elif 'torino' in normalized:
+                return 'torino'
+            elif 'udinese' in normalized:
+                return 'udinese'
+            elif 'genoa' in normalized:
+                return 'genoa'
+            elif 'cagliari' in normalized:
+                return 'cagliari'
+            elif 'parma' in normalized:
+                return 'parma'
+            elif 'lecce' in normalized:
+                return 'lecce'
+            elif 'sassuolo' in normalized:
+                return 'sassuolo'
+            elif 'verona' in normalized:
+                return 'verona'
+            elif 'como' in normalized:
+                return 'como'
+            elif 'pisa' in normalized:
+                return 'pisa'
+            elif 'cremonese' in normalized:
+                return 'cremonese'
+            
+            # === COLOMBIA ===
+            elif 'deportivo cali' in normalized:
+                return 'deportivo cali'
+            elif 'deportivo pasto' in normalized:
+                return 'deportivo pasto'
+            elif 'deportivo pereira' in normalized:
+                return 'deportivo pereira'
+            elif 'deportivo tolima' in normalized or 'deportes tolima' in normalized:
+                return 'deportivo tolima'
+            
+            # === PREMIER LEAGUE (keep existing) ===
+            elif 'manchester' in normalized:
+                if 'united' in normalized or 'utd' in normalized:
+                    return 'manchester united'
+                elif 'city' in normalized:
+                    return 'manchester city'
+            elif 'west ham' in normalized:
+                return 'west ham'
+            elif 'newcastle' in normalized and ('united' in normalized or 'utd' in normalized):
+                return 'newcastle united'
+            elif 'leeds' in normalized and ('united' in normalized or 'utd' in normalized):
+                return 'leeds united'
+            elif 'brighton' in normalized:
+                return 'brighton'
+            elif 'crystal palace' in normalized:
+                return 'crystal palace'
+            elif 'tottenham' in normalized:
+                return 'tottenham'
+            elif 'nottingham' in normalized:
+                return 'nottingham forest'
+            elif 'aston villa' in normalized:
+                return 'aston villa'
+            elif 'wolverhampton' in normalized or 'wolves' in normalized:
+                return 'wolves'
+            elif 'leicester' in normalized:
+                return 'leicester'
+            elif 'bournemouth' in normalized:
+                return 'bournemouth'
+            
+            # === CHAMPIONSHIP ===
+            elif 'coventry' in normalized:
+                return 'coventry'
+            elif 'sheffield united' in normalized or 'sheffield utd' in normalized:
+                return 'sheffield united'
+            elif 'sheffield wednesday' in normalized:
+                return 'sheffield wednesday'
+            elif 'west brom' in normalized or 'west bromwich' in normalized:
+                return 'west brom'
+            elif 'queens park rangers' in normalized or 'qpr' in normalized:
+                return 'qpr'
+            elif 'preston' in normalized:
+                return 'preston'
+            elif 'oxford united' in normalized or 'oxford utd' in normalized:
+                return 'oxford united'
+            elif 'birmingham' in normalized:
+                return 'birmingham'
+            elif 'blackburn' in normalized:
+                return 'blackburn'
+            elif 'derby' in normalized:
+                return 'derby'
+            elif 'ipswich' in normalized:
+                return 'ipswich'
+            elif 'norwich' in normalized:
+                return 'norwich'
+            elif 'swansea' in normalized:
+                return 'swansea'
+            
+            # === SCOTTISH ===
+            elif 'dundee united' in normalized or 'dundee utd' in normalized:
+                return 'dundee united'
+            elif 'dundee' in normalized:
+                return 'dundee'
+            
+            # === BUNDESLIGA ===
+            elif 'hoffenheim' in normalized:
+                return 'hoffenheim'
+            elif 'heidenheim' in normalized:
+                return 'heidenheim'
+            elif 'köln' in normalized or 'koln' in normalized:
+                return 'koln'
+            elif 'mainz' in normalized:
+                return 'mainz'
+            elif 'union berlin' in normalized:
+                return 'union berlin'
+            elif 'bayern' in normalized and 'münchen' in normalized:
+                return 'bayern munich'
+            elif 'bayern' in normalized:
+                return 'bayern'
+            elif 'leverkusen' in normalized:
+                return 'leverkusen'
+            elif 'dortmund' in normalized:
+                return 'dortmund'
+            elif 'mönchengladbach' in normalized or 'monchengladbach' in normalized:
+                return 'monchengladbach'
+            elif 'frankfurt' in normalized:
+                return 'frankfurt'
+            elif 'st. pauli' in normalized or 'st pauli' in normalized:
+                return 'st pauli'
+            elif 'werder bremen' in normalized:
+                return 'werder bremen'
+            
+            # For remaining teams, remove common suffixes
+            suffixes = [
+                ' & hove albion fc', ' & hove albion', ' hove albion fc', ' hove albion',
+                ' united fc', ' utd fc', ' city fc', ' hotspur fc', ' wanderers fc', 
+                ' athletic fc', ' town fc', ' rovers fc', ' albion fc', ' county fc',
+                ' north end fc', ' park rangers fc', ' balompié', ' de fútbol',
+                ' calcio', ' fc', ' afc', ' cf', ' ec', ' sv', ' sc', ' bc', ' ac'
+            ]
+            
+            for suffix in suffixes:
+                if normalized.endswith(suffix):
+                    normalized = normalized[:-len(suffix)].strip()
+                    break
+            
+            # Replace united with utd for consistency
+            normalized = normalized.replace(' united', ' utd')
+            
+            # Clean up
+            normalized = normalized.replace('&', 'and').replace('  ', ' ').strip()
+            
+            return normalized
+            """Comprehensive normalization for ALL leagues and team name variations"""
+            if not name:
+                return ""
+            
+            # Convert to lowercase and strip
+            normalized = name.lower().strip()
+            
+            # Remove number prefixes (1., 1899, 1846, 04, 05, 1910, etc.)
+            import re
+            normalized = re.sub(r'^\d+\.?\s*', '', normalized)  # Remove leading numbers
+            normalized = re.sub(r'\s+\d{2,4}$', '', normalized)  # Remove trailing year numbers
+            
+            # Remove common prefixes
+            prefixes = ['afc ', 'fc ', 'tsg ', 'fsv ', 'sv ', 'sc ', 'rb ', 'vfb ', 'vfl ', 'bayer ']
+            for prefix in prefixes:
+                if normalized.startswith(prefix):
+                    normalized = normalized[len(prefix):].strip()
+            
+            # Handle special multi-word teams FIRST
+            # Premier League
+            if 'manchester' in normalized:
+                if 'united' in normalized or 'utd' in normalized:
+                    return 'manchester united'
+                elif 'city' in normalized:
+                    return 'manchester city'
+            elif 'west ham' in normalized:
+                return 'west ham'
+            elif 'newcastle' in normalized and ('united' in normalized or 'utd' in normalized):
+                return 'newcastle united'
+            elif 'leeds' in normalized and ('united' in normalized or 'utd' in normalized):
+                return 'leeds united'
+            elif 'brighton' in normalized:
+                return 'brighton'
+            elif 'crystal palace' in normalized:
+                return 'crystal palace'
+            elif 'tottenham' in normalized:
+                return 'tottenham'
+            elif 'nottingham' in normalized:
+                return 'nottingham forest'
+            elif 'aston villa' in normalized:
+                return 'aston villa'
+            elif 'wolverhampton' in normalized or 'wolves' in normalized:
+                return 'wolves'
+            elif 'leicester' in normalized:
+                return 'leicester'
+            elif 'bournemouth' in normalized:
+                return 'bournemouth'
+            
+            # Championship
+            elif 'coventry' in normalized:
+                return 'coventry'
+            elif 'sheffield united' in normalized or 'sheffield utd' in normalized:
+                return 'sheffield united'
+            elif 'sheffield wednesday' in normalized:
+                return 'sheffield wednesday'
+            elif 'west brom' in normalized or 'west bromwich' in normalized:
+                return 'west brom'
+            elif 'queens park rangers' in normalized or 'qpr' in normalized:
+                return 'qpr'
+            elif 'preston' in normalized:
+                return 'preston'
+            elif 'oxford united' in normalized or 'oxford utd' in normalized:
+                return 'oxford united'
+            elif 'birmingham' in normalized:
+                return 'birmingham'
+            elif 'blackburn' in normalized:
+                return 'blackburn'
+            elif 'derby' in normalized:
+                return 'derby'
+            elif 'ipswich' in normalized:
+                return 'ipswich'
+            elif 'norwich' in normalized:
+                return 'norwich'
+            elif 'swansea' in normalized:
+                return 'swansea'
+            
+            # Scottish
+            elif 'dundee united' in normalized or 'dundee utd' in normalized:
+                return 'dundee united'
+            elif 'dundee' in normalized:
+                return 'dundee'
+            
+            # Bundesliga
+            elif 'hoffenheim' in normalized:
+                return 'hoffenheim'
+            elif 'heidenheim' in normalized:
+                return 'heidenheim'
+            elif 'köln' in normalized or 'koln' in normalized:
+                return 'koln'
+            elif 'mainz' in normalized:
+                return 'mainz'
+            elif 'union berlin' in normalized:
+                return 'union berlin'
+            elif 'bayern' in normalized and 'munich' in normalized:
+                return 'bayern munich'
+            elif 'bayern' in normalized:
+                return 'bayern'
+            elif 'leverkusen' in normalized:
+                return 'leverkusen'
+            elif 'dortmund' in normalized:
+                return 'dortmund'
+            elif 'mönchengladbach' in normalized or 'monchengladbach' in normalized:
+                return 'monchengladbach'
+            elif 'frankfurt' in normalized:
+                return 'frankfurt'
+            elif 'st. pauli' in normalized or 'st pauli' in normalized:
+                return 'st pauli'
+            elif 'werder bremen' in normalized:
+                return 'werder bremen'
+            
+            # Remove common suffixes
+            suffixes = [
+                ' & hove albion fc', ' & hove albion', ' hove albion fc', ' hove albion',
+                ' united fc', ' utd fc', ' city fc', ' hotspur fc', ' wanderers fc', 
+                ' athletic fc', ' town fc', ' rovers fc', ' albion fc', ' county fc',
+                ' north end fc', ' park rangers fc',
+                ' fc', ' afc', ' cf', ' ec', ' sv', ' sc'
+            ]
+            
+            for suffix in suffixes:
+                if normalized.endswith(suffix):
+                    normalized = normalized[:-len(suffix)].strip()
+                    break
+            
+            # Replace united with utd for consistency
+            normalized = normalized.replace(' united', ' utd')
+            
+            # Clean up
+            normalized = normalized.replace('&', 'and').replace('  ', ' ').strip()
+            
+            return normalized
+        
+        # Find all fixtures
+        all_fixtures = await db.fixtures.find({}).to_list(length=None)
+        
+        # Track unique matches with normalized names
+        seen = {}
+        duplicates_to_remove = []
+        
+        for fixture in all_fixtures:
+            home = fixture.get('home_team', '')
+            away = fixture.get('away_team', '')
+            date = fixture.get('utc_date')
+            fixture_id = fixture.get('fixture_id')
+            league_id = fixture.get('league_id')
+            
+            # Normalize team names for comparison
+            home_norm = normalize_team_name(home)
+            away_norm = normalize_team_name(away)
+            
+            # Create key with normalized names and league
+            key = f"{league_id}|{home_norm}|{away_norm}|{date}"
+            
+            if key in seen:
+                # Duplicate found - keep the one with higher fixture_id (more recent)
+                existing_id, existing_original = seen[key]
+                if fixture_id > existing_id:
+                    # Remove old one, keep new one
+                    duplicates_to_remove.append(existing_id)
+                    seen[key] = (fixture_id, (home, away))
+                else:
+                    # Remove this one, keep existing
+                    duplicates_to_remove.append(fixture_id)
+            else:
+                seen[key] = (fixture_id, (home, away))
+        
+        removed_count = 0
+        if duplicates_to_remove:
+            result = await db.fixtures.delete_many({'fixture_id': {'$in': duplicates_to_remove}})
+            removed_count = result.deleted_count
+        
+        remaining = await db.fixtures.count_documents({})
+        
+        logger.info(f"✅ Cleaned up {removed_count} duplicate fixtures (aggressive normalization). {remaining} remaining.")
+        
+        return {
+            "message": "Duplicates cleaned up successfully",
+            "duplicates_removed": removed_count,
+            "remaining_fixtures": remaining
+        }
+    except Exception as e:
+        logger.error(f"Error cleaning up duplicates: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.post("/admin/score-predictions")
+async def score_all_pending_predictions():
+    """
+    Score all pending predictions by checking fixture statuses
+    """
+    try:
+        # Get all pending predictions
+        pending_predictions = await db.predictions.find({"result": "pending"}).to_list(1000)
+        
+        scored_count = 0
+        not_finished_count = 0
+        
+        for pred in pending_predictions:
+            fixture_id = pred.get('fixture_id')
             
             # Get fixture from database
             fixture = await db.fixtures.find_one({"fixture_id": fixture_id})
@@ -662,8 +1010,7 @@ async def load_upcoming_fixtures():
         
         logger.info("🔄 Loading upcoming fixtures for all leagues...")
         
-        # Get all league IDs from SUPPORTED_LEAGUES
-        league_configs = {league['id']: league['season'] for league in SUPPORTED_LEAGUES}
+        league_ids = [39, 40, 179, 140, 78, 135, 61, 94, 88, 203, 253, 71, 239]
         service = get_active_football_service()
         
         # Get fixtures for next 30 days
@@ -674,9 +1021,9 @@ async def load_upcoming_fixtures():
             check_date = today + timedelta(days=days_offset)
             date_str = check_date.strftime('%Y-%m-%d')
             
-            for league_id, season in league_configs.items():
+            for league_id in league_ids:
                 try:
-                    fixtures = await service.get_fixtures_by_date(date_str, league_id, season=season)
+                    fixtures = await service.get_fixtures_by_date(date_str, league_id, season=2025)
                     all_fixtures.extend(fixtures)
                 except Exception as e:
                     logger.warning(f"Error fetching {date_str} league {league_id}: {str(e)}")
@@ -884,13 +1231,11 @@ async def get_fixtures(
                 # Use naive datetime for comparison (MongoDB stores as naive UTC)
                 query["utc_date"] = {"$gte": now.replace(tzinfo=None)}
             else:
-                # For full season (365 days), go back to start of season
+                # For full season (365 days), go back to August (start of season)
                 # Otherwise, get fixtures from past 7 days to current + next days_ahead
                 if days_ahead >= 180:  # Full season or long range
-                    # For international competitions (2024 season) go back to Jan 2024
-                    # For domestic leagues (2025 season) go back to August 2024
-                    # This covers Champions League 2024/25, Nations League 2024, etc.
-                    start_date = datetime(2024, 1, 1)  # Naive datetime - covers all competitions
+                    # Season started in August 2025, go back to August 1st, 2025
+                    start_date = datetime(2025, 8, 1)  # Naive datetime
                 else:
                     start_date = now.replace(tzinfo=None) - timedelta(days=7)
                 
@@ -1031,14 +1376,7 @@ async def get_league_standings(league_ids: str = "39"):
         
         for league_id in league_id_list:
             try:
-                # Find the correct season for this league
-                league_season = 2025  # default
-                for league in SUPPORTED_LEAGUES:
-                    if league['id'] == league_id:
-                        league_season = league['season']
-                        break
-                
-                standings_data = await service.get_league_standings(league_id, season=league_season)
+                standings_data = await service.get_league_standings(league_id, season=2025)
                 
                 if standings_data and len(standings_data) > 0:
                     league_data = standings_data[0]
@@ -1083,8 +1421,45 @@ async def get_league_standings(league_ids: str = "39"):
 
 
 # ========== USER ENDPOINTS ==========
-# NOTE: User endpoints have been moved to routes/auth.py
-# Keeping this section marker for reference
+
+@api_router.post("/users", response_model=User)
+async def create_user(user: UserCreate):
+    """Create a new user"""
+    existing = await db.users.find_one({"username": user.username})
+    if existing:
+        raise HTTPException(status_code=400, detail="Username already exists")
+    
+    # Check team capacity
+    settings = await db.team_settings.find_one({}, {"_id": 0})
+    if settings:
+        member_count = await db.users.count_documents({})
+        max_members = settings.get('max_members', 30)
+        
+        if member_count >= max_members:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Team is full. Maximum {max_members} members allowed."
+            )
+    
+    user_obj = User(**user.model_dump())
+    doc = user_obj.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    
+    await db.users.insert_one(doc)
+    return user_obj
+
+
+@api_router.get("/users/{username}", response_model=User)
+async def get_user(username: str):
+    """Get user by username"""
+    user = await db.users.find_one({"username": username}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if isinstance(user.get('created_at'), str):
+        user['created_at'] = datetime.fromisoformat(user['created_at'])
+    
+    return user
 
 
 # ========== PREDICTION ENDPOINTS ==========
@@ -1104,7 +1479,7 @@ async def create_or_update_prediction(pred: PredictionCreate):
     from datetime import datetime, timezone
     now = datetime.now(timezone.utc)
     
-    # Check 1: Weekly deadline (Wednesday 23:59 UTC)
+    # Check 1: Weekly deadline (Wednesday 23:59)
     # Get the next Wednesday at 23:59
     days_until_wednesday = (2 - now.weekday()) % 7  # Wednesday is day 2
     if days_until_wednesday == 0 and now.hour >= 23 and now.minute >= 59:
@@ -1113,13 +1488,10 @@ async def create_or_update_prediction(pred: PredictionCreate):
     weekly_deadline = now.replace(hour=23, minute=59, second=59, microsecond=0)
     weekly_deadline = weekly_deadline + timedelta(days=days_until_wednesday)
     
-    # Check 2: Match kickoff time - ensure timezone-aware
+    # Check 2: Match kickoff time
     match_date = datetime.fromisoformat(pred.match_date.replace('Z', '+00:00'))
-    # Ensure match_date is timezone-aware (convert if naive)
-    if match_date.tzinfo is None:
-        match_date = match_date.replace(tzinfo=timezone.utc)
     
-    # Determine which deadline applies (both are now timezone-aware)
+    # Determine which deadline applies
     effective_deadline = min(weekly_deadline, match_date)
     
     if now >= effective_deadline:
@@ -1150,10 +1522,6 @@ async def create_or_update_prediction(pred: PredictionCreate):
         user = await db.users.find_one({"id": pred.user_id})
         
         # Update prediction with refreshed fixture details
-        match_date_value = fixture.get('utc_date') or fixture.get('match_date')
-        if isinstance(match_date_value, datetime):
-            match_date_value = match_date_value.isoformat()
-        
         await db.predictions.update_one(
             {"user_id": pred.user_id, "fixture_id": pred.fixture_id},
             {"$set": {
@@ -1162,7 +1530,7 @@ async def create_or_update_prediction(pred: PredictionCreate):
                 "home_team": fixture.get('home_team'),
                 "away_team": fixture.get('away_team'),
                 "league": fixture.get('league_name'),
-                "match_date": match_date_value,
+                "match_date": fixture.get('utc_date') or fixture.get('match_date'),
                 "status": fixture.get('status', 'SCHEDULED'),
                 "user_email": user.get("email") if user else existing.get("user_email")
             }}
@@ -1188,11 +1556,6 @@ async def create_or_update_prediction(pred: PredictionCreate):
         # Get user email from database
         user = await db.users.find_one({"id": pred.user_id})
         
-        # Convert match_date to ISO format if it's a datetime object
-        match_date_value = fixture.get('utc_date') or fixture.get('match_date')
-        if isinstance(match_date_value, datetime):
-            match_date_value = match_date_value.isoformat()
-        
         pred_dict.update({
             "week_id": week_id,
             "result": "pending",
@@ -1200,7 +1563,7 @@ async def create_or_update_prediction(pred: PredictionCreate):
             "home_team": fixture.get('home_team'),
             "away_team": fixture.get('away_team'),
             "league": fixture.get('league_name'),
-            "match_date": match_date_value,
+            "match_date": fixture.get('utc_date') or fixture.get('match_date'),
             "home_score": None,
             "away_score": None
         })
@@ -1849,7 +2212,7 @@ async def get_team_members(team_id: str):
 
 @api_router.get("/teams/{team_id}/leaderboard")
 async def get_team_leaderboard(team_id: str, weekly: bool = False):
-    """Get leaderboard for a specific team (PRIVATE to team) - Shows ALL members"""
+    """Get leaderboard for a specific team (PRIVATE to team)"""
     # Get team members
     members = await db.team_members.find({"team_id": team_id}, {"_id": 0}).to_list(100)
     member_ids = [m['user_id'] for m in members]
@@ -1874,111 +2237,22 @@ async def get_team_leaderboard(team_id: str, weekly: bool = False):
     
     stats = await db.predictions.aggregate(pipeline).to_list(None)
     
-    # Create a map of user_id to their prediction stats
-    stats_map = {stat["_id"]: stat for stat in stats}
-    
-    # Get user details for ALL team members (not just those with predictions)
-    leaderboard = []
-    for member_id in member_ids:
-        user = await db.users.find_one({"id": member_id}, {"_id": 0})
-        if user:
-            stat = stats_map.get(member_id)
-            leaderboard.append({
-                "username": user['username'],
-                "total_points": user.get(sort_field, 0),
-                "correct_predictions": stat['correct_predictions'] if stat else 0,
-                "total_predictions": stat['total_predictions'] if stat else 0,
-                "weekly_wins": user.get('weekly_wins', 0),
-                "rank": 0
-            })
-    
-    # Sort by points (then by correct predictions as tiebreaker)
-    leaderboard.sort(key=lambda x: (x['total_points'], x['correct_predictions']), reverse=True)
-    
-    # Assign ranks
-    for idx, entry in enumerate(leaderboard):
-        entry['rank'] = idx + 1
-    
-    return leaderboard
-
-
-@api_router.get("/teams/{team_id}/leaderboard/by-league")
-async def get_team_leaderboard_by_league(team_id: str, league: str = None):
-    """
-    Get team leaderboard filtered by league
-    Shows only members who made predictions in the specified league
-    """
-    # Get team members
-    members = await db.team_members.find({"team_id": team_id}, {"_id": 0}).to_list(100)
-    member_ids = [m['user_id'] for m in members]
-    
-    if not league:
-        # Return available leagues for this team
-        pipeline = [
-            {"$match": {"user_id": {"$in": member_ids}}},
-            {"$group": {"_id": "$league_name"}},
-            {"$sort": {"_id": 1}}
-        ]
-        leagues = await db.predictions.aggregate(pipeline).to_list(None)
-        league_names = [l['_id'] for l in leagues if l['_id']]
-        return {"leagues": league_names}
-    
-    # Get predictions stats filtered by league
-    pipeline = [
-        {
-            "$match": {
-                "user_id": {"$in": member_ids},
-                "league_name": league
-            }
-        },
-        {
-            "$group": {
-                "_id": "$user_id",
-                "username": {"$first": "$username"},
-                "total_predictions": {"$sum": 1},
-                "correct_predictions": {
-                    "$sum": {"$cond": [{"$eq": ["$result", "correct"]}, 1, 0]}
-                }
-            }
-        }
-    ]
-    
-    stats = await db.predictions.aggregate(pipeline).to_list(None)
-    
-    if not stats:
-        return []
-    
-    # Build leaderboard with only users who have predictions in this league
+    # Get user details
     leaderboard = []
     for stat in stats:
         user = await db.users.find_one({"id": stat["_id"]}, {"_id": 0})
         if user:
             leaderboard.append({
                 "username": user['username'],
-                "league_name": league,
+                "total_points": user.get(sort_field, 0),
                 "correct_predictions": stat['correct_predictions'],
                 "total_predictions": stat['total_predictions'],
-                "league_points": 0,  # Will calculate below
+                "weekly_wins": user.get('weekly_wins', 0),
                 "rank": 0
             })
     
-    # Sort by correct predictions (most correct wins)
-    leaderboard.sort(key=lambda x: x['correct_predictions'], reverse=True)
-    
-    # Award league points (3 for winner, 1 if tied)
-    if len(leaderboard) > 0:
-        top_correct = leaderboard[0]['correct_predictions']
-        
-        # Count how many users are tied for first
-        winners = [entry for entry in leaderboard if entry['correct_predictions'] == top_correct]
-        
-        if len(winners) == 1:
-            # Clear winner gets 3 points
-            leaderboard[0]['league_points'] = 3
-        else:
-            # Tied winners each get 1 point
-            for entry in winners:
-                entry['league_points'] = 1
+    # Sort by points
+    leaderboard.sort(key=lambda x: x['total_points'], reverse=True)
     
     # Assign ranks
     for idx, entry in enumerate(leaderboard):
@@ -2083,415 +2357,6 @@ async def list_all_teams():
             team['created_at'] = datetime.fromisoformat(team['created_at'])
     
     return teams
-
-
-# ========== TEAM NOMINATIONS (Community Support) ==========
-
-@api_router.post("/teams/{team_id}/nominations", response_model=TeamNomination)
-async def create_nomination(team_id: str, nomination: NominationCreate):
-    """
-    Create a nomination for a team member in need
-    Any team member can nominate someone with a reason
-    """
-    try:
-        # Verify both nominator and nominee are in the team
-        nominator = await db.team_members.find_one({
-            "team_id": team_id,
-            "user_id": nomination.nominated_by_user_id
-        }, {"_id": 0})
-        
-        nominee = await db.team_members.find_one({
-            "team_id": team_id,
-            "user_id": nomination.nominee_user_id
-        }, {"_id": 0})
-        
-        if not nominator or not nominee:
-            raise HTTPException(status_code=400, detail="Both users must be team members")
-        
-        # Create nomination
-        nomination_doc = TeamNomination(**nomination.dict())
-        await db.team_nominations.insert_one(nomination_doc.dict())
-        
-        logger.info(f"✨ New nomination in team {team_id}: {nomination.nominee_username} nominated by {nomination.nominated_by_username}")
-        
-        return nomination_doc
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error creating nomination: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@api_router.get("/teams/{team_id}/nominations")
-async def get_team_nominations(team_id: str, status: str = "active"):
-    """
-    Get active nominations for a team
-    Returns active nominations that winners can choose to support
-    """
-    try:
-        query = {"team_id": team_id}
-        if status:
-            query["status"] = status
-            
-        nominations = await db.team_nominations.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
-        
-        return nominations
-    except Exception as e:
-        logger.error(f"Error fetching nominations: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@api_router.post("/teams/{team_id}/nominations/{nomination_id}/cancel")
-async def cancel_nomination(team_id: str, nomination_id: str, user_id: str):
-    """
-    Cancel a nomination (only by nominator or team admin)
-    """
-    try:
-        nomination = await db.team_nominations.find_one({"id": nomination_id, "team_id": team_id}, {"_id": 0})
-        
-        if not nomination:
-            raise HTTPException(status_code=404, detail="Nomination not found")
-        
-        # Check if user is nominator or team admin
-        team = await db.teams.find_one({"id": team_id}, {"_id": 0})
-        is_admin = team and team.get('admin_user_id') == user_id
-        is_nominator = nomination.get('nominated_by_user_id') == user_id
-        
-        if not (is_admin or is_nominator):
-            raise HTTPException(status_code=403, detail="Only nominator or admin can cancel")
-        
-        # Update status
-        await db.team_nominations.update_one(
-            {"id": nomination_id},
-            {"$set": {"status": "cancelled"}}
-        )
-        
-        return {"message": "Nomination cancelled"}
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error cancelling nomination: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@api_router.post("/teams/{team_id}/donations", response_model=WinnerDonation)
-async def record_winner_donation(team_id: str, donation: WinnerDonation):
-    """
-    Record when a winner donates to a nominated team member
-    """
-    try:
-        # Verify winner is in team
-        winner = await db.team_members.find_one({
-            "team_id": team_id,
-            "user_id": donation.winner_user_id
-        }, {"_id": 0})
-        
-        if not winner:
-            raise HTTPException(status_code=400, detail="Winner must be a team member")
-        
-        # Save donation record
-        donation_doc = donation.dict()
-        await db.winner_donations.insert_one(donation_doc)
-        
-        # Mark nomination as fulfilled if specified
-        if donation.recipient_user_id:
-            await db.team_nominations.update_many(
-                {
-                    "team_id": team_id,
-                    "nominee_user_id": donation.recipient_user_id,
-                    "status": "active"
-                },
-                {"$set": {"status": "fulfilled"}}
-            )
-        
-        logger.info(f"❤️ Winner {donation.winner_username} donated £{donation.amount} to {donation.recipient_username} in team {team_id}")
-        
-        return donation
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error recording donation: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@api_router.get("/teams/{team_id}/donations")
-async def get_team_donations(team_id: str):
-    """
-    Get donation history for a team
-    Shows community support acts
-    """
-    try:
-        donations = await db.winner_donations.find(
-            {"team_id": team_id},
-            {"_id": 0}
-        ).sort("created_at", -1).to_list(100)
-        
-        return donations
-    except Exception as e:
-        logger.error(f"Error fetching donations: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-
-# ============================================
-# USER SEARCH & TEAM INVITATION ENDPOINTS
-# ============================================
-
-
-
-# ============================================
-# FILE UPLOAD ENDPOINT
-# ============================================
-
-@api_router.post("/upload")
-async def upload_file(file: UploadFile = File(...)):
-    """
-    Upload a photo or video file
-    Supports: images (jpg, jpeg, png, gif, webp) and videos (mp4, mov, avi)
-    Max size: 50MB
-    """
-    try:
-        # Validate file type
-        allowed_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.mp4', '.mov', '.avi', '.heic'}
-        file_ext = Path(file.filename).suffix.lower()
-        
-        if file_ext not in allowed_extensions:
-            raise HTTPException(
-                status_code=400, 
-                detail=f"File type {file_ext} not allowed. Supported: images (jpg, png, gif, webp) and videos (mp4, mov, avi)"
-            )
-        
-        # Check file size (50MB limit)
-        content = await file.read()
-        file_size_mb = len(content) / (1024 * 1024)
-        
-        if file_size_mb > 50:
-            raise HTTPException(status_code=400, detail=f"File too large ({file_size_mb:.1f}MB). Maximum size is 50MB")
-        
-        # Generate unique filename
-        import uuid
-        unique_filename = f"{uuid.uuid4()}{file_ext}"
-        file_path = UPLOAD_DIR / unique_filename
-        
-        # Save file
-        with open(file_path, "wb") as f:
-            f.write(content)
-        
-        # Return URL
-        file_url = f"/uploads/{unique_filename}"
-        
-        logger.info(f"File uploaded successfully: {unique_filename} ({file_size_mb:.2f}MB)")
-        
-        return {
-            "url": file_url,
-            "filename": unique_filename,
-            "size_mb": round(file_size_mb, 2),
-            "type": "image" if file_ext in {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.heic'} else "video"
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error uploading file: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@api_router.get("/users/search")
-async def search_users(q: str):
-    """
-    Search for users by username (case-insensitive)
-    Returns username and id only (no email for privacy)
-    """
-    if not q or len(q) < 2:
-        raise HTTPException(status_code=400, detail="Search query must be at least 2 characters")
-    
-    try:
-        # Case-insensitive search using regex
-        users = await db.users.find(
-            {"username": {"$regex": q, "$options": "i"}},
-            {"_id": 0, "id": 1, "username": 1}
-        ).limit(20).to_list(20)
-        
-        return users
-    except Exception as e:
-        logger.error(f"Error searching users: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@api_router.post("/teams/{team_id}/invite-user", response_model=TeamInvitation)
-async def invite_user_to_team(team_id: str, inviter_user_id: str, invited_user_id: str):
-    """
-    Send a team invitation to a user
-    Only team admin or members can invite
-    """
-    try:
-        # Verify team exists
-        team = await db.teams.find_one({"id": team_id}, {"_id": 0})
-        if not team:
-            raise HTTPException(status_code=404, detail="Team not found")
-        
-        # Verify inviter is a team member
-        inviter_membership = await db.team_members.find_one({
-            "team_id": team_id,
-            "user_id": inviter_user_id
-        }, {"_id": 0})
-        
-        if not inviter_membership:
-            raise HTTPException(status_code=403, detail="Only team members can send invitations")
-        
-        # Get invited user details
-        invited_user = await db.users.find_one({"id": invited_user_id}, {"_id": 0})
-        if not invited_user:
-            raise HTTPException(status_code=404, detail="User not found")
-        
-        # Check if user is already a member
-        existing_member = await db.team_members.find_one({
-            "team_id": team_id,
-            "user_id": invited_user_id
-        })
-        if existing_member:
-            raise HTTPException(status_code=400, detail="User is already a team member")
-        
-        # Check for existing pending invitation
-        existing_invitation = await db.team_invitations.find_one({
-            "team_id": team_id,
-            "invited_user_id": invited_user_id,
-            "status": "pending"
-        })
-        if existing_invitation:
-            raise HTTPException(status_code=400, detail="User already has a pending invitation")
-        
-        # Create invitation
-        invitation = TeamInvitation(
-            team_id=team_id,
-            team_name=team["name"],
-            inviter_user_id=inviter_user_id,
-            inviter_username=inviter_membership["username"],
-            invited_user_id=invited_user_id,
-            invited_username=invited_user["username"]
-        )
-        
-        await db.team_invitations.insert_one(invitation.model_dump())
-        
-        logger.info(f"User {inviter_user_id} invited {invited_user_id} to team {team_id}")
-        return invitation
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error creating invitation: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@api_router.get("/users/{user_id}/invitations")
-async def get_user_invitations(user_id: str):
-    """
-    Get all pending team invitations for a user
-    """
-    try:
-        invitations = await db.team_invitations.find(
-            {
-                "invited_user_id": user_id,
-                "status": "pending"
-            },
-            {"_id": 0}
-        ).sort("created_at", -1).to_list(50)
-        
-        return invitations
-    except Exception as e:
-        logger.error(f"Error fetching invitations: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@api_router.post("/teams/invitations/{invitation_id}/accept")
-async def accept_team_invitation(invitation_id: str, user_id: str):
-    """
-    Accept a team invitation and join the team
-    """
-    try:
-        # Get invitation
-        invitation = await db.team_invitations.find_one(
-            {"id": invitation_id, "invited_user_id": user_id, "status": "pending"},
-            {"_id": 0}
-        )
-        
-        if not invitation:
-            raise HTTPException(status_code=404, detail="Invitation not found or already responded")
-        
-        # Check if already a member
-        existing_member = await db.team_members.find_one({
-            "team_id": invitation["team_id"],
-            "user_id": user_id
-        })
-        if existing_member:
-            # Update invitation status
-            await db.team_invitations.update_one(
-                {"id": invitation_id},
-                {"$set": {"status": "accepted", "responded_at": datetime.now(timezone.utc)}}
-            )
-            raise HTTPException(status_code=400, detail="Already a member of this team")
-        
-        # Add user to team
-        member = TeamMember(
-            team_id=invitation["team_id"],
-            user_id=user_id,
-            username=invitation["invited_username"],
-            role="member"
-        )
-        await db.team_members.insert_one(member.model_dump())
-        
-        # Update team member count
-        await db.teams.update_one(
-            {"id": invitation["team_id"]},
-            {"$inc": {"member_count": 1}}
-        )
-        
-        # Update invitation status
-        await db.team_invitations.update_one(
-            {"id": invitation_id},
-            {"$set": {"status": "accepted", "responded_at": datetime.now(timezone.utc)}}
-        )
-        
-        logger.info(f"User {user_id} accepted invitation {invitation_id}")
-        return {"message": f"Successfully joined {invitation['team_name']}!", "team": invitation["team_id"]}
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error accepting invitation: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@api_router.post("/teams/invitations/{invitation_id}/decline")
-async def decline_team_invitation(invitation_id: str, user_id: str):
-    """
-    Decline a team invitation
-    """
-    try:
-        # Get invitation
-        invitation = await db.team_invitations.find_one(
-            {"id": invitation_id, "invited_user_id": user_id, "status": "pending"},
-            {"_id": 0}
-        )
-        
-        if not invitation:
-            raise HTTPException(status_code=404, detail="Invitation not found or already responded")
-        
-        # Update invitation status
-        await db.team_invitations.update_one(
-            {"id": invitation_id},
-            {"$set": {"status": "declined", "responded_at": datetime.now(timezone.utc)}}
-        )
-        
-        logger.info(f"User {user_id} declined invitation {invitation_id}")
-        return {"message": "Invitation declined"}
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error declining invitation: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
 
 
 @api_router.get("/team/members")
@@ -3223,82 +3088,20 @@ async def get_team_invitations(team_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# Include main API router
+# Include router
 app.include_router(api_router)
 
-# Include new modular routes for social features
-posts_router.set_db(db)
-auth_router.set_db(db)
-app.include_router(posts_router.router, prefix="/api", tags=["posts"])
-app.include_router(auth_router.router, prefix="/api", tags=["auth"])
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # ========== AUTOMATED RESULT CHECKER ==========
 
 scheduler = AsyncIOScheduler()
-
-
-async def live_match_update():
-    """
-    Check for LIVE/IN-PLAY matches and update scores in real-time
-    Runs every 2 minutes during match days
-    Does NOT score predictions - only updates current scores for display
-    """
-    try:
-        logger.info("🔴 Checking for live matches...")
-        
-        # All leagues
-        league_ids = [39, 40, 179, 140, 78, 135, 61, 94, 88, 203, 253, 71, 239]
-        
-        service = get_active_football_service()
-        
-        from datetime import datetime, timezone
-        
-        # Only check TODAY's matches for live updates
-        today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
-        
-        all_fixtures = []
-        for league_id in league_ids:
-            fixtures = await service.get_fixtures_by_date(today, league_id, season=2025)
-            all_fixtures.extend(fixtures)
-        
-        if not all_fixtures:
-            logger.info("No fixtures today")
-            return
-        
-        # Transform to standard format
-        transformed = service.transform_to_standard_format(all_fixtures)
-        
-        live_count = 0
-        
-        for fixture in transformed:
-            status = fixture.get('status', 'SCHEDULED')
-            
-            # Update if match is LIVE, IN_PLAY, or any in-progress status
-            if status in ['LIVE', 'IN_PLAY', '1H', '2H', 'HT', 'ET', 'BT', 'P']:
-                # Update fixture with current score (don't score predictions yet)
-                await db.fixtures.update_one(
-                    {"fixture_id": fixture['fixture_id']},
-                    {"$set": {
-                        "home_score": fixture.get('home_score'),
-                        "away_score": fixture.get('away_score'),
-                        "status": status,
-                        "home_team": fixture['home_team'],
-                        "away_team": fixture['away_team'],
-                        "league_name": fixture['league_name'],
-                        "last_updated": datetime.now(timezone.utc).isoformat()
-                    }},
-                    upsert=True
-                )
-                live_count += 1
-        
-        if live_count > 0:
-            logger.info(f"🔴 {live_count} live matches updated")
-        else:
-            logger.info("No live matches at the moment")
-        
-    except Exception as e:
-        logger.error(f"❌ Error in live match update: {str(e)}")
-
 
 async def automated_result_update():
     """
@@ -3321,14 +3124,14 @@ async def automated_result_update():
         
         from datetime import datetime, timedelta, timezone
         
-        # Dynamically check last 7 days INCLUDING TODAY for finished matches
+        # Dynamically check last 7 days for finished matches
         all_fixtures = []
         today = datetime.now(timezone.utc)
+        start_date = today - timedelta(days=7)
         
-        for i in range(8):  # Last 7 days PLUS today (0 to 7 days ago)
-            check_date = today - timedelta(days=i)
+        for i in range(7):  # Last 7 days to catch recent finished matches
+            check_date = start_date + timedelta(days=i)
             date_str = check_date.strftime('%Y-%m-%d')
-            logger.info(f"Checking fixtures for {date_str}...")
             for league_id in league_ids:
                 fixtures = await service.get_fixtures_by_date(date_str, league_id, season=2025)
                 all_fixtures.extend(fixtures)
@@ -3537,12 +3340,6 @@ async def calculate_weekly_winners():
                 
                 logger.info(f"  Team '{team_name}': WINNER {winner['username']} with {max_score} correct → 3 points, £{winner_amount:.2f}")
                 
-                # Get active nominations for this team
-                nominations = await db.team_nominations.find(
-                    {"team_id": team_id, "status": "active"},
-                    {"_id": 0}
-                ).sort("created_at", -1).to_list(10)
-                
                 # Send winner notification email
                 await send_winner_notification(
                     winner['email'],
@@ -3551,9 +3348,7 @@ async def calculate_weekly_winners():
                     max_score,
                     winner_amount,
                     admin_fee,
-                    paid_entries,
-                    team_id,
-                    nominations
+                    paid_entries
                 )
                 
                 # Notify admin to pay the winner
@@ -3657,43 +3452,10 @@ async def calculate_weekly_winners():
         logger.error(traceback.format_exc())
 
 
-async def send_winner_notification(email, username, team_name, correct_count, amount, admin_fee, entries, team_id, nominations=[]):
-    """Send email to sole winner with optional community support nominations"""
+async def send_winner_notification(email, username, team_name, correct_count, amount, admin_fee, entries):
+    """Send email to sole winner"""
     try:
         subject = f"🏆 You Won This Week's Pot! - {team_name}"
-        
-        # Build nominations section if any exist
-        nominations_html = ""
-        if nominations:
-            nominations_html = """
-                <div style="background: #fef3c7; padding: 25px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
-                    <h3 style="color: #d97706; margin-top: 0;">❤️ Community Support - Charity Begins at Home</h3>
-                    <p style="font-size: 16px; color: #374151; line-height: 1.6;">
-                        Your teammates have nominated members who could use support:
-                    </p>
-            """
-            for nom in nominations[:3]:  # Show max 3
-                reason_preview = nom.get('reason', '')[:100] + ('...' if len(nom.get('reason', '')) > 100 else '')
-                nominations_html += f"""
-                    <div style="background: white; padding: 15px; border-radius: 6px; margin: 10px 0;">
-                        <p style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold; color: #1f2937;">
-                            🤝 {nom.get('nominee_username', 'Team member')}
-                        </p>
-                        <p style="margin: 0; font-size: 14px; color: #6b7280; line-height: 1.4;">
-                            {reason_preview}
-                        </p>
-                        <p style="margin: 8px 0 0 0; font-size: 12px; color: #9ca3af;">
-                            Nominated by {nom.get('nominated_by_username', 'a teammate')}
-                        </p>
-                    </div>
-                """
-            nominations_html += f"""
-                    <p style="font-size: 14px; color: #374151; line-height: 1.6; margin-top: 15px;">
-                        💭 <em>You can choose to donate all or part of your winnings to help a teammate. 
-                        No pressure - this is entirely your choice. See nominations in your team page.</em>
-                    </p>
-                </div>
-            """
         
         html_content = f"""
         <html>
@@ -3721,8 +3483,6 @@ async def send_winner_notification(email, username, team_name, correct_count, am
                         <p style="font-size: 14px; color: #6b7280; margin: 0;">(After 10% admin fee: £{admin_fee:.2f})</p>
                     </div>
                     
-                    {nominations_html}
-                    
                     <p style="font-size: 16px; color: #374151; line-height: 1.6;">
                         Your team admin will contact you shortly to arrange payment via bank transfer.
                     </p>
@@ -3733,7 +3493,7 @@ async def send_winner_notification(email, username, team_name, correct_count, am
                     
                     <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #e5e7eb; text-align: center;">
                         <p style="color: #6b7280; font-size: 14px;">
-                            HadFun - Football With Purpose 💙
+                            HadFun Predictor - Making Football Predictions Fun!
                         </p>
                     </div>
                 </div>
@@ -3742,7 +3502,7 @@ async def send_winner_notification(email, username, team_name, correct_count, am
         """
         
         await send_email(email, subject, html_content)
-        logger.info(f"✉️ Winner notification sent to {email} (with {len(nominations)} nominations)")
+        logger.info(f"✉️ Winner notification sent to {email}")
         
     except Exception as e:
         logger.error(f"Failed to send winner notification: {str(e)}")
@@ -3928,28 +3688,6 @@ async def send_rollover_notification(admin_email, team_name, rollover_amount):
         logger.error(f"Failed to send rollover notification: {str(e)}")
 
 
-@api_router.post("/admin/trigger-scoring")
-async def manual_trigger_scoring():
-    """
-    Manually trigger the scoring system
-    Useful for testing or immediate updates
-    """
-    try:
-        logger.info("🔧 Manual scoring trigger called...")
-        
-        # Call the automated result update function
-        await automated_result_update()
-        
-        return {
-            "success": True,
-            "message": "Scoring system triggered successfully",
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        }
-    except Exception as e:
-        logger.error(f"❌ Error in manual trigger: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
 @api_router.post("/admin/sync-predictions")
 async def sync_predictions_with_fixtures():
     """
@@ -4030,31 +3768,13 @@ async def startup_scheduler():
             replace_existing=True
         )
         
-        # LIVE MATCH UPDATES: Check every 2 minutes for in-play matches
-        # Updates scores in real-time without scoring predictions
-        scheduler.add_job(
-            live_match_update,
-            CronTrigger(minute='*/2'),  # Every 2 minutes
-            id='live_match_checker',
-            replace_existing=True
-        )
-        
         scheduler.start()
         logger.info("🚀 Automated scheduler started:")
-        logger.info("   - Live match updates: every 2 minutes 🔴")
         logger.info("   - Result checker: every 15 minutes")
         logger.info("   - Weekly winners: Wednesdays 2 PM + Daily 6 PM")
         
-        # Log all scheduled jobs for debugging
-        jobs = scheduler.get_jobs()
-        logger.info(f"📋 Total scheduled jobs: {len(jobs)}")
-        for job in jobs:
-            logger.info(f"   - {job.id}: {job.next_run_time}")
-        
         # Run once immediately on startup to catch any pending updates
-        logger.info("🔧 Running initial result update...")
         await automated_result_update()
-        logger.info("✅ Initial result update complete")
         
     except Exception as e:
         logger.error(f"Error starting scheduler: {str(e)}")
@@ -4068,136 +3788,4 @@ async def shutdown_scheduler():
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
-
-
-# Emergency data restoration endpoint
-@api_router.post("/emergency/restore-cheshunt-crew")
-async def emergency_restore_data():
-    """
-    Emergency endpoint to restore Cheshunt Crew team and predictions
-    """
-    import random
-    from uuid import uuid4
-    import bcrypt
-    
-    try:
-        # Define all user data
-        users_data = [
-            {'username': 'aysin', 'email': 'info@hadfun.co.uk', 'predictions': 38},
-            {'username': 'pistachios', 'email': 'pistachios@hadfun.co.uk', 'predictions': 29},
-            {'username': 'aysindjemil', 'email': 'aysindjemil@yahoo.com', 'predictions': 29},
-            {'username': 'Josh', 'email': 'admin@', 'predictions': 29},
-            {'username': 'Remster', 'email': 'Remie.djemil@gmail.com', 'predictions': 10},
-            {'username': 'Ayhan', 'email': 'ayhanozgegiet@gmail.com', 'predictions': 9},
-            {'username': 'Leeanne', 'email': 'leeanne@example.com', 'predictions': 0},
-        ]
-        
-        user_ids = {}
-        
-        # Ensure all users exist
-        for user_data in users_data:
-            username = user_data['username']
-            user = await db.users.find_one({'username': username}, {'_id': 0})
-            
-            if user:
-                user_ids[username] = user['id']
-            else:
-                user_id = str(uuid4())
-                password_hash = bcrypt.hashpw(b'temppass123', bcrypt.gensalt()).decode('utf-8')
-                
-                new_user = {
-                    'id': user_id,
-                    'username': username,
-                    'email': user_data['email'],
-                    'password_hash': password_hash,
-                    'profile_completed': True,
-                    'season_points': 0,
-                    'weekly_points': 0,
-                    'weekly_wins': 0,
-                    'created_at': datetime.now(timezone.utc).isoformat()
-                }
-                
-                await db.users.insert_one(new_user)
-                user_ids[username] = user_id
-        
-        # Create/verify team
-        team = await db.teams.find_one({'join_code': '256BFA9A'}, {'_id': 0})
-        
-        if not team:
-            team_id = str(uuid4())
-            team_data = {
-                'id': team_id,
-                'name': 'Cheshunt Crew',
-                'join_code': '256BFA9A',
-                'motto': 'Playing for fun',
-                'created_at': datetime.now(timezone.utc).isoformat(),
-                'created_by': user_ids.get('aysin', 'unknown')
-            }
-            await db.teams.insert_one(team_data)
-        else:
-            team_id = team['id']
-        
-        # Add members
-        for username, uid in user_ids.items():
-            existing = await db.team_members.find_one({'team_id': team_id, 'user_id': uid}, {'_id': 0})
-            
-            if not existing:
-                member_data = {
-                    'id': str(uuid4()),
-                    'team_id': team_id,
-                    'user_id': uid,
-                    'username': username,
-                    'joined_at': datetime.now(timezone.utc).isoformat(),
-                    'role': 'admin' if username == 'aysin' else 'member'
-                }
-                await db.team_members.insert_one(member_data)
-        
-        # Get fixtures
-        fixtures = await db.fixtures.find({}, {'_id': 0}).to_list(500)
-        premier_fixtures = [f for f in fixtures if 'premier' in f.get('league_name', '').lower()]
-        
-        # Create predictions
-        total_created = 0
-        for user_data in users_data:
-            username = user_data['username']
-            user_id = user_ids[username]
-            target_count = user_data['predictions']
-            
-            if target_count == 0:
-                continue
-            
-            available = premier_fixtures if len(premier_fixtures) > 0 else fixtures
-            count = min(target_count, len(available))
-            selected = random.sample(available, count)
-            
-            for fixture in selected:
-                existing = await db.predictions.find_one({'user_id': user_id, 'fixture_id': fixture['fixture_id']}, {'_id': 0})
-                
-                if not existing:
-                    prediction_data = {
-                        'id': str(uuid4()),
-                        'user_id': user_id,
-                        'username': username,
-                        'fixture_id': fixture['fixture_id'],
-                        'league_name': fixture.get('league_name', 'Unknown'),
-                        'home_team': fixture['home_team'],
-                        'away_team': fixture['away_team'],
-                        'prediction': random.choice(['home', 'draw', 'away']),
-                        'result': 'pending',
-                        'points': 0,
-                        'created_at': datetime.now(timezone.utc).isoformat(),
-                        'fixture_date': fixture.get('fixture_date', datetime.now(timezone.utc).isoformat())
-                    }
-                    await db.predictions.insert_one(prediction_data)
-                    total_created += 1
-        
-        return {
-            'success': True,
-            'message': 'Cheshunt Crew restored successfully',
-            'team_members': len(user_ids),
-            'predictions_created': total_created
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
