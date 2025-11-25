@@ -3606,6 +3606,26 @@ async def calculate_weekly_winners():
                     {"_id": 0}
                 ).sort("created_at", -1).to_list(10)
                 
+                # Get winner's correct prediction details
+                correct_predictions = await db.predictions.find({
+                    "user_id": winner_id,
+                    "result": "correct",
+                    "created_at": {"$gte": week_start.isoformat()}
+                }, {"_id": 0, "home_team": 1, "away_team": 1, "prediction": 1}).to_list(100)
+                
+                # Send in-app notification to winner
+                await create_notification(
+                    user_id=winner_id,
+                    notification_type='winner',
+                    title='🏆 You Won This Week!',
+                    message=f"Congratulations! You won with {max_score} correct predictions and earned £{winner_amount:.2f}! 🎉",
+                    data={
+                        "correct_predictions": max_score,
+                        "payout": winner_amount,
+                        "correct_predictions_details": correct_predictions
+                    }
+                )
+                
                 # Send winner notification email
                 await send_winner_notification(
                     winner['email'],
@@ -3618,6 +3638,22 @@ async def calculate_weekly_winners():
                     team_id,
                     nominations
                 )
+                
+                # Notify losers
+                losers = [uid for uid in member_ids if uid not in winners]
+                for loser_id in losers:
+                    loser_score = user_scores.get(loser_id, 0)
+                    await create_notification(
+                        user_id=loser_id,
+                        notification_type='loser',
+                        title='😔 Not This Week!',
+                        message=f"{winner['username']} won this week with {max_score} correct predictions. You got {loser_score} correct. Better luck next time! Keep coming back, keep predicting, and keep interacting with your friends. Football is unpredictable — anyone can win! 🎯⚽",
+                        data={
+                            "winner_username": winner['username'],
+                            "winner_correct_predictions": max_score,
+                            "your_correct_predictions": loser_score
+                        }
+                    )
                 
                 # Notify admin to pay the winner
                 team = await db.teams.find_one({"id": team_id}, {"_id": 0})
