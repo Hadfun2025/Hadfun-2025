@@ -3705,6 +3705,28 @@ async def calculate_weekly_winners():
                     winner = user_details[winner_id]
                     winner_names.append(winner['username'])
                     
+                    # Get winner's correct prediction details
+                    correct_predictions = await db.predictions.find({
+                        "user_id": winner_id,
+                        "result": "correct",
+                        "created_at": {"$gte": week_start.isoformat()}
+                    }, {"_id": 0, "home_team": 1, "away_team": 1, "prediction": 1}).to_list(100)
+                    
+                    # Send in-app notification for tie
+                    other_winners = [w for w in winner_names if w != winner['username']]
+                    await create_notification(
+                        user_id=winner_id,
+                        notification_type='tie',
+                        title='🤝 You Tied This Week!',
+                        message=f"You tied with {len(winners)-1} other player(s) with {max_score} correct predictions! Each of you earned 1 point. The pot of £{current_pot + rollover_amount:.2f} rolls over to next week. Keep predicting!",
+                        data={
+                            "correct_predictions": max_score,
+                            "tied_with": other_winners,
+                            "rollover_amount": current_pot + rollover_amount,
+                            "correct_predictions_details": correct_predictions
+                        }
+                    )
+                    
                     # Send tie notification email
                     await send_tie_notification(
                         winner['email'],
@@ -3713,6 +3735,22 @@ async def calculate_weekly_winners():
                         max_score,
                         len(winners),
                         current_pot + rollover_amount
+                    )
+                
+                # Notify losers in tie scenario
+                losers = [uid for uid in member_ids if uid not in winners]
+                for loser_id in losers:
+                    loser_score = user_scores.get(loser_id, 0)
+                    await create_notification(
+                        user_id=loser_id,
+                        notification_type='loser',
+                        title='😔 Not This Week!',
+                        message=f"This week had a tie! {', '.join(winner_names)} tied with {max_score} correct predictions. You got {loser_score} correct. Better luck next time! Keep coming back, keep predicting, and keep interacting with your friends. Football is unpredictable — anyone can win! 🎯⚽",
+                        data={
+                            "winner_usernames": winner_names,
+                            "winner_correct_predictions": max_score,
+                            "your_correct_predictions": loser_score
+                        }
                     )
                 
                 logger.info(f"  Team '{team_name}': TIE - {len(winners)} winners with {max_score} correct → 1 point each, POT ROLLS OVER")
