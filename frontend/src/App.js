@@ -894,13 +894,15 @@ function App() {
                   const grouped = {};
                   fixtures.forEach(fixture => {
                     const leagueName = fixture.league_name || 'Unknown League';
-                    const matchday = fixture.matchday || 'Unknown';
-                    const key = `${leagueName}|||${matchday}`;
+                    const matchdayRaw = fixture.matchday || 'Unknown';
+                    // Extract just the number from "Regular Season - 12" format
+                    const matchdayNumber = matchdayRaw.match(/\d+/) ? matchdayRaw.match(/\d+/)[0] : matchdayRaw;
+                    const key = `${leagueName}|||${matchdayNumber}`;
                     
                     if (!grouped[key]) {
                       grouped[key] = {
                         leagueName,
-                        matchday,
+                        matchday: matchdayNumber,
                         fixtures: []
                       };
                     }
