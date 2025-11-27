@@ -914,7 +914,10 @@ function App() {
                     if (a.leagueName !== b.leagueName) {
                       return a.leagueName.localeCompare(b.leagueName);
                     }
-                    return (a.matchday || 0) - (b.matchday || 0);
+                    // Convert matchday to number for proper sorting
+                    const matchdayA = parseInt(a.matchday) || 0;
+                    const matchdayB = parseInt(b.matchday) || 0;
+                    return matchdayA - matchdayB;
                   });
 
                   // Sort fixtures within each group by date (earliest first)
