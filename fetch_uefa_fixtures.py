@@ -20,7 +20,7 @@ UEFA_COMPETITIONS = {
     848: 'UEFA Conference League'    # Conference League
 }
 
-def fetch_fixtures_for_competition(league_id, season=2025):
+def fetch_fixtures_for_competition(league_id, season=2024):
     """Fetch fixtures for a specific UEFA competition and season"""
     
     headers = {
