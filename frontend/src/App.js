@@ -32,7 +32,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [leagues, setLeagues] = useState([]);
   const [fixtures, setFixtures] = useState([]);
-  const [selectedLeagues, setSelectedLeagues] = useState([39, 140, 78, 203]); // Premier League, La Liga, Bundesliga, Turkish Süper Lig
+  const [selectedLeagues, setSelectedLeagues] = useState([39, 140, 78, 203, 40, 135, 61, 179, 94, 88, 253, 71, 239]); // All leagues: PL, La Liga, Bundesliga, Süper Lig, Championship, Serie A, Ligue 1, Scottish Prem, Primeira Liga, Eredivisie, MLS, Brasileirão, Liga BetPlay
   const [predictions, setPredictions] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(false);
