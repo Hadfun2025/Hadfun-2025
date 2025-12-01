@@ -420,7 +420,7 @@ frontend:
 
 test_plan:
   current_focus:
-    - "Email Invitation UI in TeamManagement"
+    - "Liverpool UEFA Champions League Fixtures Verification"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
