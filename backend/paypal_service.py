@@ -46,8 +46,8 @@ class PayPalService:
                     }
                 }],
                 "application_context": {
-                    "return_url": "http://localhost:3000/payment/success",
-                    "cancel_url": "http://localhost:3000/payment/cancel"
+                    "return_url": f"{os.environ.get('FRONTEND_URL', 'http://localhost:3000')}/payment/success",
+                    "cancel_url": f"{os.environ.get('FRONTEND_URL', 'http://localhost:3000')}/payment/cancel"
                 }
             })
             
