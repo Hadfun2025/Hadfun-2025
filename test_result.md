@@ -328,15 +328,18 @@ frontend:
 
   - task: "Next 2 Weeks Fixture View - Upcoming Only Verification"
     implemented: true
-    working: "NA"
+    working: false
     file: "frontend/src/App.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
           agent: "main"
           comment: "Fixed backend to exclude past fixtures when days_ahead < 180. 'Next 2 weeks' now correctly shows only future fixtures. Current date: December 1, 2025. Need to verify that Next 2 Weeks view shows ONLY upcoming fixtures (Dec 2-11) without any past results from November."
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL ISSUE FOUND - Next 2 Weeks filter NOT working correctly. COMPREHENSIVE TEST RESULTS: ✅ Successfully logged in with username 'aysin', ✅ Successfully navigated to Fixtures tab, ✅ Successfully set time range to 'Next 2 Weeks' (value: 14), ✅ Found 303 fixture cards displayed, ✅ Found expected Matchday 14 and Matchday 15 fixtures, ❌ CRITICAL ISSUE: Past Matchday 13 fixtures found in Next 2 Weeks view (should only show upcoming fixtures), ❌ The filter is displaying past matchdays when it should exclude them. ROOT CAUSE: The Next 2 Weeks filter is not properly excluding past fixtures - it's showing Matchday 13 along with Matchdays 14 and 15. Expected behavior: Only show upcoming fixtures from Dec 2-11, 2025 without any past results. Screenshots captured showing the issue."
 
 metadata:
   created_by: "main_agent"
