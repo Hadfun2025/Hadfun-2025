@@ -150,7 +150,7 @@ def main():
         print(f"Current fixtures in DB: {before_count}")
         
         # Fetch fixtures
-        fixtures = fetch_fixtures_for_competition(league_id, 2024)
+        fixtures = fetch_fixtures_for_competition(league_id, 2025)
         
         if fixtures:
             print(f"\n📥 Processing {len(fixtures)} fixtures...")
