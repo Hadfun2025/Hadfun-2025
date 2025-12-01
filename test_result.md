@@ -420,7 +420,7 @@ frontend:
 
 test_plan:
   current_focus:
-    - "Liverpool UEFA Champions League Fixtures Verification"
+    - "Next 2 Weeks Fixture View - Upcoming Only Verification"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
