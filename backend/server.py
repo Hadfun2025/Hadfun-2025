@@ -885,17 +885,17 @@ async def get_fixtures(
                 query["utc_date"] = {"$gte": now.replace(tzinfo=None)}
             else:
                 # For full season (365 days), go back to start of season
-                # Otherwise, get fixtures from past 30 days to current + next days_ahead
-                # This ensures recent results stay visible for a full month
+                # For "Next X weeks" view (days_ahead < 180), only show upcoming fixtures
                 if days_ahead >= 180:  # Full season or long range
                     # For international competitions (2024 season) go back to Jan 2024
                     # For domestic leagues (2025 season) go back to August 2024
                     # This covers Champions League 2024/25, Nations League 2024, etc.
                     start_date = datetime(2024, 1, 1)  # Naive datetime - covers all competitions
+                    end_date = now.replace(tzinfo=None) + timedelta(days=days_ahead)
                 else:
-                    start_date = now.replace(tzinfo=None) - timedelta(days=30)
-                
-                end_date = now.replace(tzinfo=None) + timedelta(days=days_ahead)
+                    # For "Next 2 weeks" or "Next 4 weeks" view: only show upcoming fixtures
+                    start_date = now.replace(tzinfo=None)
+                    end_date = now.replace(tzinfo=None) + timedelta(days=days_ahead)
                 
                 # Filter by date - only include fixtures with valid dates
                 query["utc_date"] = {
