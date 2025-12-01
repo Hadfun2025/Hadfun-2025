@@ -134,7 +134,7 @@ def process_and_store_fixture(fixture_data, league_name):
 
 def main():
     print("=" * 60)
-    print("UEFA FIXTURES FETCHER - 2025/26 Season")
+    print("UEFA FIXTURES FETCHER - 2024/25 Season (CURRENT)")
     print("=" * 60)
     
     total_added = 0
