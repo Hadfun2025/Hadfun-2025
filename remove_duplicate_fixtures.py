@@ -36,7 +36,7 @@ def remove_duplicates_for_league(league_name):
             # Keep the first one (or the one with more complete data)
             # Sort by: has score data, then by _id (oldest first)
             fixtures_list.sort(key=lambda x: (
-                x.get('score', {}).get('home') is not None,  # Prefer fixtures with scores
+                (x.get('score') is not None and x.get('score', {}).get('home') is not None),  # Prefer fixtures with scores
                 -x['_id'].generation_time.timestamp()  # Then prefer older records
             ), reverse=True)
             
