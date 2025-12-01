@@ -326,6 +326,18 @@ frontend:
           agent: "testing"
           comment: "✅ COMMUNITY CARE BANNER TRANSLATION FIX VERIFIED - Re-tested the Community Care banner translation functionality and confirmed the critical issue has been resolved. COMPREHENSIVE TEST RESULTS: ✅ Language switching functionality working perfectly (tested English, Spanish, German, French), ✅ Community Care banner now translates correctly: English: 'Charity Begins at Home - Community Care', Spanish: 'La Caridad Comienza en Casa - Cuidado Comunitario', German: 'Nächstenliebe Beginnt Zuhause - Gemeinschaftsfürsorge', French: 'La Charité Commence Chez Soi - Soutien Communautaire', ✅ Navigation tabs and general UI elements translate properly, ✅ Banner appears in both Community tab and Rules page with correct translations, ✅ Language switching back to English works correctly. The fix has successfully resolved the hardcoded English text issue. Screenshots captured showing successful translations across all tested languages."
 
+  - task: "Next 2 Weeks Fixture View - Upcoming Only Verification"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Fixed backend to exclude past fixtures when days_ahead < 180. 'Next 2 weeks' now correctly shows only future fixtures. Current date: December 1, 2025. Need to verify that Next 2 Weeks view shows ONLY upcoming fixtures (Dec 2-11) without any past results from November."
+
 metadata:
   created_by: "main_agent"
   version: "1.0"
