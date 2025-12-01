@@ -11,7 +11,7 @@ from datetime import datetime
 class SocialFeatureTester:
     def __init__(self):
         # Get backend URL from frontend .env
-        self.base_url = "https://communitykick.preview.emergentagent.com"
+        self.base_url = "https://kickscore-16.preview.emergentagent.com"
         self.api_url = f"{self.base_url}/api"
         
         # Test user from review request

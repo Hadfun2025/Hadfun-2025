@@ -32,7 +32,7 @@
 ## 🧪 Testing Steps:
 
 ### Step 1: Login to Cheshunt Crew
-1. Go to: https://communitykick.preview.emergentagent.com
+1. Go to: https://kickscore-16.preview.emergentagent.com
 2. Login with your email
 3. Select or join "Cheshunt crew" team
 
@@ -128,28 +128,28 @@
 
 ```bash
 # Force update results now (don't wait 15 mins)
-curl -X POST https://communitykick.preview.emergentagent.com/api/admin/update-results
+curl -X POST https://kickscore-16.preview.emergentagent.com/api/admin/update-results
 
 # Refresh fixtures from API
-curl -X POST https://communitykick.preview.emergentagent.com/api/admin/refresh-fixtures
+curl -X POST https://kickscore-16.preview.emergentagent.com/api/admin/refresh-fixtures
 
 # Score all pending predictions
-curl -X POST https://communitykick.preview.emergentagent.com/api/admin/score-predictions
+curl -X POST https://kickscore-16.preview.emergentagent.com/api/admin/score-predictions
 
 # Check leagues
-curl https://communitykick.preview.emergentagent.com/api/leagues
+curl https://kickscore-16.preview.emergentagent.com/api/leagues
 ```
 
 ## 🎟️ Testing Promo Codes:
 
 ```bash
 # Validate LAUNCH2024 promo
-curl -X POST https://communitykick.preview.emergentagent.com/api/promo-codes/validate \
+curl -X POST https://kickscore-16.preview.emergentagent.com/api/promo-codes/validate \
   -H "Content-Type: application/json" \
   -d '{"code": "LAUNCH2024", "user_email": "your@email.com"}'
 
 # Check promo stats
-curl https://communitykick.preview.emergentagent.com/api/promo-codes/stats/LAUNCH2024
+curl https://kickscore-16.preview.emergentagent.com/api/promo-codes/stats/LAUNCH2024
 ```
 
 ## ⚠️ Known Limitations:

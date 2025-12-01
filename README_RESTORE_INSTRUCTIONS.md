@@ -24,7 +24,7 @@ sudo supervisorctl restart all
 ```
 
 ### Your app will be live at:
-https://footballpred.preview.emergentagent.com
+https://kickscore-16.preview.emergentagent.com
 
 ---
 

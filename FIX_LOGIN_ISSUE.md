@@ -13,7 +13,7 @@ The login issue on your production site (`hadfun.co.uk`) is caused by a **miscon
 ### The Issue:
 Your production deployment has:
 ```
-REACT_APP_BACKEND_URL=https://communitykick.preview.emergentagent.com
+REACT_APP_BACKEND_URL=https://kickscore-16.preview.emergentagent.com
 ```
 
 But it should have:
@@ -36,7 +36,7 @@ REACT_APP_BACKEND_URL=https://hadfun.co.uk
 2. Find the variable: `REACT_APP_BACKEND_URL`
 3. Change its value from:
    ```
-   https://communitykick.preview.emergentagent.com
+   https://kickscore-16.preview.emergentagent.com
    ```
    To:
    ```
@@ -84,8 +84,8 @@ const API = `${BACKEND_URL}/api`;
 4. If not → Create new user with POST request
 
 **Current Situation:**
-- Preview: `https://communitykick.preview.emergentagent.com/api/users/aysindjemil` ✅ Works
-- Production: `https://communitykick.preview.emergentagent.com/api/users/aysindjemil` ❌ Wrong URL
+- Preview: `https://kickscore-16.preview.emergentagent.com/api/users/aysindjemil` ✅ Works
+- Production: `https://kickscore-16.preview.emergentagent.com/api/users/aysindjemil` ❌ Wrong URL
 - Should be: `https://hadfun.co.uk/api/users/aysindjemil` ✅ Will work after fix
 
 ---
