@@ -13,9 +13,9 @@ sys.path.append('/app/backend')
 
 async def check_database():
     # Connect to MongoDB
-    mongo_url = "mongodb://localhost:27017"
+    mongo_url = os.getenv('MONGO_URL', 'mongodb://localhost:27017')
     client = AsyncIOMotorClient(mongo_url)
-    db = client["test_database"]
+    db = client[os.getenv('DB_NAME', 'test_database')]
     
     print("🔍 Checking Database Collections")
     print("=" * 50)
