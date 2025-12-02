@@ -5,7 +5,7 @@ from datetime import datetime
 
 # MongoDB connection
 client = MongoClient(os.getenv('MONGO_URL', 'mongodb://localhost:27017/'))
-db = client['test_database']
+db = client[os.getenv('DB_NAME', 'test_database')]
 
 def remove_duplicates_for_league(league_name):
     """Remove duplicate fixtures for a specific league"""
