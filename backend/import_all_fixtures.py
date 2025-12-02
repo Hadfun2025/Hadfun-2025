@@ -111,7 +111,7 @@ fixtures_json = """[
 fixtures_data = json.loads(fixtures_json)
 
 # Connect to local MongoDB
-client = MongoClient('mongodb://localhost:27017')
+client = MongoClient(os.getenv('MONGO_URL', 'mongodb://localhost:27017'))
 db = client['test_database']
 
 print(f"Importing {len(fixtures_data)} fixtures from production...")
