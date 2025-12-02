@@ -909,15 +909,15 @@ function App() {
                     grouped[key].fixtures.push(fixture);
                   });
 
-                  // Sort groups by league and matchday
+                  // Sort groups by league and earliest date (chronological order)
                   const sortedGroups = Object.values(grouped).sort((a, b) => {
                     if (a.leagueName !== b.leagueName) {
                       return a.leagueName.localeCompare(b.leagueName);
                     }
-                    // Convert matchday to number for proper sorting
-                    const matchdayA = parseInt(a.matchday) || 0;
-                    const matchdayB = parseInt(b.matchday) || 0;
-                    return matchdayA - matchdayB;
+                    // Sort by earliest date in each group to maintain chronological order
+                    const earliestDateA = new Date(Math.min(...a.fixtures.map(f => new Date(f.utc_date))));
+                    const earliestDateB = new Date(Math.min(...b.fixtures.map(f => new Date(f.utc_date))));
+                    return earliestDateA - earliestDateB;
                   });
 
                   // Sort fixtures within each group by date (earliest first)
