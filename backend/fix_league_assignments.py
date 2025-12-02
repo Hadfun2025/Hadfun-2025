@@ -11,7 +11,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import random
 
 MONGO_URL = os.getenv('MONGO_URL', 'mongodb://localhost:27017')
-DB_NAME = 'test_database'
+DB_NAME = os.getenv('DB_NAME', 'test_database')
 
 async def fix_league_assignments():
     client = AsyncIOMotorClient(MONGO_URL)
