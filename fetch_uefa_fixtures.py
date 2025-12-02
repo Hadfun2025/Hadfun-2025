@@ -11,7 +11,7 @@ BASE_URL = f"https://{API_HOST}"
 
 # MongoDB connection
 client = MongoClient(os.getenv('MONGO_URL', 'mongodb://localhost:27017/'))
-db = client['test_database']
+db = client[os.getenv('DB_NAME', 'test_database')]
 
 # UEFA Competition IDs on API-Football
 UEFA_COMPETITIONS = {
