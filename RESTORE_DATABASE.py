@@ -10,8 +10,12 @@ print("=" * 60)
 print("RESTORING FOOTBALL PREDICTION DATABASE")
 print("=" * 60)
 
+# Get environment variables
+DB_NAME = os.getenv('DB_NAME', 'test_database')
+MONGO_URL = os.getenv('MONGO_URL', 'mongodb://localhost:27017')
+
 # Check if backup exists
-backup_path = "/app/mongodb_backup/test_database"
+backup_path = f"/app/mongodb_backup/{DB_NAME}"
 if not os.path.exists(backup_path):
     print("❌ ERROR: Backup not found at " + backup_path)
     print("Cannot restore database!")
@@ -24,8 +28,8 @@ print(f"   Location: {backup_path}")
 print("\n📦 Restoring database...")
 result = subprocess.run([
     "mongorestore",
-    "--uri=mongodb://localhost:27017",
-    "--db=test_database",
+    f"--uri={MONGO_URL}",
+    f"--db={DB_NAME}",
     "--drop",  # Drop existing collections first
     backup_path
 ], capture_output=True, text=True)
