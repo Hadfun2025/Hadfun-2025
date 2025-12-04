@@ -1257,21 +1257,36 @@ function App() {
                                       </Badge>
                                     </div>
                                     
-                                    <div className="text-right">
-                                      <p className="text-xs text-gray-600 mb-1">Result</p>
-                                      {pred.result === 'correct' ? (
-                                        <Badge className="bg-green-600">
-                                          ✓ Correct (+{pred.points || 3} pts)
-                                        </Badge>
-                                      ) : pred.result === 'incorrect' ? (
-                                        <Badge className="bg-red-600">
-                                          ✗ Incorrect
-                                        </Badge>
-                                      ) : (
-                                        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                                          ⏳ Pending
-                                        </Badge>
+                                    <div className="flex items-center gap-3">
+                                      {/* Delete button - only show for pending predictions */}
+                                      {pred.result === 'pending' && pred.status !== 'FINISHED' && (
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => handleDeletePrediction(pred.id)}
+                                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                          title="Delete this prediction"
+                                        >
+                                          🗑️ Cancel
+                                        </Button>
                                       )}
+                                      
+                                      <div className="text-right">
+                                        <p className="text-xs text-gray-600 mb-1">Result</p>
+                                        {pred.result === 'correct' ? (
+                                          <Badge className="bg-green-600">
+                                            ✓ Correct (+{pred.points || 3} pts)
+                                          </Badge>
+                                        ) : pred.result === 'incorrect' ? (
+                                          <Badge className="bg-red-600">
+                                            ✗ Incorrect
+                                          </Badge>
+                                        ) : (
+                                          <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                                            ⏳ Pending
+                                          </Badge>
+                                        )}
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
