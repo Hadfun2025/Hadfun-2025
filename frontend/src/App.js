@@ -32,7 +32,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [leagues, setLeagues] = useState([]);
   const [fixtures, setFixtures] = useState([]);
-  const [selectedLeagues, setSelectedLeagues] = useState([39, 140, 78, 203, 40, 135, 61, 179, 94, 88, 253, 71, 239, 2, 3, 848]); // All leagues: PL, La Liga, Bundesliga, Süper Lig, Championship, Serie A, Ligue 1, Scottish Prem, Primeira Liga, Eredivisie, MLS, Brasileirão, Liga BetPlay, Champions League, Europa League, Conference League
+  const [selectedLeagues, setSelectedLeagues] = useState([]); // No leagues selected by default - user must click to select
   const [predictions, setPredictions] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(false);
