@@ -3470,6 +3470,105 @@ async def automated_result_update():
         logger.error(f"❌ Error in automated result update: {str(e)}")
 
 
+
+async def calculate_matchday_winners():
+    """
+    Calculate and award points based on matchday winners per league.
+    
+    SCORING RULE (Winner-Takes-All):
+    - Group predictions by (league_id, matchday)
+    - Within each group, count correct predictions per user
+    - Award 3 points ONLY to user(s) with the most correct predictions
+    - If multiple users tie for most correct, they each get 3 points
+    
+    This function should be called after automated_result_update() 
+    to ensure all predictions are scored (marked correct/incorrect).
+    """
+    try:
+        logger.info("🏆 Calculating matchday winners per league...")
+        
+        # Get all fixtures with their matchday and league info
+        fixtures = await db.fixtures.find(
+            {"status": "FINISHED", "matchday": {"$exists": True, "$ne": None}},
+            {"_id": 0, "fixture_id": 1, "league_id": 1, "matchday": 1, "league_name": 1}
+        ).to_list(10000)
+        
+        if not fixtures:
+            logger.info("No finished fixtures with matchday info found")
+            return
+        
+        # Group fixtures by (league_id, matchday)
+        league_matchday_groups = {}
+        for fixture in fixtures:
+            league_id = fixture.get('league_id')
+            matchday = fixture.get('matchday', '').strip()
+            
+            if not league_id or not matchday:
+                continue
+            
+            key = (league_id, matchday)
+            if key not in league_matchday_groups:
+                league_matchday_groups[key] = {
+                    'league_id': league_id,
+                    'league_name': fixture.get('league_name', 'Unknown'),
+                    'matchday': matchday,
+                    'fixture_ids': []
+                }
+            league_matchday_groups[key]['fixture_ids'].append(fixture['fixture_id'])
+        
+        logger.info(f"Found {len(league_matchday_groups)} unique (league, matchday) combinations")
+        
+        # For each group, find winners and award points
+        total_winners = 0
+        for (league_id, matchday), group_data in league_matchday_groups.items():
+            fixture_ids = group_data['fixture_ids']
+            league_name = group_data['league_name']
+            
+            # Get all correct predictions for these fixtures
+            correct_predictions = await db.predictions.find({
+                "fixture_id": {"$in": fixture_ids},
+                "result": "correct"
+            }, {"_id": 0, "user_id": 1, "username": 1}).to_list(10000)
+            
+            if not correct_predictions:
+                logger.info(f"  {league_name} - {matchday}: No correct predictions")
+                continue
+            
+            # Count correct predictions per user
+            user_correct_counts = {}
+            for pred in correct_predictions:
+                user_id = pred['user_id']
+                if user_id not in user_correct_counts:
+                    user_correct_counts[user_id] = {
+                        'count': 0,
+                        'username': pred.get('username', 'Unknown')
+                    }
+                user_correct_counts[user_id]['count'] += 1
+            
+            # Find the maximum correct count
+            max_correct = max(user_correct_counts.values(), key=lambda x: x['count'])['count']
+            
+            # Find all users with max correct predictions (winners)
+            winners = [uid for uid, data in user_correct_counts.items() if data['count'] == max_correct]
+            
+            # Award 3 points to each winner
+            for winner_id in winners:
+                await db.users.update_one(
+                    {"id": winner_id},
+                    {"$inc": {"season_points": 3}}
+                )
+                username = user_correct_counts[winner_id]['username']
+                logger.info(f"  ✅ {league_name} - {matchday}: {username} wins with {max_correct} correct → +3 points")
+                total_winners += 1
+        
+        logger.info(f"🎉 Matchday winners calculation complete: {total_winners} winners awarded 3 points each")
+        
+    except Exception as e:
+        logger.error(f"❌ Error calculating matchday winners: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+
+
 async def calculate_weekly_winners():
     """
     Calculate weekly winners for each team
