@@ -51,6 +51,11 @@ async def reset_and_recalculate():
         )
         logger.info(f"  ✅ Removed points field from {result.modified_count} predictions")
         
+        # Step 2b: Clear the user_league_points collection (fresh start)
+        logger.info("Step 2b: Clearing user_league_points collection...")
+        result = await db.user_league_points.delete_many({})
+        logger.info(f"  ✅ Removed {result.deleted_count} old records")
+        
         # Step 3: Recalculate points using new winner-takes-all logic
         logger.info("Step 3: Recalculating points using winner-takes-all logic...")
         
