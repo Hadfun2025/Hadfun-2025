@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update Match Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 15px 32px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔄 Update Match Results</h1>
+    <p>Click the button below to fetch the latest match scores from API-Football and update your database.</p>
+    
+    <button onclick="updateResults()">Update Results Now</button>
+    
+    <div id="result"></div>
+
+    <script>
+        async function updateResults() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '⏳ Updating... Please wait...';
+            resultDiv.className = '';
+            
+            try {
+                const response = await fetch('/api/admin/update-results', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'success';
+                    resultDiv.innerHTML = `
+                        <strong>✅ Update Complete!</strong><br>
+                        Fixtures Updated: ${data.fixtures_updated || 0}<br>
+                        Predictions Scored: ${data.predictions_scored || 0}<br><br>
+                        <em>Refresh your fixtures page to see the scores!</em>
+                    `;
+                } else {
+                    resultDiv.className = 'error';
+                    resultDiv.innerHTML = `❌ Error: ${data.detail || 'Update failed'}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'error';
+                resultDiv.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
