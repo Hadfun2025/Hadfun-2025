@@ -1235,6 +1235,54 @@ async def get_user_predictions(user_id: str):
     return [Prediction(**{**r, "_id": str(r["_id"])}) if "_id" in r else Prediction(**r) for r in results]
 
 
+
+@api_router.delete("/predictions/{prediction_id}")
+async def delete_prediction(prediction_id: str, user_id: str):
+    """
+    Delete a prediction
+    - Only allows deleting your own predictions
+    - Cannot delete predictions for matches that have already started
+    """
+    from datetime import datetime, timezone
+    
+    # Find the prediction
+    prediction = await db.predictions.find_one({"id": prediction_id}, {"_id": 0})
+    
+    if not prediction:
+        raise HTTPException(status_code=404, detail="Prediction not found")
+    
+    # Verify ownership
+    if prediction.get('user_id') != user_id:
+        raise HTTPException(status_code=403, detail="You can only delete your own predictions")
+    
+    # Get the fixture to check if it's started
+    fixture = await db.fixtures.find_one({"fixture_id": prediction['fixture_id']}, {"_id": 0})
+    
+    if fixture:
+        # Check if match has started (status is not SCHEDULED)
+        if fixture.get('status') not in ['SCHEDULED', 'TBD', 'NS']:
+            raise HTTPException(status_code=400, detail="Cannot delete prediction for a match that has already started")
+        
+        # Also check by date - if match date is in the past, don't allow deletion
+        match_date_str = fixture.get('utc_date')
+        if match_date_str:
+            try:
+                match_date = datetime.fromisoformat(match_date_str.replace('Z', '+00:00'))
+                if match_date < datetime.now(timezone.utc):
+                    raise HTTPException(status_code=400, detail="Cannot delete prediction for a match that has already started")
+            except:
+                pass  # If date parsing fails, allow deletion (better safe than blocking)
+    
+    # Delete the prediction
+    result = await db.predictions.delete_one({"id": prediction_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Prediction not found")
+    
+    logger.info(f"Deleted prediction {prediction_id} for user {user_id}")
+    return {"message": "Prediction deleted successfully", "prediction_id": prediction_id}
+
+
 @api_router.get("/predictions/deadline-status")
 async def get_deadline_status():
     """
