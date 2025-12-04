@@ -431,6 +431,35 @@ function App() {
     }
   };
 
+
+  const handleDeletePrediction = async (predictionId) => {
+    if (!currentUser) {
+      toast.error('Please log in to delete predictions');
+      return;
+    }
+
+    // Confirm deletion
+    if (!window.confirm('Are you sure you want to delete this prediction? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      await axios.delete(`${API}/predictions/${predictionId}?user_id=${currentUser.id}`);
+      toast.success('✅ Prediction deleted successfully');
+      loadUserPredictions(); // Reload predictions list
+    } catch (error) {
+      if (error.response?.status === 400) {
+        toast.error('❌ ' + (error.response?.data?.detail || 'Cannot delete this prediction'));
+      } else if (error.response?.status === 403) {
+        toast.error('❌ You can only delete your own predictions');
+      } else {
+        toast.error('❌ Error deleting prediction: ' + (error.response?.data?.detail || error.message));
+      }
+      console.error(error);
+    }
+  };
+
+
   const toggleLeague = (leagueId) => {
     if (selectedLeagues.includes(leagueId)) {
       setSelectedLeagues(selectedLeagues.filter((id) => id !== leagueId));
