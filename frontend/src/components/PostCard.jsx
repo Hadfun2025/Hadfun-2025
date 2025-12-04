@@ -334,24 +334,29 @@ export function PostCard({ post, currentUser, onUpdate, onDelete }) {
         {/* Images */}
         {post.images && post.images.length > 0 && (
           <div className="mt-3 grid grid-cols-2 gap-2">
-            {post.images.slice(0, 4).map((img, index) => (
-              <div key={index} className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                <img
-                  src={img}
-                  alt={`Post image ${index + 1}`}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.parentElement.innerHTML = '<div class="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500"><span>Image Not Available</span></div>';
-                  }}
-                />
-                {index === 3 && post.images.length > 4 && (
-                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <p className="text-white font-semibold text-xl">+{post.images.length - 4}</p>
-                  </div>
-                )}
-              </div>
-            ))}
+            {post.images.slice(0, 4).map((img, index) => {
+              // Handle relative URLs by prepending backend URL
+              const imageUrl = img.startsWith('http') ? img : `${BACKEND_URL}${img}`;
+              
+              return (
+                <div key={index} className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                  <img
+                    src={imageUrl}
+                    alt={`Post image ${index + 1}`}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.parentElement.innerHTML = '<div class="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500"><span>Image Not Available</span></div>';
+                    }}
+                  />
+                  {index === 3 && post.images.length > 4 && (
+                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                      <p className="text-white font-semibold text-xl">+{post.images.length - 4}</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 
