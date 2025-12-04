@@ -3574,7 +3574,7 @@ async def calculate_matchday_winners():
                 
                 if not existing:
                     await db.user_league_points.insert_one({
-                        "id": str(uuid.uuid4()),
+                        "id": str(uuid4()),
                         "user_id": winner_id,
                         "username": user_correct_counts[winner_id]['username'],
                         "league_id": league_id,
