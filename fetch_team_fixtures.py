@@ -79,7 +79,7 @@ def fetch_team_fixtures(team_id, team_name, league_id=2, season=2024):
                 
                 # Create fixture document
                 fixture_doc = {
-                    'fixture_id': str(fixture['id']),
+                    'fixture_id': fixture['id'],  # Store as integer for consistency
                     'utc_date': utc_date,
                     'home_team': teams['home']['name'],
                     'away_team': teams['away']['name'],
