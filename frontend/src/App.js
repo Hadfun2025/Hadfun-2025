@@ -306,8 +306,12 @@ function App() {
 
   const loadLeaderboard = async () => {
     try {
-      const response = await axios.get(`${API}/leaderboard`);
-      setLeaderboard(response.data);
+      if (!userTeam) {
+        console.log('No team selected, skipping leaderboard load');
+        return;
+      }
+      const response = await axios.get(`${API}/teams/${userTeam.id}/leaderboard/by-league`);
+      setLeaderboard(response.data); // Now an array of {league_name, leaderboard[]}
     } catch (error) {
       console.error('Error loading leaderboard:', error);
     }
