@@ -4143,6 +4143,19 @@ async def sync_predictions_with_fixtures():
 async def startup_scheduler():
     """Start the automated result checker and weekly winners calculation on app startup"""
     try:
+        # Run one-time migration for Dec 2-3 scores (safe to run multiple times)
+        logger.info("🔧 Running one-time Dec 2-3 score migration...")
+        try:
+            import subprocess
+            result = subprocess.run(['python3', '/app/migrate_dec23_scores.py'], 
+                                  capture_output=True, text=True, timeout=10)
+            if result.returncode == 0:
+                logger.info("✅ Dec 2-3 scores migrated successfully")
+            else:
+                logger.warning(f"⚠️  Migration script issue: {result.stderr}")
+        except Exception as e:
+            logger.warning(f"⚠️  Could not run migration script: {e}")
+        
         # Run result updates every 15 minutes to score predictions
         scheduler.add_job(
             automated_result_update,
