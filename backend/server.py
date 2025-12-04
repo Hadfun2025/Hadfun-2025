@@ -1905,38 +1905,35 @@ async def get_team_leaderboard(team_id: str, weekly: bool = False):
 
 
 @api_router.get("/teams/{team_id}/leaderboard/by-league")
-async def get_team_leaderboard_by_league(team_id: str, league: str = None):
+async def get_team_leaderboard_by_league(team_id: str):
     """
-    Get team leaderboard filtered by league
-    Shows only members who made predictions in the specified league
+    Get team leaderboard grouped by league
+    Returns points earned by each team member in each league they've won
     """
     # Get team members
     members = await db.team_members.find({"team_id": team_id}, {"_id": 0}).to_list(100)
     member_ids = [m['user_id'] for m in members]
     
-    if not league:
-        # Return available leagues for this team
-        pipeline = [
-            {"$match": {"user_id": {"$in": member_ids}}},
-            {"$group": {"_id": "$league_name"}},
-            {"$sort": {"_id": 1}}
-        ]
-        leagues = await db.predictions.aggregate(pipeline).to_list(None)
-        league_names = [l['_id'] for l in leagues if l['_id']]
-        return {"leagues": league_names}
+    if not member_ids:
+        return []
     
-    # Get predictions stats filtered by league
+    # Get all league points for team members
+    league_points = await db.user_league_points.find(
+        {"user_id": {"$in": member_ids}},
+        {"_id": 0}
+    ).to_list(10000)
+    
+    # Also get prediction stats for each user per league
     pipeline = [
-        {
-            "$match": {
-                "user_id": {"$in": member_ids},
-                "league_name": league
-            }
-        },
+        {"$match": {"user_id": {"$in": member_ids}}},
         {
             "$group": {
-                "_id": "$user_id",
+                "_id": {
+                    "user_id": "$user_id",
+                    "league_id": "$league_id"
+                },
                 "username": {"$first": "$username"},
+                "league_name": {"$first": "$league"},
                 "total_predictions": {"$sum": 1},
                 "correct_predictions": {
                     "$sum": {"$cond": [{"$eq": ["$result", "correct"]}, 1, 0]}
@@ -1945,48 +1942,72 @@ async def get_team_leaderboard_by_league(team_id: str, league: str = None):
         }
     ]
     
-    stats = await db.predictions.aggregate(pipeline).to_list(None)
+    prediction_stats = await db.predictions.aggregate(pipeline).to_list(None)
     
-    if not stats:
-        return []
+    # Create a map of (user_id, league_id) -> stats
+    stats_map = {
+        (stat["_id"]["user_id"], stat["_id"]["league_id"]): stat
+        for stat in prediction_stats
+    }
     
-    # Build leaderboard with only users who have predictions in this league
-    leaderboard = []
-    for stat in stats:
-        user = await db.users.find_one({"id": stat["_id"]}, {"_id": 0})
-        if user:
-            leaderboard.append({
-                "username": user['username'],
-                "league_name": league,
-                "correct_predictions": stat['correct_predictions'],
-                "total_predictions": stat['total_predictions'],
-                "league_points": 0,  # Will calculate below
-                "rank": 0
-            })
-    
-    # Sort by correct predictions (most correct wins)
-    leaderboard.sort(key=lambda x: x['correct_predictions'], reverse=True)
-    
-    # Award league points (3 for winner, 1 if tied)
-    if len(leaderboard) > 0:
-        top_correct = leaderboard[0]['correct_predictions']
+    # Group league points by user and league
+    user_league_totals = {}
+    for lp in league_points:
+        user_id = lp['user_id']
+        league_id = lp['league_id']
+        league_name = lp['league_name']
         
-        # Count how many users are tied for first
-        winners = [entry for entry in leaderboard if entry['correct_predictions'] == top_correct]
+        key = (user_id, league_id)
+        if key not in user_league_totals:
+            user_league_totals[key] = {
+                'user_id': user_id,
+                'username': lp['username'],
+                'league_id': league_id,
+                'league_name': league_name,
+                'total_points': 0,
+                'matchday_wins': 0
+            }
+        user_league_totals[key]['total_points'] += lp['points']
+        user_league_totals[key]['matchday_wins'] += 1
+    
+    # Build leaderboard per league
+    leagues = {}
+    for key, data in user_league_totals.items():
+        user_id, league_id = key
+        league_name = data['league_name']
         
-        if len(winners) == 1:
-            # Clear winner gets 3 points
-            leaderboard[0]['league_points'] = 3
-        else:
-            # Tied winners each get 1 point
-            for entry in winners:
-                entry['league_points'] = 1
+        # Get prediction stats for this user in this league
+        stat = stats_map.get((user_id, league_id))
+        
+        if league_name not in leagues:
+            leagues[league_name] = []
+        
+        leagues[league_name].append({
+            'username': data['username'],
+            'total_points': data['total_points'],
+            'matchday_wins': data['matchday_wins'],
+            'correct_predictions': stat['correct_predictions'] if stat else 0,
+            'total_predictions': stat['total_predictions'] if stat else 0
+        })
     
-    # Assign ranks
-    for idx, entry in enumerate(leaderboard):
-        entry['rank'] = idx + 1
+    # Sort each league's leaderboard by total points
+    result = []
+    for league_name, members_data in leagues.items():
+        members_data.sort(key=lambda x: (x['total_points'], x['correct_predictions']), reverse=True)
+        
+        # Assign ranks
+        for idx, member in enumerate(members_data):
+            member['rank'] = idx + 1
+        
+        result.append({
+            'league_name': league_name,
+            'leaderboard': members_data
+        })
     
-    return leaderboard
+    # Sort leagues alphabetically
+    result.sort(key=lambda x: x['league_name'])
+    
+    return result
 
 
 @api_router.get("/user/{user_id}/team")
