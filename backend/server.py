@@ -3447,14 +3447,13 @@ async def automated_result_update():
                 # Score each prediction and update with match details
                 for pred in predictions:
                     is_correct = pred['prediction'] == actual_result
-                    points = 3 if is_correct else 0
                     
                     # Update prediction with result AND match details (team names, scores, status)
+                    # NOTE: Points are NOT assigned here - they are calculated by matchday winners
                     await db.predictions.update_one(
                         {"id": pred['id']},
                         {"$set": {
                             "result": "correct" if is_correct else "incorrect",
-                            "points": points,
                             "home_team": fixture['home_team'],
                             "away_team": fixture['away_team'],
                             "league": fixture['league_name'],
@@ -3464,9 +3463,6 @@ async def automated_result_update():
                         }}
                     )
                     scored_predictions += 1
-                    
-                    # Note: User points will be calculated weekly, not per prediction
-                    # Weekly scoring: 3 pts for sole winner, 1 pt each for ties
         
         logger.info(f"✅ Automated update complete: {updated_count} fixtures updated, {scored_predictions} predictions scored")
         
