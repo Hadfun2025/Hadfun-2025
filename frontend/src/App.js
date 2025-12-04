@@ -971,18 +971,38 @@ function App() {
                     <div key={`${group.leagueName}-${group.matchday}`} className="space-y-4">
                       {/* Matchday Header */}
                       <div className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-lg p-4 shadow-lg">
-                        <div className="flex justify-between items-center">
-                          <div>
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
                             <h3 className="text-2xl font-bold">{group.leagueName}</h3>
                             <p className="text-blue-100 text-lg font-semibold mt-1">
                               {t.fixtures.matchday} {group.matchday}
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="text-sm text-blue-100">{group.fixtures.length} {t.fixtures.matches}</p>
-                            <p className="text-xs text-blue-200">
-                              {formatDate(group.fixtures[0].utc_date)} - {formatDate(group.fixtures[group.fixtures.length - 1].utc_date)}
-                            </p>
+                            <p className="text-sm text-blue-100 mb-1">{group.fixtures.length} {t.fixtures.matches}</p>
+                            <div className="bg-white/20 backdrop-blur-sm rounded px-3 py-2">
+                              <p className="text-xs text-blue-100 font-medium mb-1">Matchday Period:</p>
+                              <p className="text-xs text-white font-bold">
+                                📅 {new Date(group.fixtures[0].utc_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                              </p>
+                              <p className="text-xs text-blue-100 my-1">to</p>
+                              <p className="text-xs text-white font-bold">
+                                📅 {new Date(group.fixtures[group.fixtures.length - 1].utc_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                              </p>
+                              {(() => {
+                                const now = new Date();
+                                const lastMatchDate = new Date(group.fixtures[group.fixtures.length - 1].utc_date);
+                                const firstMatchDate = new Date(group.fixtures[0].utc_date);
+                                
+                                if (now < firstMatchDate) {
+                                  return <p className="text-xs text-green-200 mt-2 font-semibold">⏰ Upcoming</p>;
+                                } else if (now >= firstMatchDate && now <= lastMatchDate) {
+                                  return <p className="text-xs text-yellow-200 mt-2 font-semibold">🟢 In Progress</p>;
+                                } else {
+                                  return <p className="text-xs text-gray-300 mt-2 font-semibold">✓ Finished</p>;
+                                }
+                              })()}
+                            </div>
                           </div>
                         </div>
                       </div>
