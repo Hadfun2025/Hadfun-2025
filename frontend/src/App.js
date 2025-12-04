@@ -99,7 +99,6 @@ function App() {
     if (currentUser) {
       loadFixtures();
       loadUserPredictions();
-      loadLeaderboard();
       checkUserPaymentStatus();
       loadUserTeams(); // Load all teams user is in
     }
@@ -110,6 +109,12 @@ function App() {
       loadStandings();
     }
   }, [currentUser, activeTab, selectedLeagues]);
+
+  useEffect(() => {
+    if (currentUser && selectedTeam) {
+      loadLeaderboard();
+    }
+  }, [currentUser, selectedTeam]);
 
   const checkPaymentCallback = () => {
     const urlParams = new URLSearchParams(window.location.search);
