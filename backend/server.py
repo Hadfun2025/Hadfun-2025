@@ -2019,6 +2019,7 @@ async def get_team_leaderboard_by_league(team_id: str):
         user_league_totals[key]['matchday_wins'] += 1
     
     # Build leaderboard per league
+    # First, add users who have won matchdays
     leagues = {}
     for key, data in user_league_totals.items():
         user_id, league_id = key
@@ -2037,6 +2038,27 @@ async def get_team_leaderboard_by_league(team_id: str):
             'correct_predictions': stat['correct_predictions'] if stat else 0,
             'total_predictions': stat['total_predictions'] if stat else 0
         })
+    
+    # Also add users who have made predictions but haven't won any matchdays
+    for stat in prediction_stats:
+        user_id = stat["_id"]["user_id"]
+        league_id = stat["_id"]["league_id"]
+        league_name = stat["league_name"]
+        
+        # Check if this user is already in the league leaderboard
+        key = (user_id, league_id)
+        if key not in user_league_totals:
+            # User has predictions but no matchday wins yet
+            if league_name not in leagues:
+                leagues[league_name] = []
+            
+            leagues[league_name].append({
+                'username': stat['username'],
+                'total_points': 0,
+                'matchday_wins': 0,
+                'correct_predictions': stat['correct_predictions'],
+                'total_predictions': stat['total_predictions']
+            })
     
     # Sort each league's leaderboard by total points
     result = []
