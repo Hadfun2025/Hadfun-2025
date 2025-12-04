@@ -3488,6 +3488,7 @@ async def calculate_matchday_winners():
     This function should be called after automated_result_update() 
     to ensure all predictions are scored (marked correct/incorrect).
     """
+    from uuid import uuid4
     try:
         logger.info("🏆 Calculating matchday winners per league...")
         
