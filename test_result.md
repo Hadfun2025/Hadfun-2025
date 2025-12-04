@@ -442,6 +442,22 @@ test_plan:
   test_all: false
   test_priority: "high_first"
 
+frontend:
+  - task: "New Leaderboard Functionality - Winner-Takes-All Scoring System"
+    implemented: true
+    working: true
+    file: "frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL FRONTEND BUG FOUND - Leaderboard showing 'No leaderboard data yet' despite backend API returning correct data. ROOT CAUSE: Variable name mismatch in loadLeaderboard function (using 'userTeam' instead of 'selectedTeam') and incorrect useEffect dependencies causing leaderboard to load before team selection is complete."
+        - working: true
+          agent: "testing"
+          comment: "✅ NEW LEADERBOARD FUNCTIONALITY FULLY WORKING - Fixed critical frontend bugs and verified complete winner-takes-all scoring system. COMPREHENSIVE TEST RESULTS: ✅ LOGIN: Successfully logged in with test credentials (aysin/aysin@example.com), ✅ NAVIGATION: Leaderboard tab accessible and functional, ✅ PER-LEAGUE STRUCTURE: Brasileirão (Brazil) leaderboard displays correctly as separate league-specific card, ✅ COLUMN STRUCTURE: Perfect 6-column format (#, Player, Wins, Correct, Total, PTS) as specified, ✅ USER DATA: Aysin appears in Brasileirão leaderboard with rank 🥇 (1st place), ✅ WINNER-TAKES-ALL SCORING: Aysin has exactly 3 points (multiple of 3) for 1 matchday win with 1 correct prediction out of 1 total, ✅ POINTS VALIDATION: Points are multiples of 3 confirming winner-takes-all system working correctly, ✅ UI/UX: Clean table layout with proper styling, rank indicators (🥇), and 'You' badge for current user. FIXES APPLIED: (1) Changed 'userTeam' to 'selectedTeam' in loadLeaderboard function, (2) Added separate useEffect for leaderboard loading that depends on selectedTeam being set. New leaderboard system successfully displays per-league tables instead of global leaderboard, awards 3 points only to matchday winners, and provides clear user experience."
+
 agent_communication:
     - agent: "main"
       message: "Implemented Stripe payment integration using emergentintegrations library in test mode. Created email invitation system using Resend API. Added PaymentModal component and integrated payment flow into App.js. Enhanced TeamManagement with email invitation UI. Ready for backend testing to verify: 1) Stripe checkout creation, 2) Payment status polling, 3) Email sending, 4) Team invitation flow."
