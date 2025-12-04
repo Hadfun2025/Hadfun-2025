@@ -133,10 +133,13 @@ export function PostCard({ post, currentUser, onUpdate, onDelete }) {
     }
 
     // Direct video URL (.mp4, .webm, etc.)
+    // Handle relative URLs by prepending backend URL
+    const fullVideoUrl = videoUrl.startsWith('http') ? videoUrl : `${BACKEND_URL}${videoUrl}`;
+    
     return (
       <div key={index} className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
         <video
-          src={videoUrl}
+          src={fullVideoUrl}
           controls
           className="w-full h-full object-cover"
           title={`Video ${index + 1}`}
