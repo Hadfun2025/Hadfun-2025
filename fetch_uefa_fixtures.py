@@ -104,7 +104,7 @@ def process_and_store_fixture(fixture_data, league_name):
         
         # Create fixture document
         fixture_doc = {
-            'fixture_id': str(fixture['id']),
+            'fixture_id': fixture['id'],  # Store as integer for consistency
             'utc_date': utc_date,
             'home_team': teams['home']['name'],
             'away_team': teams['away']['name'],
