@@ -3466,6 +3466,10 @@ async def automated_result_update():
         
         logger.info(f"✅ Automated update complete: {updated_count} fixtures updated, {scored_predictions} predictions scored")
         
+        # After scoring predictions, calculate matchday winners and award points
+        if scored_predictions > 0:
+            await calculate_matchday_winners()
+        
     except Exception as e:
         logger.error(f"❌ Error in automated result update: {str(e)}")
 
