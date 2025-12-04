@@ -1,0 +1,185 @@
+<analysis>**original_problem_statement:**
+The user's initial request was to ensure all European football fixtures (UEFA Champions League, etc.) and their scores were accurate in the application. This led to a cascade of related tasks and bug fixes, including:
+- Fetching the correct season's data (2025/26) after multiple attempts with wrong seasons.
+- Removing thousands of duplicate fixtures created during fetches.
+- Fixing deployment blockers caused by hardcoded URLs and database names in over 10 scripts.
+- Correcting fixture sorting and display logic, such as an issue where Matchday 13 appeared twice and Matchday 14 was missing.
+- Fixing a bug where the Next 2 weeks view was incorrectly showing past matches.
+- Fetching missing data for entire leagues (e.g., Turkish Super Lig).
+- A major misunderstanding of the application's core scoring logic was discovered at the end of the session.
+
+**User's preferred language**: English
+
+**what currently exists?**
+The application is a full-stack React/FastAPI app. The database has been populated with fixtures for the correct 2025/26 season for UEFA competitions and various domestic leagues. Numerous critical bugs have been fixed, including deployment blockers (hardcoded credentials), incorrect data fetching (wrong seasons, duplicates), and UI display issues (fixture sorting, default league selection). A one-time data migration script () was created and added to the backend's startup sequence to populate historical scores in the production database, addressing discrepancies between preview and production environments. The agent was in the middle of a major refactor of the scoring and leaderboard logic after a fundamental requirement was clarified by the user.
+
+**Last working item**:
+-   **Last item agent was working on:** The agent had just discovered a critical misunderstanding of the scoring logic. The user clarified that points are not awarded for every correct prediction. Instead, a winner-takes-all system should be in place: 3 points are awarded ONLY to the user(s) with the most correct predictions within a specific league for a given matchday. The agent was investigating the existing (incorrect) scoring code in  to plan the refactor.
+-   **Status:** IN PROGRESS
+-   **Agent Testing Done:** N
+-   **Which testing method agent to use?** Backend testing agent after the logic refactor, followed by the frontend testing agent to verify the new leaderboard UI.
+-   **User Testing Done:** N
+
+**All Pending/In progress Issue list**:
+-   **Issue 1: Incorrect Scoring Logic (P0)**
+-   **Issue 2: Incorrect Leaderboard Calculation & Display (P1)**
+-   **Issue 3: Fixture Chronological Sorting in UI (P2)**
+-   **Issue 4: Community Post Media Not Displaying (P3)**
+
+**Issues Detail:**
+-   **Issue 1: Incorrect Scoring Logic (P0)**
+    -   **Attempted fixes:** The agent identified the incorrect code in  that awards 3 points for every correct prediction.
+    -   **Next debug checklist:**
+        1.  Refactor the prediction scoring functions in  (e.g., ).
+        2.  Remove the logic that assigns points for individual correct predictions.
+        3.  Implement new logic to group predictions by  and , find the user(s) with the maximum number of correct predictions within that group, and award 3 points only to them.
+        4.  Reset all user points to 0 after implementation.
+    -   **Why fix this issue and what will be achieved with the fix?** This is a fundamental requirement of the app. The current scoring system is incorrect.
+    -   **Status:** IN PROGRESS
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** Both.
+
+-   **Issue 2: Incorrect Leaderboard Calculation & Display (P1)**
+    -   **Attempted fixes:** Agent confirmed the frontend only shows a single Overall leaderboard and the backend endpoint for per-league data is not working correctly. The UI also shows an incorrect total prediction count (e.g., 23 when it should be 2).
+    -   **Next debug checklist:**
+        1.  Fix the backend endpoint  in  to correctly calculate and return points per user for each league.
+        2.  In , refactor the leaderboard UI to render multiple tables, one for each league, using data from the fixed endpoint.
+    -   **Why fix this issue and what will be achieved with the fix?** This is a core UI/UX feature requested by the user.
+    -   **Status:** IN PROGRESS
+    -   **Is recurring issue?** Y
+    -   **Should Test frontend/backend/both after fix?** Both.
+    -   **Blocked on other issue:** Issue 1 (Incorrect Scoring Logic).
+
+-   **Issue 3: Fixture Chronological Sorting in UI (P2)**
+    -   **Attempted fixes:** The agent modified sorting logic in , but user reports and testing agent feedback indicate the issue persists, where fixtures within a matchday group are not ordered chronologically.
+    -   **Next debug checklist:**
+        1.  Re-examine the fixture grouping and sorting logic in .
+        2.  Verify the implementation of the  function for both fixture groups and the fixtures within them.
+        3.  Reproduce the specific case reported by the user (e.g., Matchday 14) to debug the rendering order.
+    -   **Why fix this issue and what will be achieved with the fix?** To fix a confusing user experience bug.
+    -   **Status:** IN PROGRESS
+    -   **Is recurring issue?** Y
+    -   **Should Test frontend/backend/both after fix?** Frontend.
+
+-   **Issue 4: Community Post Media Not Displaying (P3)**
+    -   **Attempted fixes:** None in this session. The previous agent's hypothesis was a relative URL issue.
+    -   **Next debug checklist:**
+        1.  Inspect .
+        2.  Check how  is used and if it requires prefixing with the backend URL ().
+    -   **Why fix this issue and what will be achieved with the fix?** To restore a key social feature of the application.
+    -   **Status:** NOT STARTED
+    -   **Is recurring issue?** Y
+    -   **Should Test frontend/backend/both after fix?** Both.
+
+**In progress Task List**:
+-   **Task 1: Refactor Scoring Logic (P0)**
+    -   **Where to resume:** In , rewrite the prediction scoring functions to implement the winner-takes-all rule per league, per matchday.
+    -   **What will be achieved with this?** The application's core scoring will finally match the user's requirements.
+    -   **Status:** IN PROGRESS
+
+-   **Task 2: Implement League-Specific Leaderboards (P1)**
+    -   **Where to resume:** First, fix the  endpoint in . Then, refactor the leaderboard component in  to display multiple tables based on the corrected data.
+    -   **What will be achieved with this?** The UI will show accurate, separate leaderboards for each league.
+    -   **Status:** IN PROGRESS
+    -   **Blocked on something:** Task 1.
+
+**Upcoming and Future Tasks**
+-   There are no other upcoming tasks besides completing the in-progress work and fixing the pending issues.
+
+**Completed work in this session**
+-   **Data Integrity & Fixtures:**
+    -   Successfully restored the database from the previous session's backup.
+    -   Fetched the correct 2025/26 season data for all UEFA competitions and domestic leagues, resolving numerous data accuracy issues.
+    -   Identified and removed thousands of duplicate fixtures.
+    -   Fetched complete data for the Turkish Super Lig, which was previously unusable.
+-   **Deployment & Backend:**
+    -   Fixed all identified deployment blockers by removing hardcoded MongoDB URLs and database names from over 10 different scripts.
+    -   Fixed an issue where Matchday 13 was duplicated by correcting the underlying data from the API.
+    -   Fixed the Next 2 weeks view to correctly show recent past results plus upcoming fixtures.
+    -   Created and deployed a one-time migration script () to fix historical scores in the production database.
+-   **UI/UX:**
+    -   Modified the fixtures page () so that no leagues are selected by default, requiring user interaction.
+
+**Earlier issues found/mentioned but not fixed**
+-   **Issue 1: Community Post Media Not Displaying**
+    -   **Debug checklist:** Inspect  and ensure media URLs are constructed correctly, likely by prepending the backend URL to relative paths.
+    -   **Why to solve this issue and what will be achieved with this?** Enables a key social feature of the app.
+    -   **Should Test frontend/backend/both after fix:** Both.
+    -   **Is recurring issue?** Y
+
+**Known issue recurrence from previous fork**
+-   **Issue recurrence in previous fork:** User losing database state after forking.
+-   **Recurrence count:** 2+
+-   **Status:** RESOLVED (The agent successfully restored the database from backup at the start of the session).
+
+**Code Architecture**
+
+
+**Key Technical Concepts**
+-   **Backend:** FastAPI, Motor (async MongoDB), APScheduler for automated tasks.
+-   **Frontend:** React (, ), Axios for API calls.
+-   **Database:** MongoDB.
+-   **Deployment:** Distinction between preview and production databases, requiring data migration scripts to be run on startup for production environments.
+
+**key DB schema**
+-   : 
+-   : 
+-   : 
+-   : 
+
+**changes in tech stack**
+-   None.
+
+**All files of reference**
+-   **Created/Updated:**
+    -   : Heavily modified for fixture fetching logic (date ranges), startup events (to run migration), and fixes to the automated result updater. Now requires a major refactor for scoring.
+    -   : Modified to change default league selection and attempted fixes for fixture sorting. Now requires a major refactor for the leaderboard display.
+    -   : Removed hardcoded URLs.
+    -    (New): Critical one-time script to fix historical scores, now integrated into the backend startup process.
+    -   Numerous utility scripts were updated to remove hardcoded DB credentials, unblocking deployment.
+
+**Critical Info for New Agent**
+-   **The scoring logic is fundamentally wrong and must be the top priority.** Refactor  to implement the winner-takes-all rule: 3 points are awarded only to the user(s) with the most correct predictions in a league per matchday.
+-   **The leaderboard UI is also wrong.** It shows incorrect stats and doesn't separate by league. This must be fixed in  after the scoring logic is corrected.
+-   Production and preview environments use **separate databases**. Any manual data fixes in preview will NOT transfer to production. Permanent data fixes must be handled by scripts (like ) that run on production startup.
+
+**documents created in this job**
+-   
+-   
+-   
+-   And several other single-purpose scripts for fetching or fixing data.
+
+**Last 10 User Messages and any pending user messages**
+1.  **User clarified scoring logic:** User explained that points are not per-prediction, but a 3-point winner-takes-all award per league, per matchday. (PENDING IMPLEMENTATION)
+2.  **User requested leaderboard fix:** Asked for league-specific leaderboards to be implemented now. (PENDING IMPLEMENTATION)
+3.  **User noted data issues:** Pointed out that a user's prediction was in a league (Brasileirão) that had no visible fixtures, and that results for that league were missing. (PARTIALLY ADDRESSED)
+4.  **User asked if deploy is needed:** Confirmed they need to deploy to see changes. (ADDRESSED)
+5.  **User asked if they should press Re-deploy:** Confirmed they should. (ADDRESSED)
+6.  **User reported deployed app not showing results:** Scores were visible in preview but not production. (ADDRESSED - by creating migration script)
+7.  **User reported clearing cache didn't help.** (ADDRESSED)
+8.  **User reported a manual URL trigger didn't work.** (ADDRESSED)
+9.  **User asked for migration script and confirmation of auto-updates:** Agent created the script and confirmed future updates are automated. (ADDRESSED)
+10. **User asked about duplicates:** Agent confirmed the migration script handles updates safely without creating duplicates. (ADDRESSED)
+
+**Project Health Check:**
+-   **Broken:**
+    -   Core scoring logic in .
+    -   Leaderboard calculation and UI display in .
+    -   Community Post media display feature.
+-   **Mocked:** None.
+
+**3rd Party Integrations**:
+-   **API-Football:** Used to fetch all fixture and score data. Configured via  in .
+-   **PayPal:** Integrated in  for payments.
+
+**Testing status**
+-   **Testing agent used after significant changes:** YES
+-   **Troubleshoot agent used after agent stuck in loop:** YES
+-   **Test files created:** None
+-   **Known regressions:** The chronological sorting of fixtures remains a persistent UI bug despite attempted fixes.
+
+**Credentials to test flow:**
+-   **Username:** 
+
+**What agent forgot to execute**
+-   The agent has consistently deferred the Community Post Media Not Displaying issue, which was carried over from the previous session's handoff. It has not been investigated or fixed.</analysis>

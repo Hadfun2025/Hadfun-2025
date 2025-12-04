@@ -32,7 +32,7 @@ cat /app/frontend/build/static/js/main.*.js | grep -o "Deutsch\|Nederlands"
 
 ## ⚠️ Platform-Level Caching Issue
 
-The preview URL (https://kickscore-16.preview.emergentagent.com/) is serving a **cached version** from before the changes. This is a **platform/CDN caching issue** outside our control.
+The preview URL (https://fixture-fixer.preview.emergentagent.com/) is serving a **cached version** from before the changes. This is a **platform/CDN caching issue** outside our control.
 
 ### What We Tried:
 1. ✅ Multiple frontend restarts

@@ -24,7 +24,7 @@ sudo supervisorctl restart all
 ```
 
 ### Your app will be live at:
-https://kickscore-16.preview.emergentagent.com
+https://fixture-fixer.preview.emergentagent.com
 
 ---
 
