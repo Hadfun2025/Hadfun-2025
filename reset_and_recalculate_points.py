@@ -128,6 +128,22 @@ async def reset_and_recalculate():
                     {"id": winner_id},
                     {"$inc": {"season_points": 3}}
                 )
+                
+                # Also store in user_league_points for per-league leaderboards
+                from uuid import uuid4
+                from datetime import datetime, timezone
+                await db.user_league_points.insert_one({
+                    "id": str(uuid4()),
+                    "user_id": winner_id,
+                    "username": user_correct_counts[winner_id]['username'],
+                    "league_id": league_id,
+                    "league_name": league_name,
+                    "matchday": matchday,
+                    "points": 3,
+                    "correct_count": max_correct,
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                })
+                
                 username = user_correct_counts[winner_id]['username']
                 logger.info(f"    ✅ {league_name} - {matchday}: {username} wins with {max_correct} correct → +3 points")
                 total_winners += 1
