@@ -474,6 +474,18 @@ frontend:
           agent: "testing"
           comment: "❌ CHRONOLOGICAL SORTING BUG CONFIRMED - Comprehensive testing revealed fixtures are NOT sorted chronologically within matchday groups. CRITICAL ISSUE FOUND: Day 8 (Mon, 8 Dec) appears before Day 2 (Tue, 2 Dec) in fixture order (positions 10 → 11). The sorting code in App.js lines 934-938 is not working correctly. DETAILED FINDINGS: ✅ Successfully logged in with aysin/aysin@example.com, ✅ Found 20 fixture cards with readable dates, ✅ Analyzed complete fixture sequence, ❌ MAJOR CHRONOLOGICAL ISSUE: Future fixtures (Sat 6 Dec, Sun 7 Dec, Mon 8 Dec) appear BEFORE past fixtures (Tue 2 Dec, Wed 3 Dec, Thu 4 Dec). This violates chronological order completely. The sorting algorithm in lines 934-938 (dateA - dateB ascending) should work but appears to be ineffective. Root cause likely: fixtures are being grouped incorrectly or sorting is applied before proper grouping. Screenshots captured showing the incorrect order. User report validated - chronological sorting within matchday groups is broken."
 
+  - task: "Community Posts Feature Testing"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/components/SocialFeed.jsx, frontend/src/components/CreatePost.jsx, frontend/src/components/PostCard.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Fixed media URL display issue (images/videos now properly prepend backend URL for relative paths). Need to verify community posts functionality is working. Test with credentials aysin/aysin@example.com. Check: 1) Login as aysin, 2) Navigate to Community tab, 3) Check community feed accessibility, 4) Try creating test post with text content, 5) Verify post appears in feed, 6) Test like button functionality, 7) Test comment functionality, 8) Check if images/videos display properly with correct URLs."
+
 agent_communication:
     - agent: "main"
       message: "Implemented Stripe payment integration using emergentintegrations library in test mode. Created email invitation system using Resend API. Added PaymentModal component and integrated payment flow into App.js. Enhanced TeamManagement with email invitation UI. Ready for backend testing to verify: 1) Stripe checkout creation, 2) Payment status polling, 3) Email sending, 4) Team invitation flow."
