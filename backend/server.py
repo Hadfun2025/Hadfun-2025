@@ -3557,10 +3557,33 @@ async def calculate_matchday_winners():
             
             # Award 3 points to each winner
             for winner_id in winners:
+                # Update user's total season points
                 await db.users.update_one(
                     {"id": winner_id},
                     {"$inc": {"season_points": 3}}
                 )
+                
+                # Track league-specific points for leaderboard
+                # Check if this user already won this matchday in this league (prevent duplicates)
+                existing = await db.user_league_points.find_one({
+                    "user_id": winner_id,
+                    "league_id": league_id,
+                    "matchday": matchday
+                })
+                
+                if not existing:
+                    await db.user_league_points.insert_one({
+                        "id": str(uuid.uuid4()),
+                        "user_id": winner_id,
+                        "username": user_correct_counts[winner_id]['username'],
+                        "league_id": league_id,
+                        "league_name": league_name,
+                        "matchday": matchday,
+                        "points": 3,
+                        "correct_count": max_correct,
+                        "created_at": datetime.now(timezone.utc).isoformat()
+                    })
+                
                 username = user_correct_counts[winner_id]['username']
                 logger.info(f"  ✅ {league_name} - {matchday}: {username} wins with {max_correct} correct → +3 points")
                 total_winners += 1
