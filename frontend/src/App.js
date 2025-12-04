@@ -931,11 +931,17 @@ function App() {
 
                   // Sort fixtures within each group by date (earliest first)
                   sortedGroups.forEach(group => {
+                    console.log(`Before sort - ${group.leagueName} Matchday ${group.matchday}:`, 
+                      group.fixtures.map(f => `${f.home_team} vs ${f.away_team} - ${f.utc_date}`));
+                    
                     group.fixtures.sort((a, b) => {
                       const dateA = new Date(a.utc_date);
                       const dateB = new Date(b.utc_date);
                       return dateA - dateB; // Ascending order: 24th, 25th, 26th
                     });
+                    
+                    console.log(`After sort - ${group.leagueName} Matchday ${group.matchday}:`, 
+                      group.fixtures.map(f => `${f.home_team} vs ${f.away_team} - ${f.utc_date}`));
                   });
 
                   return sortedGroups.map((group, groupIndex) => (
