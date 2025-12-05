@@ -723,6 +723,7 @@ export function TeamManagement({ currentUser, onBack }) {
                   {/* League-Specific Leaderboards */}
                   {availableLeagues.map(league => {
                     const leagueData = leagueLeaderboards[league] || [];
+                    console.log(`Rendering ${league} leaderboard:`, leagueData);
                     return (
                       <TabsContent key={league} value={league}>
                         {leagueData.length === 0 ? (
