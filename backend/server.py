@@ -2371,8 +2371,8 @@ async def upload_file(file: UploadFile = File(...)):
         with open(file_path, "wb") as f:
             f.write(content)
         
-        # Return URL
-        file_url = f"/uploads/{unique_filename}"
+        # Return URL (must be /api/uploads for Kubernetes ingress routing)
+        file_url = f"/api/uploads/{unique_filename}"
         
         logger.info(f"File uploaded successfully: {unique_filename} ({file_size_mb:.2f}MB)")
         
