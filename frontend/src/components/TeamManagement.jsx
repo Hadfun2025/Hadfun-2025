@@ -20,7 +20,7 @@ export function TeamManagement({ currentUser, onBack }) {
   const [teamLeaderboard, setTeamLeaderboard] = useState([]);
   const [teamMessages, setTeamMessages] = useState([]);
   const [availableLeagues, setAvailableLeagues] = useState([]);
-  const [selectedLeague, setSelectedLeague] = useState('overall');
+  const [selectedLeague, setSelectedLeague] = useState('');
   const [leagueLeaderboards, setLeagueLeaderboards] = useState({}); // Map: league name -> leaderboard data
   const [loading, setLoading] = useState(true);
   
