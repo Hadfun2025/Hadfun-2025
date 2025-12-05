@@ -698,60 +698,13 @@ export function TeamManagement({ currentUser, onBack }) {
               <CardContent>
                 {/* League Filter Tabs */}
                 <Tabs value={selectedLeague} onValueChange={setSelectedLeague} className="w-full">
-                  <TabsList className="grid w-full mb-4" style={{ gridTemplateColumns: `repeat(${availableLeagues.length + 1}, minmax(0, 1fr))` }}>
-                    <TabsTrigger value="overall">Overall</TabsTrigger>
+                  <TabsList className="grid w-full mb-4" style={{ gridTemplateColumns: `repeat(${availableLeagues.length}, minmax(0, 1fr))` }}>
                     {availableLeagues.map(league => (
                       <TabsTrigger key={league} value={league} className="text-xs sm:text-sm">
                         {league}
                       </TabsTrigger>
                     ))}
                   </TabsList>
-
-                  {/* Overall Leaderboard */}
-                  <TabsContent value="overall">
-                    {teamLeaderboard.length === 0 ? (
-                      <p className="text-center text-gray-500 py-8">
-                        {t.team.noPredictions}
-                      </p>
-                    ) : (
-                      <div className="overflow-x-auto">
-                        <table className="w-full border-collapse">
-                          <thead>
-                            <tr className="bg-indigo-600 text-white border-b-2 border-indigo-700">
-                              <th className="text-left p-3 font-semibold w-16">#</th>
-                              <th className="text-left p-3 font-semibold">Player</th>
-                              <th className="text-center p-3 font-semibold w-20">P</th>
-                              <th className="text-center p-3 font-semibold w-20">W</th>
-                              <th className="text-center p-3 font-semibold w-20">PTS</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {teamLeaderboard.map((entry) => (
-                              <tr
-                                key={entry.username}
-                                className={`border-b border-gray-200 hover:bg-gray-50 ${
-                                  entry.username === currentUser.username ? 'bg-indigo-50 font-semibold' : ''
-                                }`}
-                              >
-                                <td className="p-3 text-gray-600">
-                                  {entry.rank === 1 ? '🥇' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : entry.rank}
-                                </td>
-                                <td className="p-3 font-medium text-gray-900">
-                                  {entry.username}
-                                  {entry.username === currentUser.username && (
-                                    <span className="ml-2 text-xs bg-indigo-500 text-white px-2 py-0.5 rounded">You</span>
-                                  )}
-                                </td>
-                                <td className="p-3 text-center text-gray-700">{entry.total_predictions}</td>
-                                <td className="p-3 text-center text-gray-700">{entry.correct_predictions}</td>
-                                <td className="p-3 text-center font-bold text-indigo-600 text-lg">{entry.total_points}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </TabsContent>
 
                   {/* League-Specific Leaderboards */}
                   {availableLeagues.map(league => {
