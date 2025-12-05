@@ -730,17 +730,6 @@ export function TeamManagement({ currentUser, onBack }) {
                           </p>
                         ) : (
                           <div className="overflow-x-auto">
-                            <div className="mb-4 space-y-2">
-                              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                                <Trophy className="h-5 w-5 text-green-600" />
-                                {league} Leaderboard
-                              </h3>
-                              <div className="p-3 bg-blue-50 rounded-lg">
-                                <p className="text-sm text-gray-700">
-                                  <strong>League Scoring:</strong> Most correct predictions = 3 pts, Tied = 1 pt each
-                                </p>
-                              </div>
-                            </div>
                             <table className="w-full border-collapse">
                               <thead>
                                 <tr className="bg-indigo-600 text-white border-b-2 border-indigo-700">
