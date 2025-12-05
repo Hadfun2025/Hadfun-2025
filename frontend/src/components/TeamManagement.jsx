@@ -126,6 +126,7 @@ export function TeamManagement({ currentUser, onBack }) {
       leaguesRes.data.forEach(item => {
         leaderboardsMap[item.league_name] = item.leaderboard;
       });
+      console.log('League leaderboards loaded:', leaderboardsMap);
       setLeagueLeaderboards(leaderboardsMap);
       
       // Load messages
