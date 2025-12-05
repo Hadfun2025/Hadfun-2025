@@ -85,6 +85,8 @@ export function CreatePost({ user, onPostCreated }) {
     const file = event.target.files[0];
     if (!file) return;
 
+    console.log('File upload started:', { name: file.name, type: file.type, size: file.size });
+
     // Check file size (50MB limit)
     const maxSize = 50 * 1024 * 1024; // 50MB in bytes
     if (file.size > maxSize) {
@@ -93,16 +95,27 @@ export function CreatePost({ user, onPostCreated }) {
     }
 
     // Check file type
-    const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/heic'];
+    const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/heic', 'image/heif'];
     const validVideoTypes = ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/avi'];
     
-    if (type === 'image' && !validImageTypes.includes(file.type)) {
-      toast.error('Please upload a valid image (JPG, PNG, GIF, WEBP)');
+    // Mobile browsers sometimes don't set proper MIME types, so also check file extension
+    const fileName = file.name.toLowerCase();
+    const isImageByExtension = fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || 
+                                fileName.endsWith('.png') || fileName.endsWith('.gif') || 
+                                fileName.endsWith('.webp') || fileName.endsWith('.heic') || 
+                                fileName.endsWith('.heif');
+    const isVideoByExtension = fileName.endsWith('.mp4') || fileName.endsWith('.mov') || 
+                                fileName.endsWith('.avi');
+    
+    if (type === 'image' && !validImageTypes.includes(file.type) && !isImageByExtension) {
+      toast.error('Please upload a valid image (JPG, PNG, GIF, WEBP, HEIC)');
+      console.error('Invalid image type:', file.type, fileName);
       return;
     }
     
-    if (type === 'video' && !validVideoTypes.includes(file.type)) {
+    if (type === 'video' && !validVideoTypes.includes(file.type) && !isVideoByExtension) {
       toast.error('Please upload a valid video (MP4, MOV, AVI)');
+      console.error('Invalid video type:', file.type, fileName);
       return;
     }
 
