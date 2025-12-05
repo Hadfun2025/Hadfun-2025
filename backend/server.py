@@ -2046,7 +2046,8 @@ async def get_team_leaderboard_by_league(team_id: str):
     for stat in prediction_stats:
         user_id = stat["_id"]["user_id"]
         league_id = stat["_id"]["league_id"]
-        league_name = stat["league_name"]
+        league_name = stat.get("league_name", "Unknown League")
+        username = stat.get("username", "Unknown Player")
         
         # Check if this user is already in the league leaderboard
         key = (user_id, league_id)
@@ -2055,13 +2056,18 @@ async def get_team_leaderboard_by_league(team_id: str):
             if league_name not in leagues:
                 leagues[league_name] = []
             
-            leagues[league_name].append({
-                'username': stat['username'],
-                'total_points': 0,
-                'matchday_wins': 0,
-                'correct_predictions': stat['correct_predictions'],
-                'total_predictions': stat['total_predictions']
-            })
+            # Verify we have username before adding
+            if username and username != "Unknown Player":
+                leagues[league_name].append({
+                    'username': username,
+                    'total_points': 0,
+                    'matchday_wins': 0,
+                    'correct_predictions': stat['correct_predictions'],
+                    'total_predictions': stat['total_predictions']
+                })
+            else:
+                # Log warning for debugging
+                logger.warning(f"Missing username for user {user_id} in league {league_name}")
     
     # Sort each league's leaderboard by total points
     result = []
