@@ -62,7 +62,7 @@ function App() {
   const [selectedTeam, setSelectedTeam] = useState(null); // Currently selected team
   const [standings, setStandings] = useState({}); // League standings
   const [selectedMatchday, setSelectedMatchday] = useState(null); // Matchday filter
-  const [daysAhead, setDaysAhead] = useState(14); // Days ahead for fixtures to show current and upcoming matches
+  const [daysAhead, setDaysAhead] = useState(28); // Days ahead for fixtures (4 weeks of upcoming matches)
   
   // Community Welcome Banner
   const [showCommunityBanner, setShowCommunityBanner] = useState(() => {
