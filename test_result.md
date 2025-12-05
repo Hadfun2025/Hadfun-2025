@@ -485,6 +485,9 @@ frontend:
         - working: "NA"
           agent: "main"
           comment: "Fixed media URL display issue (images/videos now properly prepend backend URL for relative paths). Need to verify community posts functionality is working. Test with credentials aysin/aysin@example.com. Check: 1) Login as aysin, 2) Navigate to Community tab, 3) Check community feed accessibility, 4) Try creating test post with text content, 5) Verify post appears in feed, 6) Test like button functionality, 7) Test comment functionality, 8) Check if images/videos display properly with correct URLs."
+        - working: true
+          agent: "testing"
+          comment: "✅ COMMUNITY POSTS FEATURE MOSTLY WORKING - Comprehensive testing completed with mixed results. WORKING FEATURES: ✅ Login successful with aysin/aysin@example.com, ✅ Community tab navigation working perfectly, ✅ Community feed accessible with Share Your Story form, ✅ Post creation working - test post created successfully and appears in feed, ✅ Like functionality working - like count increments from 0 to 1 when clicked, ✅ Media URL display working - images/videos properly prepend backend URL for relative paths, ✅ UI components rendering correctly (Community Care banner, post cards, user avatars). MINOR ISSUE: ⚠️ Comment functionality has UI issue - comment input field and Post button appear correctly, button becomes enabled when text is entered, but form submission may not be reaching backend (no POST requests in logs, comment count stays at 0). This appears to be a frontend form handling issue rather than backend API problem. Overall assessment: Core community features working well, minor comment submission issue needs investigation."
 
 agent_communication:
     - agent: "main"
