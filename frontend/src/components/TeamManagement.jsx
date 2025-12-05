@@ -755,8 +755,8 @@ export function TeamManagement({ currentUser, onBack }) {
                                       {entry.rank === 1 ? '🥇' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : entry.rank}
                                     </td>
                                     <td className="p-3 font-medium text-gray-900">
-                                      {entry.username}
-                                      {entry.username === currentUser.username && (
+                                      {entry.username || 'Unknown Player'}
+                                      {currentUser && entry.username === currentUser.username && (
                                         <span className="ml-2 text-xs bg-indigo-500 text-white px-2 py-0.5 rounded">You</span>
                                       )}
                                     </td>
