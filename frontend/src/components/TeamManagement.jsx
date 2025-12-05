@@ -724,6 +724,11 @@ export function TeamManagement({ currentUser, onBack }) {
                   {availableLeagues.map(league => {
                     const leagueData = leagueLeaderboards[league] || [];
                     console.log(`Rendering ${league} leaderboard:`, JSON.stringify(leagueData, null, 2));
+                    console.log(`League data length: ${leagueData.length}`);
+                    if (leagueData.length > 0) {
+                      console.log(`First entry username: "${leagueData[0].username}"`);
+                      console.log(`First entry keys:`, Object.keys(leagueData[0]));
+                    }
                     return (
                       <TabsContent key={league} value={league}>
                         {leagueData.length === 0 ? (
