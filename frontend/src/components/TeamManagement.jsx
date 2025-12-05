@@ -743,12 +743,13 @@ export function TeamManagement({ currentUser, onBack }) {
                             </div>
                             <table className="w-full border-collapse">
                               <thead>
-                                <tr className="bg-green-600 text-white border-b-2 border-green-700">
+                                <tr className="bg-indigo-600 text-white border-b-2 border-indigo-700">
                                   <th className="text-left p-3 font-semibold w-16">#</th>
                                   <th className="text-left p-3 font-semibold">Player</th>
-                                  <th className="text-center p-3 font-semibold w-24">Correct</th>
+                                  <th className="text-center p-3 font-semibold w-24">Wins</th>
+                                  <th className="text-center p-3 font-semibold w-20">Correct</th>
                                   <th className="text-center p-3 font-semibold w-20">Total</th>
-                                  <th className="text-center p-3 font-semibold w-24">League Pts</th>
+                                  <th className="text-center p-3 font-semibold w-24">PTS</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -756,7 +757,7 @@ export function TeamManagement({ currentUser, onBack }) {
                                   <tr
                                     key={entry.username}
                                     className={`border-b border-gray-200 hover:bg-gray-50 ${
-                                      entry.username === currentUser.username ? 'bg-green-50 font-semibold' : ''
+                                      entry.username === currentUser.username ? 'bg-indigo-50 font-semibold' : ''
                                     }`}
                                   >
                                     <td className="p-3 text-gray-600">
@@ -765,15 +766,13 @@ export function TeamManagement({ currentUser, onBack }) {
                                     <td className="p-3 font-medium text-gray-900">
                                       {entry.username}
                                       {entry.username === currentUser.username && (
-                                        <span className="ml-2 text-xs bg-green-500 text-white px-2 py-0.5 rounded">You</span>
+                                        <span className="ml-2 text-xs bg-indigo-500 text-white px-2 py-0.5 rounded">You</span>
                                       )}
                                     </td>
+                                    <td className="p-3 text-center text-gray-700">{entry.matchday_wins || 0}</td>
                                     <td className="p-3 text-center text-gray-700">{entry.correct_predictions}</td>
                                     <td className="p-3 text-center text-gray-700">{entry.total_predictions}</td>
-                                    <td className="p-3 text-center font-bold text-green-600 text-lg">
-                                      {entry.league_points}
-                                      {entry.league_points === 3 && ' 🏆'}
-                                    </td>
+                                    <td className="p-3 text-center font-bold text-indigo-600 text-lg">{entry.total_points || 0}</td>
                                   </tr>
                                 ))}
                               </tbody>
