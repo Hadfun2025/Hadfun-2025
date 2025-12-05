@@ -381,17 +381,18 @@ export function CreatePost({ user, onPostCreated }) {
               <p className="text-sm font-semibold text-green-900 mb-2">📸 Option 1: Upload from your device</p>
               <input
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/heic,image/heif"
+                capture="environment"
                 onChange={(e) => handleFileUpload(e, 'image')}
                 disabled={images.length >= 5 || uploadingFile}
-                className="text-sm"
+                className="text-sm w-full"
                 id="image-upload"
               />
               <p className="text-xs text-gray-600 mt-1">
                 {uploadingFile && uploadProgress ? (
                   <span className="text-green-700 font-semibold">⏳ {uploadProgress}</span>
                 ) : (
-                  'JPG, PNG, GIF, WEBP • Max 50MB'
+                  '📱 iPhone: If photos don\'t upload, try converting to JPG in Photos app first • JPG, PNG, GIF, WEBP • Max 50MB'
                 )}
               </p>
             </div>
