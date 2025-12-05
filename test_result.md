@@ -438,7 +438,7 @@ frontend:
 
 test_plan:
   current_focus:
-    - "Community Posts Feature Testing"
+    - "Fixture Date Range Filtering - Next 4 Weeks Default (Upcoming Only)"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
