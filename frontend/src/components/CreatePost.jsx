@@ -159,18 +159,26 @@ export function CreatePost({ user, onPostCreated }) {
       event.target.value = '';
     } catch (error) {
       console.error('Upload error:', error);
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        code: error.code
+      });
       
       // Enhanced error messages
       if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
-        toast.error('Upload timeout - file may be too large or connection is slow. Please try again.');
+        toast.error('Upload timeout - file may be too large or connection is slow. Please try a smaller file or check your connection.');
       } else if (error.response?.status === 413) {
-        toast.error('File too large for server. Please use a smaller file.');
+        toast.error('File too large for server. Please compress your image or use a smaller file.');
       } else if (error.response?.status === 500) {
-        toast.error('Server error during upload. Please try again.');
+        toast.error('Server error during upload. Please try again or use a different image format (JPG or PNG work best).');
+      } else if (error.response?.status === 400) {
+        toast.error(error.response?.data?.detail || 'File type not supported. Please try JPG or PNG format.');
       } else if (!navigator.onLine) {
         toast.error('No internet connection. Please check your network.');
       } else {
-        toast.error(error.response?.data?.detail || error.message || 'Error uploading file. Please try again.');
+        toast.error(error.response?.data?.detail || error.message || 'Error uploading file. Try converting to JPG/PNG first.');
       }
     } finally {
       setUploadingFile(false);
