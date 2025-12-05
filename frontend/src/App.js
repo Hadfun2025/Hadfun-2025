@@ -805,9 +805,9 @@ function App() {
                       }}
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     >
-                      <option value={7}>Current Week (Default)</option>
+                      <option value={7}>Current Week</option>
                       <option value={14}>Next 2 Weeks</option>
-                      <option value={30}>Next Month</option>
+                      <option value={28}>Next 4 Weeks (Default)</option>
                       <option value={60}>Next 2 Months</option>
                       <option value={90}>Next 3 Months</option>
                       <option value={365}>Full Season (All Past & Future)</option>
