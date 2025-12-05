@@ -506,6 +506,18 @@ frontend:
           agent: "testing"
           comment: "✅ TURKISH SÜPER LIG PREDICTION FUNCTIONALITY FULLY WORKING - Comprehensive testing completed successfully. DETAILED FINDINGS: ✅ Login successful with test credentials (aysin/aysin@example.com), ✅ Turkish Süper Lig (League ID: 203) found and selectable in league filter, ✅ Navigation and UI functionality working perfectly, ✅ Found 5 December 5-6 fixtures as requested: Galatasaray vs Samsunspor (Fri 5 Dec), Eyüpspor vs Kayserispor (Sat 6 Dec), Konyaspor vs Rizespor (Sat 6 Dec), Başakşehir vs Fenerbahçe (Sat 6 Dec), Fenerbahçe vs Konyaspor (Mon 15 Dec), ✅ Prediction buttons (Home/Away/Draw) are FULLY FUNCTIONAL - successfully tested all three prediction types with immediate visual feedback and state changes, ✅ Success messages appear when predictions are saved ('Prediction saved: DRAW! You can change this until Wed 23:59'), ✅ Button states update correctly showing selected predictions with visual indicators (rings and color changes), ✅ No JavaScript errors or console errors detected. USER ISSUE ANALYSIS: The reported issue appears to be related to prediction timing rules rather than technical malfunction. The app correctly locks predictions after Wednesday 23:59 deadline or when matches have finished. CONCLUSION: Turkish league functionality is working correctly - users should ensure predictions are made before the Wednesday 23:59 deadline for upcoming fixtures."
 
+  - task: "Team Leaderboard Username Display Issue"
+    implemented: true
+    working: false
+    file: "frontend/src/components/TeamManagement.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL ISSUE CONFIRMED - TEAM LEADERBOARD USERNAME DISPLAY BROKEN. Comprehensive testing of team leaderboard reveals usernames are NOT displaying correctly. DETAILED FINDINGS: ✅ Successfully logged in as aysin (username: aysin, email: aysin@example.com), ✅ Successfully navigated to Team tab and clicked Leaderboard, ✅ Found all 4 league tabs (Brasileirão, Championship, Süper Lig, UEFA Europa Conference League), ✅ Team: Cheshunt Crew confirmed with 7 members, ❌ CRITICAL ISSUE: Team leaderboard showing 'Unknown Player' instead of actual usernames across multiple leagues, ❌ aysin username NOT visible in most leagues (only appears in Brasileirão), ❌ Josh username NOT found in any league, ❌ Found 4 'Unknown Player' entries total across leagues. ROOT CAUSE: Team leaderboard API is not properly resolving usernames to display actual player names. Expected behavior: Should show 'aysin', 'Josh', and other team member usernames with 'You' badge for current user. Current behavior: Displaying 'Unknown Player' placeholders instead of real usernames. This affects user experience as team members cannot see who they're competing against. Screenshots captured showing the issue across all league tabs."
+
   - task: "Fixture Date Range Filtering - Next 4 Weeks Default (Upcoming Only)"
     implemented: true
     working: true
