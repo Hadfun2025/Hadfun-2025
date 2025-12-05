@@ -507,6 +507,18 @@ frontend:
           agent: "testing"
           comment: "✅ TURKISH SÜPER LIG PREDICTION FUNCTIONALITY FULLY WORKING - Comprehensive testing completed successfully. DETAILED FINDINGS: ✅ Login successful with test credentials (aysin/aysin@example.com), ✅ Turkish Süper Lig (League ID: 203) found and selectable in league filter, ✅ Navigation and UI functionality working perfectly, ✅ Found 5 December 5-6 fixtures as requested: Galatasaray vs Samsunspor (Fri 5 Dec), Eyüpspor vs Kayserispor (Sat 6 Dec), Konyaspor vs Rizespor (Sat 6 Dec), Başakşehir vs Fenerbahçe (Sat 6 Dec), Fenerbahçe vs Konyaspor (Mon 15 Dec), ✅ Prediction buttons (Home/Away/Draw) are FULLY FUNCTIONAL - successfully tested all three prediction types with immediate visual feedback and state changes, ✅ Success messages appear when predictions are saved ('Prediction saved: DRAW! You can change this until Wed 23:59'), ✅ Button states update correctly showing selected predictions with visual indicators (rings and color changes), ✅ No JavaScript errors or console errors detected. USER ISSUE ANALYSIS: The reported issue appears to be related to prediction timing rules rather than technical malfunction. The app correctly locks predictions after Wednesday 23:59 deadline or when matches have finished. CONCLUSION: Turkish league functionality is working correctly - users should ensure predictions are made before the Wednesday 23:59 deadline for upcoming fixtures."
 
+  - task: "Fixture Date Range Filtering - Next 4 Weeks Default (Upcoming Only)"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "user"
+          comment: "Verify fixture date range filtering - should show ONLY upcoming fixtures (next 4 weeks), no past fixtures. Fixed backend to show ONLY future fixtures (not past 3 days). Default time range changed to 28 days (4 weeks). Should NOT show Dec 2, 3, 4 past fixtures anymore. Test with credentials aysin/aysin@example.com. Check: 1) Time Range defaults to 'Next 4 Weeks (Default)', 2) No past fixtures visible (no Dec 2, 3, 4), 3) Fixtures start from current date/time onwards, 4) Verify fixtures show for next 4 weeks, 5) Try changing time range selector to see different ranges work."
+
 agent_communication:
     - agent: "main"
       message: "Implemented Stripe payment integration using emergentintegrations library in test mode. Created email invitation system using Resend API. Added PaymentModal component and integrated payment flow into App.js. Enhanced TeamManagement with email invitation UI. Ready for backend testing to verify: 1) Stripe checkout creation, 2) Payment status polling, 3) Email sending, 4) Team invitation flow."
