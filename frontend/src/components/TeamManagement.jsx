@@ -113,7 +113,20 @@ export function TeamManagement({ currentUser, onBack }) {
       
       // Load available leagues
       const leaguesRes = await axios.get(`${API}/teams/${userTeam.id}/leaderboard/by-league`);
-      setAvailableLeagues(leaguesRes.data.leagues || []);
+      const leagues = leaguesRes.data.map(item => item.league_name);
+      setAvailableLeagues(leagues);
+      
+      // Set default selected league to the first one
+      if (leagues.length > 0 && !selectedLeague) {
+        setSelectedLeague(leagues[0]);
+      }
+      
+      // Preload all league leaderboards
+      const leaderboardsMap = {};
+      leaguesRes.data.forEach(item => {
+        leaderboardsMap[item.league_name] = item.leaderboard;
+      });
+      setLeagueLeaderboards(leaderboardsMap);
       
       // Load messages
       const messagesRes = await axios.get(`${API}/teams/${userTeam.id}/messages`);
