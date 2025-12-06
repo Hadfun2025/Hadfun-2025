@@ -2033,8 +2033,8 @@ def normalize_league_name(league_name: str) -> str:
     return normalized if normalized else league_name
 
 
-@api_router.get("/teams/{team_id}/leaderboard/by-league")
-async def get_team_leaderboard_by_league(team_id: str):
+@api_router.get("/teams/{team_id}/leaderboard/by-league-old")
+async def get_team_leaderboard_by_league_old(team_id: str):
     """
     Get team leaderboard grouped by league
     Returns separate leaderboard for each league showing who won in that league
