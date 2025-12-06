@@ -2100,17 +2100,32 @@ async def get_team_leaderboard_by_league(team_id: str):
         user_league_totals[key]['total_points'] += lp['points']
         user_league_totals[key]['matchday_wins'] += 1
     
-    # Build leaderboard per league
+    # Build leaderboard per league  
+    # Group by normalized league name to merge variants
     leagues = {}
+    user_in_league = {}  # Track which users are in which league to avoid duplicates
+    
     for key, data in user_league_totals.items():
         user_id, league_id = key
         league_name = data['league_name']  # Already normalized
+        
+        # Check if this user already exists in this league (from different league_id variant)
+        league_user_key = (league_name, user_id)
+        if league_user_key in user_in_league:
+            # Merge stats with existing entry
+            existing_idx = user_in_league[league_user_key]
+            leagues[league_name][existing_idx]['total_points'] += data['total_points']
+            leagues[league_name][existing_idx]['matchday_wins'] += data['matchday_wins']
+            continue
         
         # Get prediction stats for this user in this league
         stat = stats_map.get((user_id, league_id))
         
         if league_name not in leagues:
             leagues[league_name] = []
+        
+        entry_idx = len(leagues[league_name])
+        user_in_league[league_user_key] = entry_idx
         
         leagues[league_name].append({
             'username': data['username'],
