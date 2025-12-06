@@ -2181,12 +2181,16 @@ async def get_team_leaderboard_by_league(team_id: str):
             member['rank'] = idx + 1
         
         result.append({
-            'league_name': league_name,
+            'league_name': league_name,  # Already normalized
             'leaderboard': members_data
         })
     
     # Sort leagues alphabetically
     result.sort(key=lambda x: x['league_name'])
+    
+    logger.info(f"Returning {len(result)} leagues for team {team_id}")
+    for league in result:
+        logger.info(f"  {league['league_name']}: {len(league['leaderboard'])} members")
     
     return result
 
