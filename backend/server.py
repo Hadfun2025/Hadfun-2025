@@ -2124,7 +2124,7 @@ async def get_team_leaderboard_by_league(team_id: str):
     for stat in prediction_stats:
         user_id = stat["_id"]["user_id"]
         league_id = stat["_id"]["league_id"]
-        league_name = stat.get("league_name", "Unknown League")
+        league_name = normalize_league_name(stat.get("league_name", "Unknown League"))  # Normalize here
         username = stat.get("username", "Unknown Player")
         
         # Check if this user is already in the league leaderboard
