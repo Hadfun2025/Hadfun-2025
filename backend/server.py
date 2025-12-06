@@ -2019,8 +2019,14 @@ async def get_user_team(user_id: str):
 
 
 def normalize_league_name(league_name: str) -> str:
-    """
-    Normalize league names to merge duplicates
+    """Normalize league names to merge duplicates"""
+    if not league_name:
+        return "Unknown League"
+    
+    # Remove country suffixes in parentheses
+    import re
+    normalized = re.sub(r'\s*\([^)]*\)\s*$', '', league_name).strip()
+    return normalized if normalized else league_name
 
 
 @api_router.get("/teams/{team_id}/leaderboard/by-league")
