@@ -2009,6 +2009,138 @@ async def get_team_leaderboard(team_id: str):
 
 @api_router.get("/user/{user_id}/team")
 async def get_user_team(user_id: str):
+
+
+@api_router.get("/teams/{team_id}/leaderboard/by-league")
+async def get_team_leaderboard_by_league(team_id: str):
+    """
+    Get team leaderboard grouped by league
+    Returns separate leaderboard for each league showing who won in that league
+    Used by main Leaderboard tab to show league-specific standings
+    """
+    # Get team members
+    members = await db.team_members.find({"team_id": team_id}, {"_id": 0}).to_list(100)
+    member_ids = [m['user_id'] for m in members]
+    
+    if not member_ids:
+        return []
+    
+    # Get all league points for team members
+    league_points = await db.user_league_points.find(
+        {"user_id": {"$in": member_ids}},
+        {"_id": 0}
+    ).to_list(10000)
+    
+    # Also get prediction stats for each user per league
+    pipeline = [
+        {"$match": {"user_id": {"$in": member_ids}}},
+        {
+            "$group": {
+                "_id": {
+                    "user_id": "$user_id",
+                    "league_id": "$league_id"
+                },
+                "username": {"$first": "$username"},
+                "league_name": {"$first": "$league"},
+                "total_predictions": {"$sum": 1},
+                "correct_predictions": {
+                    "$sum": {"$cond": [{"$eq": ["$result", "correct"]}, 1, 0]}
+                }
+            }
+        }
+    ]
+    
+    prediction_stats = await db.predictions.aggregate(pipeline).to_list(None)
+    
+    # Create a map of (user_id, league_id) -> stats
+    stats_map = {
+        (stat["_id"]["user_id"], stat["_id"]["league_id"]): stat
+        for stat in prediction_stats
+    }
+    
+    # Group league points by user and league
+    user_league_totals = {}
+    for lp in league_points:
+        user_id = lp['user_id']
+        league_id = lp['league_id']
+        league_name = lp['league_name']
+        
+        key = (user_id, league_id)
+        if key not in user_league_totals:
+            user_league_totals[key] = {
+                'user_id': user_id,
+                'username': lp['username'],
+                'league_id': league_id,
+                'league_name': league_name,
+                'total_points': 0,
+                'matchday_wins': 0
+            }
+        user_league_totals[key]['total_points'] += lp['points']
+        user_league_totals[key]['matchday_wins'] += 1
+    
+    # Build leaderboard per league
+    leagues = {}
+    for key, data in user_league_totals.items():
+        user_id, league_id = key
+        league_name = data['league_name']
+        
+        # Get prediction stats for this user in this league
+        stat = stats_map.get((user_id, league_id))
+        
+        if league_name not in leagues:
+            leagues[league_name] = []
+        
+        leagues[league_name].append({
+            'username': data['username'],
+            'total_points': data['total_points'],
+            'matchday_wins': data['matchday_wins'],
+            'correct_predictions': stat['correct_predictions'] if stat else 0,
+            'total_predictions': stat['total_predictions'] if stat else 0
+        })
+    
+    # Also add users who have made predictions but haven't won any matchdays yet
+    for stat in prediction_stats:
+        user_id = stat["_id"]["user_id"]
+        league_id = stat["_id"]["league_id"]
+        league_name = stat.get("league_name", "Unknown League")
+        username = stat.get("username", "Unknown Player")
+        
+        # Check if this user is already in the league leaderboard
+        key = (user_id, league_id)
+        if key not in user_league_totals:
+            # User has predictions but no matchday wins yet
+            if league_name not in leagues:
+                leagues[league_name] = []
+            
+            # Verify we have username before adding
+            if username and username != "Unknown Player":
+                leagues[league_name].append({
+                    'username': username,
+                    'total_points': 0,
+                    'matchday_wins': 0,
+                    'correct_predictions': stat['correct_predictions'],
+                    'total_predictions': stat['total_predictions']
+                })
+    
+    # Sort each league's leaderboard by total points
+    result = []
+    for league_name, members_data in leagues.items():
+        members_data.sort(key=lambda x: (x['total_points'], x['correct_predictions']), reverse=True)
+        
+        # Assign ranks
+        for idx, member in enumerate(members_data):
+            member['rank'] = idx + 1
+        
+        result.append({
+            'league_name': league_name,
+            'leaderboard': members_data
+        })
+    
+    # Sort leagues alphabetically
+    result.sort(key=lambda x: x['league_name'])
+    
+    return result
+
     """Get the team a user belongs to (legacy - returns first team)"""
     membership = await db.team_members.find_one({"user_id": user_id}, {"_id": 0})
     if not membership:
