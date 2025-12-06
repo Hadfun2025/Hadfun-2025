@@ -1955,11 +1955,11 @@ async def get_team_leaderboard(team_id: str, weekly: bool = False):
     return leaderboard
 
 
-@api_router.get("/teams/{team_id}/leaderboard/by-league")
-async def get_team_leaderboard_by_league(team_id: str):
+@api_router.get("/teams/{team_id}/leaderboard")
+async def get_team_leaderboard(team_id: str):
     """
-    Get team leaderboard grouped by league
-    Returns points earned by each team member in each league they've won
+    Get unified team leaderboard showing all members and their overall stats
+    Single leaderboard per team - no league tabs needed
     """
     # Get team members
     members = await db.team_members.find({"team_id": team_id}, {"_id": 0}).to_list(100)
