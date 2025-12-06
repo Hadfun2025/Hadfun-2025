@@ -697,75 +697,61 @@ export function TeamManagement({ currentUser, onBack }) {
                 <CardDescription>{t.team.privateToTeam}</CardDescription>
               </CardHeader>
               <CardContent>
-                {/* League Filter Tabs */}
-                <Tabs value={selectedLeague} onValueChange={setSelectedLeague} className="w-full">
-                  <TabsList className="grid w-full mb-4" style={{ gridTemplateColumns: `repeat(${availableLeagues.length}, minmax(0, 1fr))` }}>
-                    {availableLeagues.map(league => (
-                      <TabsTrigger key={league} value={league} className="text-xs sm:text-sm">
-                        {league}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
+                {/* Single Unified Team Leaderboard */}
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <div className="mb-4">
+                    <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                      <Trophy className="h-6 w-6 text-indigo-600" />
+                      Team Leaderboard
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-1">All team members across all leagues</p>
+                  </div>
 
-                  {/* League-Specific Leaderboards */}
-                  {availableLeagues.map(league => {
-                    const leagueData = leagueLeaderboards[league] || [];
-                    console.log(`Rendering ${league} leaderboard:`, JSON.stringify(leagueData, null, 2));
-                    console.log(`League data length: ${leagueData.length}`);
-                    if (leagueData.length > 0) {
-                      console.log(`First entry username: "${leagueData[0].username}"`);
-                      console.log(`First entry keys:`, Object.keys(leagueData[0]));
-                    }
-                    return (
-                      <TabsContent key={league} value={league}>
-                        {leagueData.length === 0 ? (
-                          <p className="text-center text-gray-500 py-8">
-                            Loading {league} leaderboard...
-                          </p>
-                        ) : (
-                          <div className="overflow-x-auto">
-                            <table className="w-full border-collapse">
-                              <thead>
-                                <tr className="bg-indigo-600 text-white border-b-2 border-indigo-700">
-                                  <th className="text-left p-3 font-semibold w-16">#</th>
-                                  <th className="text-left p-3 font-semibold">Player</th>
-                                  <th className="text-center p-3 font-semibold w-24">Wins</th>
-                                  <th className="text-center p-3 font-semibold w-20">Correct</th>
-                                  <th className="text-center p-3 font-semibold w-20">Total</th>
-                                  <th className="text-center p-3 font-semibold w-24">PTS</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {leagueData.map((entry, index) => (
-                                  <tr
-                                    key={`${league}-${entry.username}-${index}`}
-                                    className={`border-b border-gray-200 hover:bg-gray-50 ${
-                                      currentUser && entry.username === currentUser.username ? 'bg-indigo-50 font-semibold' : ''
-                                    }`}
-                                  >
-                                    <td className="p-3 text-gray-600">
-                                      {entry.rank === 1 ? '🥇' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : entry.rank}
-                                    </td>
-                                    <td className="p-3 font-medium text-gray-900">
-                                      {entry.username || 'Unknown Player'}
-                                      {currentUser && entry.username === currentUser.username && (
-                                        <span className="ml-2 text-xs bg-indigo-500 text-white px-2 py-0.5 rounded">You</span>
-                                      )}
-                                    </td>
-                                    <td className="p-3 text-center text-gray-700">{entry.matchday_wins || 0}</td>
-                                    <td className="p-3 text-center text-gray-700">{entry.correct_predictions}</td>
-                                    <td className="p-3 text-center text-gray-700">{entry.total_predictions}</td>
-                                    <td className="p-3 text-center font-bold text-indigo-600 text-lg">{entry.total_points || 0}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        )}
-                      </TabsContent>
-                    );
-                  })}
-                </Tabs>
+                  {teamLeaderboard.length === 0 ? (
+                    <p className="text-center text-gray-500 py-8">
+                      No predictions yet. Be the first to predict!
+                    </p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="bg-indigo-600 text-white border-b-2 border-indigo-700">
+                            <th className="text-left p-3 font-semibold w-16">#</th>
+                            <th className="text-left p-3 font-semibold">Player</th>
+                            <th className="text-center p-3 font-semibold w-20">Wins</th>
+                            <th className="text-center p-3 font-semibold w-20">Correct</th>
+                            <th className="text-center p-3 font-semibold w-20">Total</th>
+                            <th className="text-center p-3 font-semibold w-24">PTS</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {teamLeaderboard.map((entry) => (
+                            <tr
+                              key={entry.username}
+                              className={`border-b border-gray-200 hover:bg-gray-50 ${
+                                currentUser && entry.username === currentUser.username ? 'bg-indigo-50 font-semibold' : ''
+                              }`}
+                            >
+                              <td className="p-3 text-gray-600">
+                                {entry.rank === 1 ? '🥇' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : entry.rank}
+                              </td>
+                              <td className="p-3 font-medium text-gray-900">
+                                {entry.username}
+                                {currentUser && entry.username === currentUser.username && (
+                                  <span className="ml-2 text-xs bg-indigo-500 text-white px-2 py-0.5 rounded">You</span>
+                                )}
+                              </td>
+                              <td className="p-3 text-center text-gray-700">{entry.matchday_wins}</td>
+                              <td className="p-3 text-center text-gray-700">{entry.correct_predictions}</td>
+                              <td className="p-3 text-center text-gray-700">{entry.total_predictions}</td>
+                              <td className="p-3 text-center font-bold text-indigo-600 text-lg">{entry.total_points}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
