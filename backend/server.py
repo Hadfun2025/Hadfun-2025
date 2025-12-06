@@ -2142,7 +2142,16 @@ async def get_team_leaderboard_by_league(team_id: str):
         league_name = normalize_league_name(stat.get("league_name", "Unknown League"))  # Normalize here
         username = stat.get("username", "Unknown Player")
         
-        # Check if this user is already in the league leaderboard
+        # Check if this user is already in the league leaderboard (by normalized name)
+        league_user_key = (league_name, user_id)
+        if league_user_key in user_in_league:
+            # User already in leaderboard, merge prediction stats
+            existing_idx = user_in_league[league_user_key]
+            leagues[league_name][existing_idx]['correct_predictions'] += stat['correct_predictions']
+            leagues[league_name][existing_idx]['total_predictions'] += stat['total_predictions']
+            continue
+        
+        # Check if this user has points in ANY variant of this league
         key = (user_id, league_id)
         if key not in user_league_totals:
             # User has predictions but no matchday wins yet
@@ -2151,6 +2160,9 @@ async def get_team_leaderboard_by_league(team_id: str):
             
             # Verify we have username before adding
             if username and username != "Unknown Player":
+                entry_idx = len(leagues[league_name])
+                user_in_league[league_user_key] = entry_idx
+                
                 leagues[league_name].append({
                     'username': username,
                     'total_points': 0,
