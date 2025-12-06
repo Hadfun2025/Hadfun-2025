@@ -2018,6 +2018,21 @@ async def get_user_team(user_id: str):
     return {"team": team, "membership": team_member}
 
 
+def normalize_league_name(league_name: str) -> str:
+    """
+    Normalize league names to merge duplicates
+    E.g., "Championship (England)" and "Championship" become just "Championship"
+    """
+    if not league_name:
+        return "Unknown League"
+    
+    # Remove country suffixes in parentheses for common leagues
+    import re
+    normalized = re.sub(r'\s*\([^)]*\)\s*$', '', league_name).strip()
+    
+    return normalized if normalized else league_name
+
+
 @api_router.get("/teams/{team_id}/leaderboard/by-league")
 async def get_team_leaderboard_by_league(team_id: str):
     """
