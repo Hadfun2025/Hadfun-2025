@@ -2114,10 +2114,11 @@ async def get_team_leaderboard_by_league(team_id: str):
         # Check if this user already exists in this league (from different league_id variant)
         league_user_key = (league_name, user_id)
         if league_user_key in user_in_league:
-            # Merge stats with existing entry
+            # User already in this normalized league - merge points but DON'T duplicate prediction counts
             existing_idx = user_in_league[league_user_key]
             leagues[league_name][existing_idx]['total_points'] += data['total_points']
             leagues[league_name][existing_idx]['matchday_wins'] += data['matchday_wins']
+            # Note: NOT adding correct/total predictions here - they should be the same fixtures
             continue
         
         # Get prediction stats for this user in this league
