@@ -2021,6 +2021,95 @@ async def get_user_team(user_id: str):
 def normalize_league_name(league_name: str) -> str:
     """
     Normalize league names to merge duplicates
+
+
+@api_router.get("/teams/{team_id}/leaderboard/by-league")
+async def get_team_leaderboard_by_league(team_id: str):
+    """
+    SIMPLIFIED team leaderboard by league - NO DUPLICATES, ALL USERS
+    """
+    # Get team members
+    members = await db.team_members.find({"team_id": team_id}, {"_id": 0}).to_list(100)
+    member_ids = [m['user_id'] for m in members]
+    
+    if not member_ids:
+        return []
+    
+    # Build leaderboard by getting ALL predictions for each member
+    leagues = {}
+    
+    for member_id in member_ids:
+        # Get user info
+        user = await db.users.find_one({"id": member_id}, {"_id": 0})
+        if not user:
+            continue
+        
+        username = user.get('username', 'Unknown')
+        
+        # Get all predictions for this user
+        predictions = await db.predictions.find({"user_id": member_id}, {"_id": 0}).to_list(10000)
+        
+        # Group predictions by NORMALIZED league name
+        user_leagues = {}
+        for pred in predictions:
+            league_name = normalize_league_name(pred.get('league', 'Unknown'))
+            
+            if league_name not in user_leagues:
+                user_leagues[league_name] = {
+                    'correct': 0,
+                    'total': 0
+                }
+            
+            user_leagues[league_name]['total'] += 1
+            if pred.get('result') == 'correct':
+                user_leagues[league_name]['correct'] += 1
+        
+        # Get matchday wins for this user
+        wins_by_league = {}
+        league_points_docs = await db.user_league_points.find({"user_id": member_id}, {"_id": 0}).to_list(10000)
+        
+        for lp in league_points_docs:
+            league_name = normalize_league_name(lp.get('league_name', 'Unknown'))
+            if league_name not in wins_by_league:
+                wins_by_league[league_name] = {'wins': 0, 'points': 0}
+            wins_by_league[league_name]['wins'] += 1
+            wins_by_league[league_name]['points'] += lp.get('points', 0)
+        
+        # Add user to each league they participated in
+        for league_name, stats in user_leagues.items():
+            if league_name not in leagues:
+                leagues[league_name] = []
+            
+            wins_data = wins_by_league.get(league_name, {'wins': 0, 'points': 0})
+            
+            leagues[league_name].append({
+                'username': username,
+                'total_points': wins_data['points'],
+                'matchday_wins': wins_data['wins'],
+                'correct_predictions': stats['correct'],
+                'total_predictions': stats['total']
+            })
+    
+    # Build result
+    result = []
+    for league_name, members_data in leagues.items():
+        # Sort by points, then correct predictions
+        members_data.sort(key=lambda x: (x['total_points'], x['correct_predictions']), reverse=True)
+        
+        # Assign ranks
+        for idx, member in enumerate(members_data):
+            member['rank'] = idx + 1
+        
+        result.append({
+            'league_name': league_name,
+            'leaderboard': members_data
+        })
+    
+    # Sort leagues alphabetically
+    result.sort(key=lambda x: x['league_name'])
+    
+    return result
+
     E.g., "Championship (England)" and "Championship" become just "Championship"
     """
     if not league_name:
