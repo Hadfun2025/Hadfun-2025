@@ -107,10 +107,6 @@ export function TeamManagement({ currentUser, onBack }) {
       const membersRes = await axios.get(`${API}/teams/${userTeam.id}/members`);
       setTeamMembers(membersRes.data);
       
-      // Load leaderboard
-      const leaderboardRes = await axios.get(`${API}/teams/${userTeam.id}/leaderboard`);
-      setTeamLeaderboard(leaderboardRes.data);
-      
       // Load team leaderboard (unified, no league tabs)
       const leaderboardRes = await axios.get(`${API}/teams/${userTeam.id}/leaderboard`);
       setTeamLeaderboard(leaderboardRes.data);
