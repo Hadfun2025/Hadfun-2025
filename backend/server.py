@@ -2103,7 +2103,9 @@ async def get_team_leaderboard_by_league(team_id: str):
     # Build leaderboard per league  
     # Group by normalized league name to merge variants
     leagues = {}
-    user_in_league = {}  # Track which users are in which league to avoid duplicates
+    
+    # Track which users are in which league to avoid duplicates (moved outside loops)
+    user_in_league = {}
     
     for key, data in user_league_totals.items():
         user_id, league_id = key
