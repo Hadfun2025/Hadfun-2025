@@ -2085,7 +2085,7 @@ async def get_team_leaderboard_by_league(team_id: str):
     for lp in league_points:
         user_id = lp['user_id']
         league_id = lp['league_id']
-        league_name = lp['league_name']
+        league_name = normalize_league_name(lp['league_name'])  # Normalize here
         
         key = (user_id, league_id)
         if key not in user_league_totals:
@@ -2104,7 +2104,7 @@ async def get_team_leaderboard_by_league(team_id: str):
     leagues = {}
     for key, data in user_league_totals.items():
         user_id, league_id = key
-        league_name = data['league_name']
+        league_name = data['league_name']  # Already normalized
         
         # Get prediction stats for this user in this league
         stat = stats_map.get((user_id, league_id))
