@@ -2121,8 +2121,13 @@ async def get_team_leaderboard_by_league(team_id: str):
             # Note: NOT adding correct/total predictions here - they should be the same fixtures
             continue
         
-        # Get prediction stats for this user in this league
-        stat = stats_map.get((user_id, league_id))
+        # Get prediction stats for this user - check all league_id variants with same normalized name
+        correct = 0
+        total = 0
+        for (stat_user_id, stat_league_id), stat_data in stats_map.items():
+            if stat_user_id == user_id and normalize_league_name(stat_data.get('league_name', '')) == league_name:
+                correct = max(correct, stat_data['correct_predictions'])  # Use max to avoid duplicates
+                total = max(total, stat_data['total_predictions'])
         
         if league_name not in leagues:
             leagues[league_name] = []
@@ -2134,8 +2139,8 @@ async def get_team_leaderboard_by_league(team_id: str):
             'username': data['username'],
             'total_points': data['total_points'],
             'matchday_wins': data['matchday_wins'],
-            'correct_predictions': stat['correct_predictions'] if stat else 0,
-            'total_predictions': stat['total_predictions'] if stat else 0
+            'correct_predictions': correct,
+            'total_predictions': total
         })
     
     # Also add users who have made predictions but haven't won any matchdays yet
