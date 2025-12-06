@@ -1993,7 +1993,8 @@ async def get_team_leaderboard(team_id: str):
             'total_points': total_points,
             'matchday_wins': matchday_wins,
             'correct_predictions': correct_predictions,
-            'total_predictions': total_predictions
+            'total_predictions': total_predictions,
+            'rank': 0  # Will be assigned after sorting
         })
     
     # Sort by total points, then by correct predictions
