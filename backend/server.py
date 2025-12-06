@@ -2009,6 +2009,13 @@ async def get_team_leaderboard(team_id: str):
 
 @api_router.get("/user/{user_id}/team")
 async def get_user_team(user_id: str):
+    """Get user's team membership"""
+    team_member = await db.team_members.find_one({"user_id": user_id}, {"_id": 0})
+    if not team_member:
+        return {"team": None, "membership": None}
+    
+    team = await db.teams.find_one({"id": team_member['team_id']}, {"_id": 0})
+    return {"team": team, "membership": team_member}
 
 
 @api_router.get("/teams/{team_id}/leaderboard/by-league")
