@@ -218,26 +218,26 @@ def get_mock_fixtures(league_ids: List[int], days_ahead: int) -> List[Dict]:
 
 # ========== PREDEFINED LEAGUES ==========
 SUPPORTED_LEAGUES = [
-    # British Isles - CURRENT SEASON 2024 (2024/25)
-    {"id": 39, "name": "Premier League", "country": "England", "season": 2024},
-    {"id": 40, "name": "Championship", "country": "England", "season": 2024},
-    {"id": 179, "name": "Scottish Premiership", "country": "Scotland", "season": 2024},
-    # European Leagues - CURRENT SEASON 2024 (2024/25)
-    {"id": 140, "name": "La Liga", "country": "Spain", "season": 2024},
-    {"id": 78, "name": "Bundesliga", "country": "Germany", "season": 2024},
-    {"id": 135, "name": "Serie A", "country": "Italy", "season": 2024},
-    {"id": 61, "name": "Ligue 1", "country": "France", "season": 2024},
-    {"id": 94, "name": "Primeira Liga", "country": "Portugal", "season": 2024},
-    {"id": 88, "name": "Eredivisie", "country": "Netherlands", "season": 2024},
-    {"id": 203, "name": "Süper Lig", "country": "Turkey", "season": 2024},
+    # British Isles
+    {"id": 39, "name": "Premier League", "country": "England", "season": 2025},
+    {"id": 40, "name": "Championship", "country": "England", "season": 2025},
+    {"id": 179, "name": "Scottish Premiership", "country": "Scotland", "season": 2025},
+    # European Leagues
+    {"id": 140, "name": "La Liga", "country": "Spain", "season": 2025},
+    {"id": 78, "name": "Bundesliga", "country": "Germany", "season": 2025},
+    {"id": 135, "name": "Serie A", "country": "Italy", "season": 2025},
+    {"id": 61, "name": "Ligue 1", "country": "France", "season": 2025},
+    {"id": 94, "name": "Primeira Liga", "country": "Portugal", "season": 2025},
+    {"id": 88, "name": "Eredivisie", "country": "Netherlands", "season": 2025},
+    {"id": 203, "name": "Süper Lig", "country": "Turkey", "season": 2025},
     # Americas Leagues
-    {"id": 253, "name": "MLS", "country": "USA", "season": 2024},
-    {"id": 71, "name": "Brasileirão", "country": "Brazil", "season": 2024},
-    {"id": 239, "name": "Liga BetPlay", "country": "Colombia", "season": 2024},
-    # European Competitions - CURRENT SEASON 2024 (2024/25)
-    {"id": 2, "name": "UEFA Champions League", "country": "Europe", "season": 2024},
-    {"id": 3, "name": "UEFA Europa League", "country": "Europe", "season": 2024},
-    {"id": 848, "name": "UEFA Conference League", "country": "Europe", "season": 2024},
+    {"id": 253, "name": "MLS", "country": "USA", "season": 2025},
+    {"id": 71, "name": "Brasileirão", "country": "Brazil", "season": 2025},
+    {"id": 239, "name": "Liga BetPlay", "country": "Colombia", "season": 2025},
+    # European Competitions (2025/26 Season)
+    {"id": 2, "name": "UEFA Champions League", "country": "Europe", "season": 2025},
+    {"id": 3, "name": "UEFA Europa League", "country": "Europe", "season": 2025},
+    {"id": 848, "name": "UEFA Conference League", "country": "Europe", "season": 2025},
     # International Tournaments
     {"id": 1, "name": "World Cup", "country": "World", "season": 2026},
 ]
