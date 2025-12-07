@@ -2114,17 +2114,6 @@ async def get_team_leaderboard_by_league(team_id: str):
     
     return result
 
-    E.g., "Championship (England)" and "Championship" become just "Championship"
-    """
-    if not league_name:
-        return "Unknown League"
-    
-    # Remove country suffixes in parentheses for common leagues
-    import re
-    normalized = re.sub(r'\s*\([^)]*\)\s*$', '', league_name).strip()
-    
-    return normalized if normalized else league_name
-
 
 @api_router.get("/teams/{team_id}/leaderboard/by-league-old")
 async def get_team_leaderboard_by_league_old(team_id: str):
