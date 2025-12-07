@@ -833,6 +833,18 @@ export function TeamManagement({ currentUser, onBack }) {
                     <p className="text-xs text-gray-500">Anyone with this code can join your team</p>
                   </div>
                   
+                  {/* Preview of what gets shared */}
+                  <div className="bg-purple-100 border border-purple-300 rounded-lg p-3 mb-3 text-left">
+                    <p className="text-xs font-semibold text-purple-900 mb-2">📱 Preview - This is what gets shared:</p>
+                    <div className="bg-white rounded p-2 text-xs text-gray-700 font-mono whitespace-pre-wrap">
+{`🏆 Join my team "${userTeam.name}" on the Predictions App!
+
+Use this code: ${userTeam.join_code}
+
+Or visit: ${window.location.origin} and enter the code when joining a team.`}
+                    </div>
+                  </div>
+                  
                   {/* Share Buttons */}
                   <div className="grid grid-cols-2 gap-2 mb-3">
                     <Button 
