@@ -1228,6 +1228,20 @@ async def create_or_update_prediction(pred: PredictionCreate):
         doc['created_at'] = doc['created_at'].isoformat()
         
         await db.predictions.insert_one(doc)
+        
+        # Send email confirmation
+        try:
+            if user and user.get('email'):
+                await send_prediction_email(user.get('email'), user.get('username'), {
+                    'home_team': fixture.get('home_team'),
+                    'away_team': fixture.get('away_team'),
+                    'prediction': pred.prediction,
+                    'league': fixture.get('league_name'),
+                    'match_date': match_date_value
+                }, is_update=False)
+        except Exception as e:
+            logger.error(f"Failed to send prediction email: {str(e)}")
+        
         return pred_obj
 
 
