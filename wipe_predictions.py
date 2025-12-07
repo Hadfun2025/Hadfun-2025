@@ -10,7 +10,7 @@ from datetime import datetime
 async def wipe_predictions():
     """Clean wipe of all predictions and points"""
     client = AsyncIOMotorClient(os.environ.get('MONGO_URL'))
-    db = client[os.environ.get('DB_NAME')]
+    db = client.test_database
     
     print("🧹 Starting clean wipe...")
     print("=" * 60)
