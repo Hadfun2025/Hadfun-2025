@@ -2097,7 +2097,7 @@ async def get_team_leaderboard_by_league(team_id: str):
                 'total_predictions': stats['total']
             })
     
-    # Build result
+    # Build result with current matchday info
     result = []
     for league_name, members_data in leagues.items():
         # Sort by points, then correct predictions
@@ -2107,8 +2107,17 @@ async def get_team_leaderboard_by_league(team_id: str):
         for idx, member in enumerate(members_data):
             member['rank'] = idx + 1
         
+        # Get current matchday for this league (most recent matchday with fixtures)
+        latest_fixture = await db.fixtures.find_one(
+            {"league_name": {"$regex": league_name.split("(")[0].strip(), "$options": "i"}},
+            {"_id": 0, "matchday": 1},
+            sort=[("utc_date", -1)]
+        )
+        current_matchday = latest_fixture.get('matchday') if latest_fixture else None
+        
         result.append({
             'league_name': league_name,
+            'current_matchday': current_matchday,
             'leaderboard': members_data
         })
     
