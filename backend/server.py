@@ -2932,6 +2932,25 @@ async def get_user_invitations(user_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@api_router.get("/teams/{team_id}/sent-invitations")
+async def get_team_sent_invitations(team_id: str):
+    """
+    Get all invitations sent by a team (for invitation tracking)
+    Shows pending, accepted, and declined invitations
+    """
+    try:
+        invitations = await db.team_invitations.find(
+            {"team_id": team_id},
+            {"_id": 0}
+        ).sort("created_at", -1).to_list(100)
+        
+        return invitations
+    except Exception as e:
+        logger.error(f"Error fetching sent invitations: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
 @api_router.post("/teams/invitations/{invitation_id}/accept")
 async def accept_team_invitation(invitation_id: str, user_id: str):
     """
