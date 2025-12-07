@@ -996,10 +996,13 @@ async def get_fixtures(
             ])
         fixtures = await fixtures_cursor.to_list(length=None)  # Convert to list asynchronously
         
-        # Convert MongoDB _id to string if present
+        # Convert MongoDB _id and datetime objects to strings
         for fixture in fixtures:
             if '_id' in fixture:
                 fixture['_id'] = str(fixture['_id'])
+            # Convert datetime to ISO string for frontend
+            if 'utc_date' in fixture and hasattr(fixture['utc_date'], 'isoformat'):
+                fixture['utc_date'] = fixture['utc_date'].isoformat()
         
         logger.info(f"Retrieved {len(fixtures)} fixtures from database for leagues: {league_id_list}")
         
