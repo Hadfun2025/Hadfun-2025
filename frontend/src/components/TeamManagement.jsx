@@ -223,6 +223,28 @@ export function TeamManagement({ currentUser, onBack }) {
     toast.success('Join code copied to clipboard!');
   };
 
+  const shareViaWhatsApp = () => {
+    const message = `🏆 Join my team "${userTeam.name}" on the Predictions App!\n\n` +
+      `Use this code: ${userTeam.join_code}\n\n` +
+      `Or visit: ${window.location.origin} and enter the code when joining a team.`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+    toast.success('Opening WhatsApp...');
+  };
+
+  const shareViaSMS = () => {
+    const message = `Join my team "${userTeam.name}" on the Predictions App! Use code: ${userTeam.join_code} at ${window.location.origin}`;
+    const smsUrl = `sms:?body=${encodeURIComponent(message)}`;
+    window.location.href = smsUrl;
+    toast.success('Opening Messages app...');
+  };
+
+  const copyInviteLink = () => {
+    const inviteText = `Join my team "${userTeam.name}"!\nCode: ${userTeam.join_code}\nVisit: ${window.location.origin}`;
+    navigator.clipboard.writeText(inviteText);
+    toast.success('Invite message copied! Share it anywhere!');
+  };
+
   const handleSendInvite = async () => {
     if (!inviteEmail.trim()) {
       toast.error('Please enter an email address');
