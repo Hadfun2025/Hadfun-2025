@@ -228,8 +228,21 @@ export function TeamManagement({ currentUser, onBack }) {
       `Use this code: ${userTeam.join_code}\n\n` +
       `Or visit: ${window.location.origin} and enter the code when joining a team.`;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-    toast.success('Opening WhatsApp...');
+    
+    // Try to open WhatsApp
+    const opened = window.open(whatsappUrl, '_blank');
+    
+    if (opened) {
+      toast.success('Opening WhatsApp...', {
+        description: 'Select a contact and send!'
+      });
+    } else {
+      // Fallback: copy to clipboard if popup blocked
+      navigator.clipboard.writeText(message);
+      toast.info('WhatsApp blocked by browser', {
+        description: 'Message copied! Paste it into WhatsApp manually'
+      });
+    }
   };
 
   const shareViaSMS = () => {
