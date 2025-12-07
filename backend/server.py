@@ -2950,7 +2950,7 @@ async def get_team_sent_invitations(team_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@api_router.post("/admin/wipe-predictions")
+@api_router.get("/admin/wipe-predictions")
 async def wipe_all_predictions(confirm_code: str):
     """
     ADMIN ENDPOINT: Wipe all predictions and reset points
