@@ -995,6 +995,46 @@ async def get_fixtures(
                 ("utc_date", 1),  # Sort by date ascending
             ])
         fixtures = await fixtures_cursor.to_list(length=None)  # Convert to list asynchronously
+
+
+@api_router.get("/admin/debug-fixtures")
+async def debug_fixtures():
+    """Debug: Check what fixtures exist for Dec 6-8, 2025"""
+    try:
+        from datetime import datetime
+        
+        # Check fixtures for Dec 6-8
+        fixtures = await db.fixtures.find(
+            {
+                "utc_date": {
+                    "$gte": datetime(2025, 12, 6, 0, 0, 0),
+                    "$lte": datetime(2025, 12, 8, 23, 59, 59)
+                }
+            },
+            {"_id": 0}
+        ).to_list(50)
+        
+        summary = {
+            "total_found": len(fixtures),
+            "date_range": "Dec 6-8, 2025",
+            "current_server_time": datetime.now().isoformat(),
+            "fixtures": []
+        }
+        
+        for fix in fixtures[:20]:
+            summary["fixtures"].append({
+                "date": str(fix.get('utc_date'))[:16],
+                "status": fix.get('status'),
+                "match": f"{fix.get('home_team')} vs {fix.get('away_team')}",
+                "league": fix.get('league_name'),
+                "has_scores": fix.get('home_score') is not None
+            })
+        
+        return summary
+    except Exception as e:
+        return {"error": str(e)}
+
+
         
         if not fixtures:
             logger.warning(f"No fixtures found in database for leagues: {league_id_list}")
