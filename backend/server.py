@@ -2234,6 +2234,15 @@ async def debug_test_normalization():
         "UEFA Champions League",
         "UEFA Europa League (Europe)",
     ]
+    
+    results = {}
+    for name in test_cases:
+        results[name] = normalize_league_name(name)
+    
+    return {
+        "normalization_examples": results,
+        "note": "Names with the same normalized value will be merged in leaderboards"
+    }
 
 
 @api_router.get("/admin/debug/user-team-data/{username}")
