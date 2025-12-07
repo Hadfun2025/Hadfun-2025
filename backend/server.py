@@ -2950,6 +2950,15 @@ async def get_team_sent_invitations(team_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@api_router.get("/admin/force-results-update")
+async def force_results_update():
+    """Force update results from API"""
+    try:
+        await automated_result_update()
+        return {"status": "success", "message": "Results updated"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
 @api_router.get("/admin/wipe-predictions")
 async def wipe_all_predictions(confirm_code: str):
     """
