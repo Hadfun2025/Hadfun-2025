@@ -1173,6 +1173,19 @@ async def create_or_update_prediction(pred: PredictionCreate):
             }}
         )
         
+        # Send email confirmation
+        try:
+            if user and user.get('email'):
+                await send_prediction_email(user.get('email'), user.get('username'), {
+                    'home_team': fixture.get('home_team'),
+                    'away_team': fixture.get('away_team'),
+                    'prediction': pred.prediction,
+                    'league': fixture.get('league_name'),
+                    'match_date': match_date_value
+                }, is_update=True)
+        except Exception as e:
+            logger.error(f"Failed to send prediction email: {str(e)}")
+        
         # Return updated prediction
         updated = await db.predictions.find_one({
             "user_id": pred.user_id,
