@@ -1344,68 +1344,7 @@ function App() {
             </Card>
           </TabsContent>
 
-          {/* Leaderboard Tab */}
-          <TabsContent value="leaderboard">
-            <div className="space-y-6">
-              {leaderboard.length === 0 ? (
-                <Card>
-                  <CardContent className="py-8 text-center">
-                    <p className="text-gray-600">No leaderboard data yet. Make predictions to see your ranking!</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                leaderboard.map((leagueData) => (
-                  <Card key={leagueData.league_name}>
-                    <CardHeader>
-                      <CardTitle className="text-xl">{leagueData.league_name}</CardTitle>
-                      <CardDescription>Team leaderboard for this league</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="overflow-x-auto">
-                        <table className="w-full border-collapse">
-                          <thead>
-                            <tr className="bg-indigo-600 text-white border-b-2 border-indigo-700">
-                              <th className="text-left p-3 font-semibold w-16">#</th>
-                              <th className="text-left p-3 font-semibold">Player</th>
-                              <th className="text-center p-3 font-semibold w-24">Wins</th>
-                              <th className="text-center p-3 font-semibold w-20">Correct</th>
-                              <th className="text-center p-3 font-semibold w-20">Total</th>
-                              <th className="text-center p-3 font-semibold w-24">PTS</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {leagueData.leaderboard.map((entry) => (
-                              <TableRow
-                                key={entry.username}
-                                data-testid={`leaderboard-${leagueData.league_name}-${entry.rank}`}
-                                className={`border-b border-gray-200 hover:bg-gray-50 ${
-                                  entry.username === currentUser.username ? 'bg-indigo-50 font-semibold' : ''
-                                }`}
-                              >
-                                <td className="p-3 text-gray-600">
-                                  {entry.rank === 1 ? '🥇' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : entry.rank}
-                                </td>
-                                <td className="p-3 font-medium text-gray-900">
-                                  {entry.username}
-                                  {entry.username === currentUser.username && (
-                                    <span className="ml-2 text-xs bg-indigo-500 text-white px-2 py-0.5 rounded">You</span>
-                                  )}
-                                </td>
-                                <td className="p-3 text-center text-gray-700">{entry.matchday_wins}</td>
-                                <td className="p-3 text-center text-gray-700">{entry.correct_predictions}</td>
-                                <td className="p-3 text-center text-gray-700">{entry.total_predictions}</td>
-                                <td className="p-3 text-center font-bold text-indigo-600 text-lg">{entry.total_points}</td>
-                              </TableRow>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
-          </TabsContent>
+          {/* Leaderboard tab removed - now only in My Team section */}
 
           {/* Standings Tab */}
           <TabsContent value="standings">
