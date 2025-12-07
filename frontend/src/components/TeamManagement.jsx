@@ -65,6 +65,16 @@ export function TeamManagement({ currentUser, onBack }) {
     }
   };
 
+  const loadSentInvitations = async () => {
+    if (!userTeam) return;
+    try {
+      const response = await axios.get(`${API}/teams/${userTeam.id}/sent-invitations`);
+      setSentInvitations(response.data);
+    } catch (error) {
+      console.error('Error loading sent invitations:', error);
+    }
+  };
+
   useEffect(() => {
     loadUserTeam();
   }, [currentUser]);
