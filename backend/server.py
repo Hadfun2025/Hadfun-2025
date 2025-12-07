@@ -896,9 +896,9 @@ async def get_fixtures(
                     start_date = datetime(2024, 1, 1)  # Naive datetime - covers all competitions
                     end_date = now.replace(tzinfo=None) + timedelta(days=days_ahead)
                 else:
-                    # For "Next 2 weeks" or "Next 4 weeks" view: show last 1 day + upcoming fixtures
-                    # This allows users to see very recent results while focusing on upcoming games
-                    start_date = now.replace(tzinfo=None) - timedelta(days=1)
+                    # For "Next 2 weeks" or "Next 4 weeks" view: show last 3 days + upcoming fixtures
+                    # This allows users to see recent weekend results while focusing on upcoming games
+                    start_date = now.replace(tzinfo=None) - timedelta(days=3)
                     end_date = now.replace(tzinfo=None) + timedelta(days=days_ahead)
                 
                 # Filter by date - only include fixtures with valid dates
