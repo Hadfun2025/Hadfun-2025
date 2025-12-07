@@ -59,6 +59,84 @@ async def send_email(to_email: str, subject: str, html_content: str):
         logger.error(f"Failed to send email to {to_email}: {str(e)}")
         raise
 
+
+
+async def send_prediction_email(to_email: str, username: str, prediction_data: dict, is_update: bool = False):
+    """Send prediction confirmation email to user"""
+    action = "updated" if is_update else "recorded"
+    prediction_text = prediction_data['prediction'].upper()
+    
+    if prediction_text == "HOME":
+        prediction_display = f"✅ {prediction_data['home_team']} to WIN"
+    elif prediction_text == "AWAY":
+        prediction_display = f"✅ {prediction_data['away_team']} to WIN"
+    else:
+        prediction_display = "🤝 DRAW"
+    
+    match_date_str = prediction_data.get('match_date', '')
+    if isinstance(match_date_str, str):
+        try:
+            from datetime import datetime
+            dt = datetime.fromisoformat(match_date_str.replace('Z', '+00:00'))
+            match_date_display = dt.strftime('%A, %B %d, %Y at %H:%M UTC')
+        except:
+            match_date_display = match_date_str[:16]
+    else:
+        match_date_display = str(match_date_str)[:16]
+    
+    subject = f"{'Updated' if is_update else 'New'} Prediction: {prediction_data['home_team']} vs {prediction_data['away_team']}"
+    
+    html_content = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+            <h1 style="margin: 0;">🎯 Prediction {'Updated' if is_update else 'Confirmed'}!</h1>
+        </div>
+        
+        <div style="background: #f7fafc; padding: 30px; border-radius: 0 0 10px 10px;">
+            <p style="font-size: 16px; color: #2d3748;">Hi <strong>{username}</strong>,</p>
+            
+            <p style="font-size: 16px; color: #2d3748;">Your prediction has been {action}:</p>
+            
+            <div style="background: white; border-left: 4px solid #667eea; padding: 20px; margin: 20px 0; border-radius: 5px;">
+                <h2 style="margin: 0 0 15px 0; color: #2d3748; font-size: 20px;">
+                    ⚽ {prediction_data['home_team']} vs {prediction_data['away_team']}
+                </h2>
+                <p style="margin: 5px 0; color: #4a5568;">
+                    <strong>League:</strong> {prediction_data.get('league', 'Unknown')}
+                </p>
+                <p style="margin: 5px 0; color: #4a5568;">
+                    <strong>Match Date:</strong> {match_date_display}
+                </p>
+                <div style="background: #edf2f7; padding: 15px; margin-top: 15px; border-radius: 5px; text-align: center;">
+                    <p style="margin: 0; font-size: 18px; font-weight: bold; color: #667eea;">
+                        Your Prediction: {prediction_display}
+                    </p>
+                </div>
+            </div>
+            
+            <p style="font-size: 14px; color: #718096; margin-top: 30px;">
+                💡 <strong>Tip:</strong> You can update your prediction anytime before the match starts or until Wednesday 23:59 UTC (whichever comes first).
+            </p>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="https://www.hadfun.co.uk" style="background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                    View All Predictions
+                </a>
+            </div>
+            
+            <p style="font-size: 12px; color: #a0aec0; text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+                Good luck! 🍀<br>
+                HadFun Predictions App
+            </p>
+        </div>
+    </body>
+    </html>
+    """
+    
+    await send_email(to_email, subject, html_content)
+
+
 # Helper function to get the active football service
 def get_active_football_service():
     """
