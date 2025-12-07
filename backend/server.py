@@ -3988,7 +3988,7 @@ async def automated_result_update():
         updated_count = 0
         scored_predictions = 0
         
-        # Fetch fixtures from current season (2024/25)
+        # Fetch fixtures from current season (2025)
         service = get_active_football_service()
         
         from datetime import datetime, timedelta, timezone
@@ -4002,7 +4002,7 @@ async def automated_result_update():
             date_str = check_date.strftime('%Y-%m-%d')
             logger.info(f"Checking fixtures for {date_str}...")
             for league_id in league_ids:
-                fixtures = await service.get_fixtures_by_date(date_str, league_id, season=2024)
+                fixtures = await service.get_fixtures_by_date(date_str, league_id, season=2025)
                 all_fixtures.extend(fixtures)
         
         if not all_fixtures:
