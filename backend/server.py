@@ -2231,6 +2231,9 @@ async def debug_test_normalization():
         "Premier League (England)",
         "La Liga",
         "La Liga (Spain)",
+        "UEFA Champions League",
+        "UEFA Europa League (Europe)",
+    ]
 
 
 @api_router.get("/admin/debug/user-team-data/{username}")
