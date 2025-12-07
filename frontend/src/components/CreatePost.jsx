@@ -379,20 +379,29 @@ export function CreatePost({ user, onPostCreated }) {
             {/* Upload from Phone/Computer */}
             <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-2">
               <p className="text-sm font-semibold text-green-900 mb-2">📸 Option 1: Upload from your device</p>
+              <Label 
+                htmlFor="image-upload" 
+                className="flex items-center justify-center gap-2 bg-white border-2 border-dashed border-green-400 rounded-lg p-4 cursor-pointer hover:bg-green-50 transition-colors"
+              >
+                <Image className="h-5 w-5 text-green-600" />
+                <span className="text-sm font-medium text-green-700">
+                  {uploadingFile ? uploadProgress : 'Tap to select or take photo'}
+                </span>
+              </Label>
               <input
                 type="file"
-                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/heic,image/heif"
+                accept="image/*"
                 capture="environment"
                 onChange={(e) => handleFileUpload(e, 'image')}
                 disabled={images.length >= 5 || uploadingFile}
-                className="text-sm w-full"
+                className="hidden"
                 id="image-upload"
               />
-              <p className="text-xs text-gray-600 mt-1">
+              <p className="text-xs text-gray-600 mt-2">
                 {uploadingFile && uploadProgress ? (
                   <span className="text-green-700 font-semibold">⏳ {uploadProgress}</span>
                 ) : (
-                  '📱 iPhone: If photos don\'t upload, try converting to JPG in Photos app first • JPG, PNG, GIF, WEBP • Max 50MB'
+                  '📱 Works with phone camera, photo library, or computer files • JPG, PNG, GIF, WEBP, HEIC • Max 50MB'
                 )}
               </p>
             </div>
