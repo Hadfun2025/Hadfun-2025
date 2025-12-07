@@ -2118,6 +2118,134 @@ async def get_team_leaderboard_by_league(team_id: str):
     return result
 
 
+@api_router.get("/admin/debug/team-database/{team_id}")
+async def debug_team_database(team_id: str):
+    """
+    🔍 Debug endpoint to inspect raw database state for a team
+    Shows: members, predictions grouped by league name, potential duplicates
+    
+    Usage after deployment:
+    curl "https://your-app-url.com/api/admin/debug/team-database/{team_id}"
+    """
+    try:
+        # Get team info
+        team = await db.teams.find_one({"id": team_id}, {"_id": 0})
+        if not team:
+            return {"error": "Team not found"}
+        
+        # Get all team members
+        members = await db.team_members.find({"team_id": team_id}, {"_id": 0}).to_list(100)
+        member_ids = [m['user_id'] for m in members]
+        
+        # Get all users
+        users = await db.users.find({"id": {"$in": member_ids}}, {"_id": 0}).to_list(100)
+        user_map = {u['id']: u.get('username', 'Unknown') for u in users}
+        
+        # Get all predictions for team members
+        predictions = await db.predictions.find(
+            {"user_id": {"$in": member_ids}}, 
+            {"_id": 0}
+        ).to_list(10000)
+        
+        # Group predictions by league name (RAW - showing duplicates if any)
+        league_summary = {}
+        for pred in predictions:
+            league_name = pred.get('league', 'Unknown')
+            league_id = pred.get('league_id', 'N/A')
+            user_id = pred.get('user_id')
+            username = user_map.get(user_id, 'Unknown')
+            
+            key = f"{league_name} (ID: {league_id})"
+            if key not in league_summary:
+                league_summary[key] = {
+                    'raw_name': league_name,
+                    'normalized_name': normalize_league_name(league_name),
+                    'league_id': league_id,
+                    'total_predictions': 0,
+                    'users': {}
+                }
+            
+            league_summary[key]['total_predictions'] += 1
+            
+            if username not in league_summary[key]['users']:
+                league_summary[key]['users'][username] = 0
+            league_summary[key]['users'][username] += 1
+        
+        # Get league points
+        league_points = await db.user_league_points.find(
+            {"user_id": {"$in": member_ids}},
+            {"_id": 0}
+        ).to_list(10000)
+        
+        # Check for duplicate league names
+        duplicate_leagues = {}
+        league_ids = {}
+        for key, data in league_summary.items():
+            league_id = data['league_id']
+            if league_id not in league_ids:
+                league_ids[league_id] = []
+            league_ids[league_id].append(data['raw_name'])
+        
+        for league_id, names in league_ids.items():
+            if len(names) > 1:
+                duplicate_leagues[league_id] = {
+                    'league_id': league_id,
+                    'duplicate_names': names,
+                    'normalized_to': normalize_league_name(names[0])
+                }
+        
+        return {
+            "team": {
+                "id": team_id,
+                "name": team.get('name'),
+                "member_count": len(members)
+            },
+            "members": [
+                {
+                    "username": user_map.get(m['user_id'], 'Unknown'),
+                    "user_id": m['user_id']
+                }
+                for m in members
+            ],
+            "league_summary": league_summary,
+            "duplicate_leagues": duplicate_leagues,
+            "league_points_count": len(league_points),
+            "total_predictions": len(predictions),
+            "note": "duplicate_leagues shows which leagues have inconsistent naming that will be normalized"
+        }
+        
+    except Exception as e:
+        return {"error": str(e), "type": type(e).__name__}
+
+
+@api_router.get("/admin/debug/test-normalization")
+async def debug_test_normalization():
+    """
+    🧪 Test the league name normalization function
+    Shows how different league names will be normalized
+    """
+    test_cases = [
+        "Championship",
+        "Championship (England)",
+        "Premier League",
+        "Premier League (England)",
+        "La Liga",
+        "La Liga (Spain)",
+        "UEFA Champions League",
+        "UEFA Europa League (Europe)",
+    ]
+    
+    results = {}
+    for name in test_cases:
+        results[name] = normalize_league_name(name)
+    
+    return {
+        "normalization_examples": results,
+        "note": "Names with the same normalized value will be merged in leaderboards"
+    }
+
+
+
 @api_router.get("/teams/{team_id}/leaderboard/by-league-old")
 async def get_team_leaderboard_by_league_old(team_id: str):
     """
