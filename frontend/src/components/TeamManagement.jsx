@@ -82,6 +82,7 @@ export function TeamManagement({ currentUser, onBack }) {
   useEffect(() => {
     if (userTeam) {
       loadTeamData();
+      loadSentInvitations();
     }
   }, [userTeam]);
 
