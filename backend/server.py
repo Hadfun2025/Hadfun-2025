@@ -2032,11 +2032,14 @@ def normalize_league_name(league_name: str) -> str:
 @api_router.get("/teams/{team_id}/leaderboard/by-league")
 async def get_team_leaderboard_by_league(team_id: str):
     """SIMPLIFIED team leaderboard by league - NO DUPLICATES ALL USERS"""
+    logger.info(f"📊 Leaderboard request for team: {team_id}")
     # Get team members
     members = await db.team_members.find({"team_id": team_id}, {"_id": 0}).to_list(100)
     member_ids = [m['user_id'] for m in members]
+    logger.info(f"Found {len(member_ids)} members")
     
     if not member_ids:
+        logger.warning("No members found, returning empty list")
         return []
     
     # Build leaderboard by getting ALL predictions for each member
