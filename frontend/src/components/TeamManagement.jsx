@@ -242,7 +242,9 @@ export function TeamManagement({ currentUser, onBack }) {
   const copyInviteLink = () => {
     const inviteText = `Join my team "${userTeam.name}"!\nCode: ${userTeam.join_code}\nVisit: ${window.location.origin}`;
     navigator.clipboard.writeText(inviteText);
-    toast.success('Invite message copied! Share it anywhere!');
+    toast.success('Invite message copied! Share it anywhere!', {
+      description: 'Now paste it into WhatsApp, SMS, or any messaging app'
+    });
   };
 
   const handleSendInvite = async () => {
