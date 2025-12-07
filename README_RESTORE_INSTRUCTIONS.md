@@ -24,7 +24,7 @@ sudo supervisorctl restart all
 ```
 
 ### Your app will be live at:
-https://fixture-fixer.preview.emergentagent.com
+https://football-oracle-114.preview.emergentagent.com
 
 ---
 
