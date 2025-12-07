@@ -2946,6 +2946,65 @@ async def get_team_sent_invitations(team_id: str):
         
         return invitations
     except Exception as e:
+
+
+@api_router.post("/admin/wipe-predictions")
+async def wipe_all_predictions(confirm_code: str):
+    """
+    ADMIN ENDPOINT: Wipe all predictions and reset points
+    Requires confirmation code to prevent accidental wipes
+    
+    Usage: POST /api/admin/wipe-predictions?confirm_code=WIPE2024
+    """
+    # Safety check - require confirmation code
+    if confirm_code != "WIPE2024":
+        raise HTTPException(status_code=403, detail="Invalid confirmation code")
+    
+    try:
+        # Count before deletion
+        predictions_count = await db.predictions.count_documents({})
+        league_points_count = await db.user_league_points.count_documents({})
+        
+        # Delete all predictions
+        result1 = await db.predictions.delete_many({})
+        
+        # Delete all league points
+        result2 = await db.user_league_points.delete_many({})
+        
+        # Reset user points to zero
+        result3 = await db.users.update_many(
+            {},
+            {
+                "$set": {
+                    "total_points": 0,
+                    "season_points": 0,
+                    "points": 0,
+                    "correct_predictions": 0,
+                    "total_predictions": 0,
+                    "weekly_wins": 0
+                }
+            }
+        )
+        
+        logger.info(f"🧹 WIPE COMPLETE: Deleted {result1.deleted_count} predictions, {result2.deleted_count} league points, reset {result3.modified_count} users")
+        
+        return {
+            "status": "success",
+            "message": "All predictions and points wiped successfully",
+            "details": {
+                "predictions_deleted": result1.deleted_count,
+                "league_points_deleted": result2.deleted_count,
+                "users_reset": result3.modified_count,
+                "users_preserved": await db.users.count_documents({}),
+                "teams_preserved": await db.teams.count_documents({})
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Error wiping predictions: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
         logger.error(f"Error fetching sent invitations: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
