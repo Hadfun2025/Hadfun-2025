@@ -112,7 +112,7 @@ function App() {
 
   useEffect(() => {
     if (currentUser && selectedTeam) {
-      loadLeaderboard();
+      // loadLeaderboard(); // Removed - now only in My Team section
     }
   }, [currentUser, selectedTeam]);
 
