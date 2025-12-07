@@ -1044,20 +1044,7 @@ async def check_fixtures_exist():
     except Exception as e:
         return {"error": str(e)}
 
-# Continue with original fixtures endpoint
-
-        # Convert MongoDB _id to string if present
-        for fixture in fixtures:
-            if '_id' in fixture:
-                fixture['_id'] = str(fixture['_id'])
-        
-        logger.info(f"Retrieved {len(fixtures)} fixtures from database for leagues: {league_id_list}")
-        
-        return fixtures
-    
-    except Exception as e:
-        logger.error(f"Error fetching fixtures: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error fetching fixtures: {str(e)}")
+# Fixtures endpoint continues...
 
 
 @api_router.get("/matchdays")
