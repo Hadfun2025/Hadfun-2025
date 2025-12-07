@@ -995,6 +995,19 @@ async def get_fixtures(
                 ("utc_date", 1),  # Sort by date ascending
             ])
         fixtures = await fixtures_cursor.to_list(length=None)  # Convert to list asynchronously
+        
+        # Convert MongoDB _id to string if present
+        for fixture in fixtures:
+            if '_id' in fixture:
+                fixture['_id'] = str(fixture['_id'])
+        
+        logger.info(f"Retrieved {len(fixtures)} fixtures from database for leagues: {league_id_list}")
+        
+        return fixtures
+    
+    except Exception as e:
+        logger.error(f"Error fetching fixtures: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error fetching fixtures: {str(e)}")
 
 
 @api_router.get("/admin/debug-fixtures")
