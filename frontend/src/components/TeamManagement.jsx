@@ -52,6 +52,7 @@ export function TeamManagement({ currentUser, onBack }) {
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [pendingInvitations, setPendingInvitations] = useState([]);
+  const [sentInvitations, setSentInvitations] = useState([]);
   const [emailInviteSent, setEmailInviteSent] = useState(false);
   const [lastInvitedUser, setLastInvitedUser] = useState('');
 
