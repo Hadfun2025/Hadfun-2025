@@ -654,14 +654,7 @@ function App() {
                 <TrendingUp className="w-4 h-4 sm:mr-1" />
                 <span className="hidden sm:inline">{t.tabs.predictions}</span>
               </TabsTrigger>
-              <TabsTrigger 
-                value="leaderboard" 
-                data-testid="leaderboard-tab"
-                className="data-[state=active]:bg-amber-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 font-semibold text-xs sm:text-sm whitespace-nowrap px-3 sm:px-4"
-              >
-                <Users className="w-4 h-4 sm:mr-1" />
-                <span className="hidden sm:inline">{t.tabs.leaderboard}</span>
-              </TabsTrigger>
+              {/* Leaderboard tab removed */}
               <TabsTrigger 
                 value="team" 
                 data-testid="team-tab" 
