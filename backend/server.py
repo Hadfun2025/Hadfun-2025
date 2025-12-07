@@ -2353,19 +2353,6 @@ async def debug_user_team_data(username: str):
             "traceback": traceback.format_exc()
         }
 
-        "UEFA Champions League",
-        "UEFA Europa League (Europe)",
-    ]
-    
-    results = {}
-    for name in test_cases:
-        results[name] = normalize_league_name(name)
-    
-    return {
-        "normalization_examples": results,
-        "note": "Names with the same normalized value will be merged in leaderboards"
-    }
-
 
 
 @api_router.get("/teams/{team_id}/leaderboard/by-league-old")
