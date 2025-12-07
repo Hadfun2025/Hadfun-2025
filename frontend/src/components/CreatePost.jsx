@@ -465,19 +465,29 @@ export function CreatePost({ user, onPostCreated }) {
             {/* Upload from Phone/Computer */}
             <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-2">
               <p className="text-sm font-semibold text-purple-900 mb-2">🎥 Option 1: Upload from your device</p>
+              <Label 
+                htmlFor="video-upload" 
+                className="flex items-center justify-center gap-2 bg-white border-2 border-dashed border-purple-400 rounded-lg p-4 cursor-pointer hover:bg-purple-50 transition-colors"
+              >
+                <Video className="h-5 w-5 text-purple-600" />
+                <span className="text-sm font-medium text-purple-700">
+                  {uploadingFile ? uploadProgress : 'Tap to select or record video'}
+                </span>
+              </Label>
               <input
                 type="file"
                 accept="video/*"
+                capture="environment"
                 onChange={(e) => handleFileUpload(e, 'video')}
                 disabled={videos.length >= 2 || uploadingFile}
-                className="text-sm"
+                className="hidden"
                 id="video-upload"
               />
-              <p className="text-xs text-gray-600 mt-1">
+              <p className="text-xs text-gray-600 mt-2">
                 {uploadingFile && uploadProgress ? (
                   <span className="text-purple-700 font-semibold">⏳ {uploadProgress}</span>
                 ) : (
-                  'MP4, MOV, AVI • Max 50MB'
+                  '📱 Works with phone camera, video library, or computer files • MP4, MOV, AVI • Max 50MB'
                 )}
               </p>
             </div>
