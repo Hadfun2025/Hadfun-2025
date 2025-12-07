@@ -4071,26 +4071,6 @@ async def automated_result_update():
                     )
                     scored_predictions += 1
         
-
-
-@api_router.get("/admin/force-update-results")
-async def force_update_results():
-    """
-    Manually trigger the automated result checker
-    Fetches scores from API-Football and updates database
-    """
-    try:
-        logger.info("🔄 Manual result update triggered...")
-        await automated_result_update()
-        return {
-            "status": "success",
-            "message": "Result update completed. Check fixtures for updated scores."
-        }
-    except Exception as e:
-        logger.error(f"Error in manual result update: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
         logger.info(f"✅ Automated update complete: {updated_count} fixtures updated, {scored_predictions} predictions scored")
         
         # After scoring predictions, calculate matchday winners and award points
