@@ -349,6 +349,8 @@ export function TeamManagement({ currentUser, onBack }) {
       
       toast.success(`✅ Invitation sent to ${invitedUsername}!`);
       setLastInvitedUser(invitedUsername);
+      // Reload sent invitations to show updated list
+      loadSentInvitations();
       // Remove user from search results after successful invite
       setSearchResults(searchResults.filter(u => u.id !== invitedUserId));
       // Auto-hide the message after 5 seconds
