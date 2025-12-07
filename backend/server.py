@@ -2946,6 +2946,8 @@ async def get_team_sent_invitations(team_id: str):
         
         return invitations
     except Exception as e:
+        logger.error(f"Error fetching sent invitations: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @api_router.post("/admin/wipe-predictions")
