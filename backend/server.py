@@ -1035,11 +1035,17 @@ async def debug_fixtures():
         return {"error": str(e)}
 
 
-        
-        if not fixtures:
-            logger.warning(f"No fixtures found in database for leagues: {league_id_list}")
-            return []
-        
+@api_router.get("/fixtures-check")
+async def check_fixtures_exist():
+    """Quick check if fixtures exist"""
+    try:
+        total = await db.fixtures.count_documents({})
+        return {"total_fixtures": total}
+    except Exception as e:
+        return {"error": str(e)}
+
+# Continue with original fixtures endpoint
+
         # Convert MongoDB _id to string if present
         for fixture in fixtures:
             if '_id' in fixture:
