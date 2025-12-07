@@ -2231,6 +2231,116 @@ async def debug_test_normalization():
         "Premier League (England)",
         "La Liga",
         "La Liga (Spain)",
+
+
+@api_router.get("/admin/debug/user-team-data/{username}")
+async def debug_user_team_data(username: str):
+    """
+    🔍 Debug endpoint - Find team and database state by username
+    Easier than needing team_id
+    
+    Usage: /api/admin/debug/user-team-data/aysin
+    """
+    try:
+        # Find user
+        user = await db.users.find_one({"username": username}, {"_id": 0})
+        if not user:
+            return {"error": f"User '{username}' not found"}
+        
+        user_id = user['id']
+        
+        # Find team membership
+        team_member = await db.team_members.find_one({"user_id": user_id}, {"_id": 0})
+        if not team_member:
+            return {"error": f"User '{username}' is not in any team"}
+        
+        team_id = team_member['team_id']
+        
+        # Get team info
+        team = await db.teams.find_one({"id": team_id}, {"_id": 0})
+        
+        # Get all team members
+        members = await db.team_members.find({"team_id": team_id}, {"_id": 0}).to_list(100)
+        member_ids = [m['user_id'] for m in members]
+        
+        # Get all users
+        users = await db.users.find({"id": {"$in": member_ids}}, {"_id": 0}).to_list(100)
+        user_map = {u['id']: u.get('username', 'Unknown') for u in users}
+        
+        # Get all predictions for team members
+        predictions = await db.predictions.find(
+            {"user_id": {"$in": member_ids}}, 
+            {"_id": 0}
+        ).to_list(10000)
+        
+        # Group predictions by league and user
+        league_summary = {}
+        for pred in predictions:
+            league_name = pred.get('league', 'Unknown')
+            league_id = pred.get('league_id', 'N/A')
+            user_id_pred = pred.get('user_id')
+            username_pred = user_map.get(user_id_pred, 'Unknown')
+            result = pred.get('result', 'pending')
+            
+            # Use normalized name as key
+            normalized = normalize_league_name(league_name)
+            key = f"{normalized} (ID: {league_id})"
+            
+            if key not in league_summary:
+                league_summary[key] = {
+                    'normalized_name': normalized,
+                    'league_id': league_id,
+                    'raw_names_seen': set(),
+                    'users': {}
+                }
+            
+            # Track raw names
+            league_summary[key]['raw_names_seen'].add(league_name)
+            
+            if username_pred not in league_summary[key]['users']:
+                league_summary[key]['users'][username_pred] = {
+                    'total': 0,
+                    'correct': 0,
+                    'incorrect': 0,
+                    'pending': 0
+                }
+            
+            league_summary[key]['users'][username_pred]['total'] += 1
+            league_summary[key]['users'][username_pred][result] += 1
+        
+        # Convert sets to lists for JSON serialization
+        for league in league_summary.values():
+            league['raw_names_seen'] = list(league['raw_names_seen'])
+        
+        # Check for users with NO predictions
+        users_with_no_predictions = []
+        for uid, uname in user_map.items():
+            user_pred_count = len([p for p in predictions if p['user_id'] == uid])
+            if user_pred_count == 0:
+                users_with_no_predictions.append(uname)
+        
+        return {
+            "requested_user": username,
+            "team": {
+                "id": team_id,
+                "name": team.get('name'),
+                "total_members": len(members)
+            },
+            "all_team_members": list(user_map.values()),
+            "users_with_no_predictions": users_with_no_predictions,
+            "league_summary": league_summary,
+            "total_predictions": len(predictions),
+            "note": "Check 'users' under each league to see who has predictions and who is missing"
+        }
+        
+    except Exception as e:
+        import traceback
+        return {
+            "error": str(e), 
+            "type": type(e).__name__,
+            "traceback": traceback.format_exc()
+        }
+
         "UEFA Champions League",
         "UEFA Europa League (Europe)",
     ]
