@@ -609,22 +609,22 @@ export function TeamManagement({ currentUser, onBack }) {
 
         {/* Team Content Tabs */}
         <Tabs defaultValue="forum" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="forum">
-              <MessageCircle className="w-4 h-4 mr-2" />
-              {t.team.teamForum}
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-2">
+            <TabsTrigger value="forum" className="flex items-center justify-center gap-2 px-4 py-2">
+              <MessageCircle className="w-4 h-4" />
+              <span className="text-sm font-medium">Team Forum</span>
             </TabsTrigger>
-            <TabsTrigger value="leaderboard">
-              <Trophy className="w-4 h-4 mr-2" />
-              {t.tabs.leaderboard}
+            <TabsTrigger value="leaderboard" className="flex items-center justify-center gap-2 px-4 py-2">
+              <Trophy className="w-4 h-4" />
+              <span className="text-sm font-medium">Leaderboard</span>
             </TabsTrigger>
-            <TabsTrigger value="members">
-              <Users className="w-4 h-4 mr-2" />
-              {t.team.teamMembers}
+            <TabsTrigger value="members" className="flex items-center justify-center gap-2 px-4 py-2">
+              <Users className="w-4 h-4" />
+              <span className="text-sm font-medium">Team Members</span>
             </TabsTrigger>
-            <TabsTrigger value="support">
-              <Heart className="w-4 h-4 mr-2" />
-              {t.communityCare?.title?.split(' - ')[0] || 'Community Care'}
+            <TabsTrigger value="support" className="flex items-center justify-center gap-2 px-4 py-2">
+              <Heart className="w-4 h-4" />
+              <span className="text-sm font-medium">Community Care</span>
             </TabsTrigger>
           </TabsList>
 
