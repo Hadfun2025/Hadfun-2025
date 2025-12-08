@@ -1008,6 +1008,12 @@ async def get_fixtures(
         
         logger.info(f"Retrieved {len(fixtures)} fixtures from database for leagues: {league_id_list}")
         
+        # Add debug info to help diagnose issue (temporary)
+        if len(fixtures) > 0:
+            first_date = fixtures[0].get('utc_date', 'N/A')
+            last_date = fixtures[-1].get('utc_date', 'N/A')
+            logger.info(f"📅 Date range in results: {first_date} to {last_date}")
+        
         return fixtures
     
     except Exception as e:
