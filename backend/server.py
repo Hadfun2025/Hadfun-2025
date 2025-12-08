@@ -1051,12 +1051,45 @@ async def debug_fixtures():
         return {"error": str(e)}
 
 
-@api_router.get("/fixtures-check")
-async def check_fixtures_exist():
-    """Quick check if fixtures exist"""
+@api_router.get("/admin/check-future-fixtures")
+async def check_future_fixtures():
+    """Check what fixtures exist after Dec 8, 2025"""
     try:
-        total = await db.fixtures.count_documents({})
-        return {"total_fixtures": total}
+        from datetime import datetime
+        
+        # Count fixtures after Dec 8
+        after_dec8 = await db.fixtures.count_documents({
+            "utc_date": {"$gt": datetime(2025, 12, 8, 23, 59, 59)}
+        })
+        
+        # Count fixtures with NULL dates
+        null_dates = await db.fixtures.count_documents({
+            "utc_date": None
+        })
+        
+        # Sample fixtures Dec 9-15
+        sample = await db.fixtures.find(
+            {
+                "utc_date": {
+                    "$gte": datetime(2025, 12, 9, 0, 0, 0),
+                    "$lte": datetime(2025, 12, 15, 23, 59, 59)
+                }
+            },
+            {"_id": 0, "home_team": 1, "away_team": 1, "utc_date": 1, "matchday": 1}
+        ).limit(10).to_list(10)
+        
+        return {
+            "fixtures_after_dec8": after_dec8,
+            "fixtures_with_null_dates": null_dates,
+            "sample_dec9_15": [
+                {
+                    "match": f"{f.get('home_team')} vs {f.get('away_team')}",
+                    "date": str(f.get('utc_date'))[:16],
+                    "matchday": f.get('matchday')
+                }
+                for f in sample
+            ]
+        }
     except Exception as e:
         return {"error": str(e)}
 
