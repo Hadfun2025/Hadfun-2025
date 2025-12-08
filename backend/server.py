@@ -979,6 +979,8 @@ async def get_fixtures(
                     start_date = now.replace(tzinfo=None) - timedelta(days=3)
                     end_date = now.replace(tzinfo=None) + timedelta(days=days_ahead)
                 
+                logger.info(f"📅 Date range query: {start_date} to {end_date} (days_ahead={days_ahead})")
+                
                 # Filter by date - only include fixtures with valid dates
                 query["utc_date"] = {
                     "$gte": start_date, 
