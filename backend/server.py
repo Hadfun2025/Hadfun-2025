@@ -1053,6 +1053,58 @@ async def debug_fixtures():
         return {"error": str(e)}
 
 
+@api_router.get("/admin/test-date-query")
+async def test_date_query(days_ahead: int = 28):
+    """Test what the date query returns"""
+    try:
+        from datetime import datetime, timedelta, timezone
+        
+        now = datetime.now(timezone.utc)
+        start_date = now.replace(tzinfo=None) - timedelta(days=3)
+        end_date = now.replace(tzinfo=None) + timedelta(days=days_ahead)
+        
+        # Same query as get_fixtures
+        count = await db.fixtures.count_documents({
+            "utc_date": {
+                "$gte": start_date,
+                "$lte": end_date,
+                "$ne": None
+            }
+        })
+        
+        # Sample fixtures
+        samples = await db.fixtures.find(
+            {
+                "utc_date": {
+                    "$gte": start_date,
+                    "$lte": end_date,
+                    "$ne": None
+                }
+            },
+            {"_id": 0, "home_team": 1, "away_team": 1, "utc_date": 1, "matchday": 1}
+        ).sort("utc_date", 1).limit(20).to_list(20)
+        
+        return {
+            "query_params": {
+                "days_ahead": days_ahead,
+                "start_date": str(start_date),
+                "end_date": str(end_date),
+                "now": str(now)
+            },
+            "total_found": count,
+            "sample_fixtures": [
+                {
+                    "date": str(f.get('utc_date'))[:16] if f.get('utc_date') else "NO DATE",
+                    "match": f"{f.get('home_team')} vs {f.get('away_team')}",
+                    "matchday": f.get('matchday')
+                }
+                for f in samples
+            ]
+        }
+    except Exception as e:
+        import traceback
+        return {"error": str(e), "traceback": traceback.format_exc()}
+
 @api_router.get("/admin/check-future-fixtures")
 async def check_future_fixtures():
     """Check what fixtures exist after Dec 8, 2025"""
