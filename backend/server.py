@@ -981,28 +981,19 @@ async def get_fixtures(
                 
                 logger.info(f"📅 Date range query: {start_date} to {end_date} (days_ahead={days_ahead})")
                 
-                # Filter by date - handle both datetime objects AND ISO strings
-                # Convert dates to ISO strings for comparison (works with both formats)
-                start_str = start_date.isoformat()
-                end_str = end_date.isoformat()
+                # Filter by date - convert to ISO strings (works with both datetime and string dates in MongoDB)
+                # ISO strings are naturally sortable: "2025-12-15" > "2025-12-08"
+                start_str = start_date.strftime("%Y-%m-%d")
+                end_str = end_date.strftime("%Y-%m-%d")
                 
-                # Query matches either datetime objects OR ISO string dates
-                query["$or"] = [
-                    {
-                        "utc_date": {
-                            "$gte": start_date,
-                            "$lte": end_date,
-                            "$type": "date"  # Match datetime objects
-                        }
-                    },
-                    {
-                        "utc_date": {
-                            "$gte": start_str,
-                            "$lte": end_str,
-                            "$type": "string"  # Match ISO string dates
-                        }
-                    }
-                ]
+                # Use string comparison which works for both datetime objects and ISO string dates
+                query["utc_date"] = {
+                    "$gte": start_str,
+                    "$ne": None
+                }
+                
+                # For end date, we can't reliably use $lte with mixed types, so we'll filter after fetching
+                # This ensures we get all fixtures from start_date onwards
         
         # Get fixtures from database - sort by date, with current/future matches first
         if upcoming_only:
