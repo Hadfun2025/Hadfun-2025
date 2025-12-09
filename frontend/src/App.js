@@ -1222,17 +1222,14 @@ function App() {
                   <p className="text-center text-gray-600 py-8">{t.messages.noPredictionsYet}</p>
                 ) : (
                   <div className="space-y-6">
-                    {/* Group predictions by league, then by matchday */}
+                    {/* Group predictions by league only - NO matchday subgroups */}
                     {(() => {
                       const groupedByLeague = predictions.reduce((acc, pred) => {
                         const leagueName = pred.league_name || 'Unknown League';
                         if (!acc[leagueName]) {
-                          acc[leagueName] = {
-                            predictions: [],
-                            league_id: pred.league_id
-                          };
+                          acc[leagueName] = [];
                         }
-                        acc[leagueName].predictions.push(pred);
+                        acc[leagueName].push(pred);
                         return acc;
                       }, {});
 
@@ -1243,17 +1240,16 @@ function App() {
                           if (leagueB === 'Unknown League') return -1;
                           return leagueA.localeCompare(leagueB);
                         })
-                        .map(([leagueName, leagueData]) => {
-                          // Group predictions within league by matchday
-                          const groupedByMatchday = leagueData.predictions.reduce((acc, pred) => {
-                            const matchday = pred.matchday || 'Unknown';
-                            if (!acc[matchday]) acc[matchday] = [];
-                            acc[matchday].push(pred);
-                            return acc;
-                          }, {});
+                        .map(([leagueName, leaguePredictions]) => {
+                          // Sort all predictions in this league by date
+                          leaguePredictions.sort((a, b) => {
+                            const dateA = new Date(a.utc_date || a.match_date);
+                            const dateB = new Date(b.utc_date || b.match_date);
+                            return dateA - dateB;
+                          });
                           
                           return (
-                          <div key={leagueName} className="mb-8 border-2 border-indigo-200 rounded-lg overflow-hidden">
+                          <div key={leagueName} className="mb-6 border-2 border-indigo-200 rounded-lg overflow-hidden">
                             {/* League Header */}
                             <div className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white p-4">
                               <h3 className="text-2xl font-bold flex items-center gap-2">
@@ -1261,45 +1257,13 @@ function App() {
                                 {leagueName}
                               </h3>
                               <p className="text-sm text-indigo-100 mt-1">
-                                {leagueData.predictions.length} {leagueData.predictions.length === 1 ? 'prediction' : 'predictions'}
+                                {leaguePredictions.length} {leaguePredictions.length === 1 ? 'prediction' : 'predictions'}
                               </p>
                             </div>
                             
-                            {/* Matchdays within this league */}
-                            <div className="p-4 space-y-4">
-                              {Object.entries(groupedByMatchday)
-                                .sort(([matchdayA, predsA], [matchdayB, predsB]) => {
-                                  if (matchdayA === 'Unknown') return 1;
-                                  if (matchdayB === 'Unknown') return -1;
-                                  
-                                  // Sort by earliest date in each matchday
-                                  const earliestA = predsA.reduce((earliest, pred) => {
-                                    const date = new Date(pred.utc_date || pred.match_date);
-                                    return !earliest || date < earliest ? date : earliest;
-                                  }, null);
-                                  
-                                  const earliestB = predsB.reduce((earliest, pred) => {
-                                    const date = new Date(pred.utc_date || pred.match_date);
-                                    return !earliest || date < earliest ? date : earliest;
-                                  }, null);
-                                  
-                                  return earliestA - earliestB;
-                                })
-                                .map(([matchday, preds]) => {
-                                  // Sort predictions within matchday by date
-                                  preds.sort((a, b) => {
-                                    const dateA = new Date(a.utc_date || a.match_date);
-                                    const dateB = new Date(b.utc_date || b.match_date);
-                                    return dateA - dateB;
-                                  });
-                                  
-                                  return (
-                                    <div key={matchday} className="bg-gray-50 rounded-lg p-3">
-                                      <h4 className="text-md font-semibold text-indigo-700 mb-3 border-b border-indigo-200 pb-2">
-                                        {matchday !== 'Unknown' ? `Matchday ${matchday}` : 'Other Matches'}
-                                      </h4>
-                                      <div className="space-y-3">
-                                        {preds.map((pred) => (
+                            {/* All predictions for this league */}
+                            <div className="p-4 space-y-3">
+                              {leaguePredictions.map((pred) => (
                                 <div
                                   key={pred.id}
                                   className="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
