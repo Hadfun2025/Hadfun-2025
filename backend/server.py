@@ -1047,6 +1047,27 @@ async def get_fixtures(
                     'away': fixture.get('away_score')
                 }
         
+        # DEDUPLICATE: Remove duplicate fixtures (same fixture_id)
+        # Keep the one with scores if available, otherwise keep the first one
+        seen_fixture_ids = {}
+        deduplicated_fixtures = []
+        
+        for fixture in fixtures:
+            fixture_id = fixture.get('fixture_id')
+            if fixture_id not in seen_fixture_ids:
+                seen_fixture_ids[fixture_id] = fixture
+                deduplicated_fixtures.append(fixture)
+            else:
+                # If current fixture has scores and the existing one doesn't, replace it
+                existing = seen_fixture_ids[fixture_id]
+                if fixture.get('home_score') is not None and existing.get('home_score') is None:
+                    # Replace the existing one
+                    deduplicated_fixtures.remove(existing)
+                    seen_fixture_ids[fixture_id] = fixture
+                    deduplicated_fixtures.append(fixture)
+        
+        fixtures = deduplicated_fixtures
+        
         logger.info(f"Retrieved {len(fixtures)} fixtures from database for leagues: {league_id_list}")
         
         # Add debug info to help diagnose issue (temporary)
