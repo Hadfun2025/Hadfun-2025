@@ -749,6 +749,20 @@ async def update_match_results():
         raise HTTPException(status_code=500, detail=f"Error updating results: {str(e)}")
 
 
+@api_router.post("/admin/load-todays-fixtures")
+async def trigger_load_todays_fixtures():
+    """
+    Admin endpoint to manually load today's and tomorrow's fixtures
+    Useful after deployments or to refresh current matches
+    """
+    try:
+        await load_todays_fixtures()
+        return {"status": "success", "message": "Today's fixtures loaded"}
+    except Exception as e:
+        logger.error(f"Error in admin load today's fixtures: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @api_router.post("/admin/load-upcoming-fixtures")
 async def load_upcoming_fixtures():
     """
