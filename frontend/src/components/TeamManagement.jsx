@@ -119,9 +119,9 @@ export function TeamManagement({ currentUser, onBack }) {
       const membersRes = await axios.get(`${API}/teams/${userTeam.id}/members`);
       setTeamMembers(membersRes.data);
       
-      // Load team leaderboard (unified, no league tabs)
-      const leaderboardRes = await axios.get(`${API}/teams/${userTeam.id}/leaderboard`);
-      setTeamLeaderboard(leaderboardRes.data);
+      // Load team leaderboard by league (separate tables for each league)
+      const leaderboardRes = await axios.get(`${API}/teams/${userTeam.id}/leaderboard/by-league`);
+      setTeamLeaderboard(leaderboardRes.data); // This is now an array of league objects
       console.log('Team leaderboard loaded:', leaderboardRes.data);
       
       // Load messages
