@@ -640,6 +640,14 @@ function App() {
                 <span className="hidden sm:inline">{t.tabs.fixtures}</span>
               </TabsTrigger>
               <TabsTrigger 
+                value="worldcup" 
+                data-testid="worldcup-tab"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-500 data-[state=active]:to-yellow-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 font-semibold text-xs sm:text-sm whitespace-nowrap px-3 sm:px-4"
+              >
+                <Trophy className="w-4 h-4 sm:mr-1" />
+                <span className="hidden sm:inline">🏆 WC 2026</span>
+              </TabsTrigger>
+              <TabsTrigger 
                 value="standings" 
                 data-testid="standings-tab"
                 className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 font-semibold text-xs sm:text-sm whitespace-nowrap px-3 sm:px-4"
@@ -655,7 +663,6 @@ function App() {
                 <TrendingUp className="w-4 h-4 sm:mr-1" />
                 <span className="hidden sm:inline">{t.tabs.predictions}</span>
               </TabsTrigger>
-              {/* Leaderboard tab removed */}
               <TabsTrigger 
                 value="team" 
                 data-testid="team-tab" 
