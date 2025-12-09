@@ -759,6 +759,9 @@ async def load_upcoming_fixtures():
                 try:
                     fixtures = await service.get_fixtures_by_date(date_str, league_id, season=season)
                     all_fixtures.extend(fixtures)
+                    # Add delay to avoid per-minute rate limit (60 requests/min = 1 req/sec)
+                    import asyncio
+                    await asyncio.sleep(1.2)
                 except Exception as e:
                     logger.warning(f"Error fetching {date_str} league {league_id}: {str(e)}")
                     continue
