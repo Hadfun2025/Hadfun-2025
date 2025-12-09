@@ -22,6 +22,7 @@ import { TeamManagement } from '@/components/TeamManagement';
 import { PaymentModal } from '@/components/PaymentModal';
 import { ProfileSetup } from '@/components/ProfileSetup';
 import { SocialFeed } from '@/components/SocialFeed';
+import { WorldCupGroups } from '@/components/WorldCupGroups';
 import { useLanguage } from '@/LanguageContext';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
