@@ -5316,7 +5316,11 @@ async def startup_scheduler():
         for job in jobs:
             logger.info(f"   - {job.id}: {job.next_run_time}")
         
-        # Run once immediately on startup to catch any pending updates
+        # Load today's and tomorrow's fixtures on startup to ensure current matches are available
+        logger.info("🔧 Loading today's fixtures on startup...")
+        await load_todays_fixtures()
+        
+        # Run initial result update on startup
         logger.info("🔧 Running initial result update...")
         await automated_result_update()
         logger.info("✅ Initial result update complete")
