@@ -1225,7 +1225,8 @@ function App() {
                     {/* Group predictions by league only - NO matchday subgroups */}
                     {(() => {
                       const groupedByLeague = predictions.reduce((acc, pred) => {
-                        const leagueName = pred.league_name || 'Unknown League';
+                        // Check multiple possible field names for league
+                        const leagueName = pred.league_name || pred.league || 'Unknown League';
                         if (!acc[leagueName]) {
                           acc[leagueName] = [];
                         }
