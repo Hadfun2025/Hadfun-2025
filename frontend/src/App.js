@@ -1154,6 +1154,11 @@ function App() {
             </div>
           </TabsContent>
 
+          {/* World Cup 2026 Tab */}
+          <TabsContent value="worldcup">
+            <WorldCupGroups />
+          </TabsContent>
+
           {/* My Predictions Tab */}
           <TabsContent value="predictions">
             <Card>
