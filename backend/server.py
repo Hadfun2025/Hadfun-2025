@@ -4258,6 +4258,7 @@ async def automated_result_update():
         service = get_active_football_service()
         
         from datetime import datetime, timedelta, timezone
+        import asyncio
         
         # Dynamically check last 7 days INCLUDING TODAY for finished matches
         all_fixtures = []
@@ -4270,6 +4271,8 @@ async def automated_result_update():
             for league_id in league_ids:
                 fixtures = await service.get_fixtures_by_date(date_str, league_id, season=2025)
                 all_fixtures.extend(fixtures)
+                # Add delay to avoid hitting per-minute rate limit (60 requests/min = 1 req/sec)
+                await asyncio.sleep(1.2)
         
         if not all_fixtures:
             logger.warning("No fixtures data available from API for 2025 season")
