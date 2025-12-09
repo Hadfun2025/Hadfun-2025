@@ -334,6 +334,20 @@ async def get_leagues():
     return SUPPORTED_LEAGUES
 
 
+@api_router.get("/world-cup/groups")
+async def get_world_cup_groups():
+    """
+    Get World Cup 2026 groups with teams
+    Returns the 12 groups (A-L) with 4 teams each
+    """
+    try:
+        groups = await db.world_cup_groups.find({}, {"_id": 0}).sort("group_name", 1).to_list(100)
+        return groups
+    except Exception as e:
+        logger.error(f"Error fetching World Cup groups: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @api_router.post("/admin/refresh-fixtures")
 async def refresh_fixtures_from_api():
     """
