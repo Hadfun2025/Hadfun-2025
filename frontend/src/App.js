@@ -1221,33 +1221,34 @@ function App() {
                 {predictions.length === 0 ? (
                   <p className="text-center text-gray-600 py-8">{t.messages.noPredictionsYet}</p>
                 ) : (
-                  <div className="space-y-4">
-                    {/* Group predictions by matchday */}
+                  <div className="space-y-6">
+                    {/* Group predictions by league */}
                     {(() => {
-                      const groupedByMatchday = predictions.reduce((acc, pred) => {
-                        const matchday = pred.matchday || 'Unknown';
-                        if (!acc[matchday]) acc[matchday] = [];
-                        acc[matchday].push(pred);
+                      const groupedByLeague = predictions.reduce((acc, pred) => {
+                        const leagueName = pred.league_name || 'Unknown League';
+                        if (!acc[leagueName]) {
+                          acc[leagueName] = {
+                            predictions: [],
+                            league_id: pred.league_id
+                          };
+                        }
+                        acc[leagueName].predictions.push(pred);
                         return acc;
                       }, {});
 
-                      return Object.entries(groupedByMatchday)
-                        .sort(([matchdayA, predsA], [matchdayB, predsB]) => {
-                          if (matchdayA === 'Unknown') return 1;
-                          if (matchdayB === 'Unknown') return -1;
-                          
-                          // Sort by earliest date in each matchday group, not by matchday number
-                          const earliestA = predsA.reduce((earliest, pred) => {
-                            const date = new Date(pred.utc_date || pred.match_date);
-                            return !earliest || date < earliest ? date : earliest;
-                          }, null);
-                          
-                          const earliestB = predsB.reduce((earliest, pred) => {
-                            const date = new Date(pred.utc_date || pred.match_date);
-                            return !earliest || date < earliest ? date : earliest;
-                          }, null);
-                          
-                          return earliestA - earliestB; // Earliest matchday first
+                      return Object.entries(groupedByLeague)
+                        .sort(([leagueA], [leagueB]) => {
+                          // Sort leagues alphabetically
+                          if (leagueA === 'Unknown League') return 1;
+                          if (leagueB === 'Unknown League') return -1;
+                          return leagueA.localeCompare(leagueB);
+                        })
+                        .map(([leagueName, leagueData]) => {
+                          // Sort predictions within each league by date
+                          const sortedPredictions = leagueData.predictions.sort((a, b) => {
+                            const dateA = new Date(a.utc_date || a.match_date);
+                            const dateB = new Date(b.utc_date || b.match_date);
+                            return dateA - dateB;
                         })
                         .map(([matchday, preds]) => {
                           // Sort predictions within matchday by date (earliest first)
