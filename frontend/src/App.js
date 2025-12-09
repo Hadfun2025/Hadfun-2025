@@ -289,7 +289,10 @@ function App() {
   const loadStandings = async () => {
     setLoading(true);
     try {
-      const leagueIds = selectedLeagues.join(',');
+      // Default to major leagues if none selected
+      const leagueIds = selectedLeagues.length > 0 
+        ? selectedLeagues.join(',') 
+        : '39,40,140,78,135,61'; // Premier League, Championship, La Liga, Bundesliga, Serie A, Ligue 1
       const response = await axios.get(`${API}/standings?league_ids=${leagueIds}`);
       setStandings(response.data);
     } catch (error) {
