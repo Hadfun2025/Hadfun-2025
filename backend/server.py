@@ -341,7 +341,10 @@ async def get_world_cup_groups():
     Returns the 12 groups (A-L) with 4 teams each
     """
     try:
-        groups = await db.world_cup_groups.find({}, {"_id": 0}).sort("group_name", 1).to_list(100)
+        groups = await db.world_cup_groups.find({}, {"_id": 0}).sort("group", 1).to_list(100)
+        # Normalize field name for frontend
+        for group in groups:
+            group['group_name'] = group.get('group', 'Unknown')
         return groups
     except Exception as e:
         logger.error(f"Error fetching World Cup groups: {str(e)}")
