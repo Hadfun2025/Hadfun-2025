@@ -11,7 +11,7 @@ def test_leaderboard_team_names():
     """Test 1: Global Leaderboard with Team Names"""
     print("=== Test 1: Global Leaderboard with Team Names ===")
     
-    base_url = "https://football-oracle-114.preview.emergentagent.com"
+    base_url = "https://matchpredict-43.preview.emergentagent.com"
     api_url = f"{base_url}/api"
     
     try:
@@ -57,7 +57,7 @@ def test_fixture_details_in_database():
     """Test 2: Check if fixtures have complete details"""
     print("\n=== Test 2: Fixture Details in Database ===")
     
-    base_url = "https://football-oracle-114.preview.emergentagent.com"
+    base_url = "https://matchpredict-43.preview.emergentagent.com"
     api_url = f"{base_url}/api"
     
     try:
@@ -98,7 +98,7 @@ def test_prediction_endpoints():
     """Test 3: Test prediction endpoints (without creating new data)"""
     print("\n=== Test 3: Prediction Endpoints ===")
     
-    base_url = "https://football-oracle-114.preview.emergentagent.com"
+    base_url = "https://matchpredict-43.preview.emergentagent.com"
     api_url = f"{base_url}/api"
     
     try:
@@ -124,7 +124,7 @@ def test_automated_result_update_simulation():
     """Test 4: Check if there are any finished fixtures with scores"""
     print("\n=== Test 4: Automated Result Update (Check for Finished Fixtures) ===")
     
-    base_url = "https://football-oracle-114.preview.emergentagent.com"
+    base_url = "https://matchpredict-43.preview.emergentagent.com"
     api_url = f"{base_url}/api"
     
     try:

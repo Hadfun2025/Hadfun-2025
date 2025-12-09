@@ -7,7 +7,7 @@ import requests
 from datetime import datetime
 
 def test_email_invitation():
-    base_url = "https://football-oracle-114.preview.emergentagent.com/api"
+    base_url = "https://matchpredict-43.preview.emergentagent.com/api"
     
     # Create a test team first
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

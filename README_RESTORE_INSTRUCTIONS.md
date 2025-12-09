@@ -24,7 +24,7 @@ sudo supervisorctl restart all
 ```
 
 ### Your app will be live at:
-https://football-oracle-114.preview.emergentagent.com
+https://matchpredict-43.preview.emergentagent.com
 
 ---
 
