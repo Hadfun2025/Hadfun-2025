@@ -1006,6 +1006,12 @@ async def get_fixtures(
             # Convert datetime to ISO string for frontend
             if 'utc_date' in fixture and hasattr(fixture['utc_date'], 'isoformat'):
                 fixture['utc_date'] = fixture['utc_date'].isoformat()
+            # Add score object for frontend compatibility
+            if 'home_score' in fixture or 'away_score' in fixture:
+                fixture['score'] = {
+                    'home': fixture.get('home_score'),
+                    'away': fixture.get('away_score')
+                }
         
         logger.info(f"Retrieved {len(fixtures)} fixtures from database for leagues: {league_id_list}")
         
