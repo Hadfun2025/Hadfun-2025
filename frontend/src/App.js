@@ -645,7 +645,7 @@ function App() {
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-500 data-[state=active]:to-yellow-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 font-semibold text-xs sm:text-sm whitespace-nowrap px-3 sm:px-4"
               >
                 <Trophy className="w-4 h-4 sm:mr-1" />
-                <span className="hidden sm:inline">🏆 WC 2026</span>
+                <span className="hidden sm:inline">World Cup</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="standings" 
