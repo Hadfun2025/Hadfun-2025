@@ -1249,22 +1249,23 @@ function App() {
                             const dateA = new Date(a.utc_date || a.match_date);
                             const dateB = new Date(b.utc_date || b.match_date);
                             return dateA - dateB;
-                        })
-                        .map(([matchday, preds]) => {
-                          // Sort predictions within matchday by date (earliest first)
-                          preds.sort((a, b) => {
-                            const dateA = new Date(a.utc_date || a.match_date);
-                            const dateB = new Date(b.utc_date || b.match_date);
-                            return dateA - dateB; // Earliest date first
                           });
                           
                           return (
-                          <div key={matchday} className="mb-6">
-                            <h3 className="text-lg font-bold text-indigo-600 mb-3">
-                              {matchday !== 'Unknown' ? `${t.fixtures?.matchday || 'Matchday'} ${matchday}` : 'Other Matches'}
-                            </h3>
+                          <div key={leagueName} className="mb-6">
+                            {/* League Header */}
+                            <div className="bg-gradient-to-r from-indigo-50 to-blue-50 border-l-4 border-indigo-600 p-4 rounded-lg mb-4">
+                              <h3 className="text-xl font-bold text-indigo-900 flex items-center gap-2">
+                                <Trophy className="w-5 h-5" />
+                                {leagueName}
+                              </h3>
+                              <p className="text-sm text-indigo-700 mt-1">
+                                {sortedPredictions.length} {sortedPredictions.length === 1 ? 'prediction' : 'predictions'}
+                              </p>
+                            </div>
+                            
                             <div className="space-y-3">
-                              {preds.map((pred) => (
+                              {sortedPredictions.map((pred) => (
                                 <div
                                   key={pred.id}
                                   className="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
