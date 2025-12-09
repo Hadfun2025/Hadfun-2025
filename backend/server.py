@@ -5184,6 +5184,64 @@ async def sync_predictions_with_fixtures():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+async def load_todays_fixtures():
+    """
+    Load today's and tomorrow's fixtures to ensure current matches are available
+    Lighter version of load_upcoming_fixtures for startup
+    """
+    try:
+        from datetime import datetime, timedelta, timezone
+        
+        logger.info("🔄 Loading today's and tomorrow's fixtures...")
+        
+        # Get all league IDs from SUPPORTED_LEAGUES
+        league_configs = {league['id']: league['season'] for league in SUPPORTED_LEAGUES}
+        service = get_active_football_service()
+        
+        # Get fixtures for today and tomorrow only
+        all_fixtures = []
+        today = datetime.now(timezone.utc)
+        
+        for days_offset in range(2):  # Today and tomorrow
+            check_date = today + timedelta(days=days_offset)
+            date_str = check_date.strftime('%Y-%m-%d')
+            
+            for league_id, season in league_configs.items():
+                try:
+                    fixtures = await service.get_fixtures_by_date(date_str, league_id, season=season)
+                    all_fixtures.extend(fixtures)
+                    # Add small delay to avoid rate limits
+                    import asyncio
+                    await asyncio.sleep(0.5)
+                except Exception as e:
+                    logger.warning(f"Error fetching {date_str} league {league_id}: {str(e)}")
+                    continue
+        
+        logger.info(f"   Retrieved {len(all_fixtures)} fixtures for today/tomorrow")
+        
+        if not all_fixtures:
+            logger.info("   No fixtures found for today/tomorrow")
+            return
+        
+        # Transform and save to database
+        transformed = service.transform_to_standard_format(all_fixtures)
+        
+        loaded_count = 0
+        for fixture in transformed:
+            # Insert or update fixture
+            await db.fixtures.update_one(
+                {"fixture_id": fixture['fixture_id']},
+                {"$set": fixture},
+                upsert=True
+            )
+            loaded_count += 1
+        
+        logger.info(f"✅ Loaded {loaded_count} today/tomorrow fixtures")
+        
+    except Exception as e:
+        logger.error(f"❌ Error loading today's fixtures: {str(e)}")
+
+
 @app.on_event("startup")
 async def startup_scheduler():
     """Start the automated result checker and weekly winners calculation on app startup"""
