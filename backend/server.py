@@ -5219,11 +5219,21 @@ async def startup_scheduler():
             replace_existing=True
         )
         
+        # WEEKLY FIXTURE REFRESH: Load upcoming fixtures every Sunday at 3 AM
+        # This ensures we always have the next 30 days of fixtures loaded
+        scheduler.add_job(
+            load_upcoming_fixtures,
+            CronTrigger(day_of_week='sun', hour=3, minute=0),  # Sunday 3:00 AM
+            id='weekly_fixture_refresh',
+            replace_existing=True
+        )
+        
         scheduler.start()
         logger.info("🚀 Automated scheduler started:")
         logger.info("   - Live match updates: every 2 minutes 🔴")
         logger.info("   - Result checker: every 15 minutes")
         logger.info("   - Weekly winners: Wednesdays 2 PM + Daily 6 PM")
+        logger.info("   - Weekly fixture refresh: Sundays 3 AM 📅")
         
         # Log all scheduled jobs for debugging
         jobs = scheduler.get_jobs()
