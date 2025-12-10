@@ -1070,6 +1070,11 @@ async def get_fixtures(
         
         logger.info(f"Retrieved {len(fixtures)} fixtures from database for leagues: {league_id_list}")
         
+        # Convert datetime objects to ISO strings for JSON serialization
+        for fixture in fixtures:
+            if fixture.get('utc_date') and hasattr(fixture['utc_date'], 'isoformat'):
+                fixture['utc_date'] = fixture['utc_date'].isoformat()
+        
         # Add debug info to help diagnose issue (temporary)
         if len(fixtures) > 0:
             first_date = fixtures[0].get('utc_date', 'N/A')
