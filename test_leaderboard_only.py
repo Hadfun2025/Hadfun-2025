@@ -10,7 +10,7 @@ def test_leaderboard_team_names():
     """Test that global leaderboard includes team_name field"""
     print("=== Testing Global Leaderboard with Team Names ===")
     
-    base_url = "https://matchpredict-43.preview.emergentagent.com"
+    base_url = "https://leaguepicks-1.preview.emergentagent.com"
     api_url = f"{base_url}/api"
     
     try:
