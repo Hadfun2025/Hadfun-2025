@@ -5256,7 +5256,7 @@ async def load_todays_fixtures():
         logger.info(f"   Retrieved {len(all_fixtures)} fixtures for past 7 days + next 2 days")
         
         if not all_fixtures:
-            logger.info("   No fixtures found for today/tomorrow")
+            logger.info("   No fixtures found for past 7 days + next 2 days")
             return
         
         # Transform and save to database
@@ -5272,7 +5272,7 @@ async def load_todays_fixtures():
             )
             loaded_count += 1
         
-        logger.info(f"✅ Loaded {loaded_count} today/tomorrow fixtures")
+        logger.info(f"✅ Loaded {loaded_count} fixtures (past 7 days + next 2 days) - ensures weekend results are always available")
         
     except Exception as e:
         logger.error(f"❌ Error loading today's fixtures: {str(e)}")
