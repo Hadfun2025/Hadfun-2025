@@ -742,7 +742,7 @@ export function TeamManagement({ currentUser, onBack }) {
                             })}
                           </span>
                         </div>
-                        <p className="text-gray-700">{msg.message}</p>
+                        <p className="text-gray-700 whitespace-pre-wrap">{renderMessageWithLinks(msg.message)}</p>
                       </div>
                     ))
                   )}
