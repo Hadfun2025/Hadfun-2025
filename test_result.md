@@ -1235,3 +1235,22 @@ GET /api/fixtures?status=LIVE
 - Live scores will start updating 2 minutes after kickoff
 - Final scoring happens ~15 minutes after final whistle
 
+
+frontend:
+  - task: "Fix Duplicate European Fixtures Rendering Bug"
+    implemented: true
+    working: true
+    file: "frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "User reported duplicate European fixtures on production (hadfun.co.uk). Screenshot shows Bayern München vs Sporting CP appearing twice - once with score (3-1), once without. Also affecting other Champions League matches."
+        - working: false
+          agent: "main"
+          comment: "Investigated issue. Backend API and database have NO duplicates - all data is clean. Issue is in frontend rendering. Every Champions League fixture is being rendered TWICE (18 unique fixtures appearing as 36 cards). Screenshot tool confirmed: Bayern München vs Sporting CP appears 2 times (fixture_id: 1451111 rendered twice)."
+        - working: true
+          agent: "main"
+          comment: "✅ DUPLICATE FIXTURES BUG FIXED - Root cause: Frontend grouping/rendering logic was creating duplicate cards for the same fixture_id. Implemented defensive deduplication in App.js lines 936-950: Before grouping fixtures by league/matchday, now deduplicate based on fixture_id using a Set to track seen IDs. This ensures each fixture only renders once even if duplicates exist in the fixtures state array. Fix verified on preview environment: Champions League + Bundesliga showing 36 unique fixtures (previously 56 with duplicates). Bayern vs Sporting now shows once. All European fixtures display correctly with no duplicates. Ready for production deployment."
