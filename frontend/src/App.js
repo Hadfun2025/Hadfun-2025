@@ -935,7 +935,9 @@ function App() {
                   // Group fixtures by league and matchday
                   const grouped = {};
                   
-                  // BUGFIX: Deduplicate fixtures before grouping (defensive programming)
+                  // BUGFIX: Deduplicate fixtures before grouping to prevent duplicate rendering
+                  // This ensures each fixture_id is only rendered once, even if there are
+                  // duplicate entries in the fixtures array (defensive programming)
                   const uniqueFixtures = [];
                   const seenIds = new Set();
                   fixtures.forEach(fixture => {
@@ -944,8 +946,6 @@ function App() {
                       uniqueFixtures.push(fixture);
                     }
                   });
-                  
-                  console.log(`Fixtures: ${fixtures.length} total, ${uniqueFixtures.length} unique`);
                   
                   uniqueFixtures.forEach(fixture => {
                     const leagueName = fixture.league_name || 'Unknown League';
