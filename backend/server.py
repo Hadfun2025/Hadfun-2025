@@ -1070,16 +1070,22 @@ async def get_fixtures(
         
         logger.info(f"Retrieved {len(fixtures)} fixtures from database for leagues: {league_id_list}")
         
-        # Convert datetime objects to ISO strings for JSON serialization
+        # Convert datetime objects to ISO strings and ensure utc_date is populated
         converted_count = 0
         for fixture in fixtures:
             utc_date = fixture.get('utc_date')
-            if utc_date is not None:
-                if hasattr(utc_date, 'isoformat'):
-                    fixture['utc_date'] = utc_date.isoformat()
-                    converted_count += 1
+            match_date = fixture.get('match_date')
+            
+            # If utc_date is a datetime object, convert it to ISO string
+            if utc_date is not None and hasattr(utc_date, 'isoformat'):
+                fixture['utc_date'] = utc_date.isoformat()
+                converted_count += 1
+            # If utc_date is null but match_date exists, copy match_date to utc_date
+            elif utc_date is None and match_date:
+                fixture['utc_date'] = match_date
+                converted_count += 1
         
-        logger.info(f"🔄 Converted {converted_count} datetime objects to ISO strings")
+        logger.info(f"🔄 Processed {converted_count} fixture dates for JSON serialization")
         
         # Add debug info to help diagnose issue (temporary)
         if len(fixtures) > 0:
