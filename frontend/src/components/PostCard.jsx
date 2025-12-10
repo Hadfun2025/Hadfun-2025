@@ -42,6 +42,30 @@ export function PostCard({ post, currentUser, onUpdate, onDelete }) {
     return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
+  const renderContentWithLinks = (content) => {
+    // Convert URLs in text to clickable links
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = content.split(urlRegex);
+    
+    return parts.map((part, index) => {
+      if (part.match(urlRegex)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-800 underline break-all"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {part}
+          </a>
+        );
+      }
+      return <span key={index}>{part}</span>;
+    });
+  };
+
   const getYouTubeEmbedUrl = (url) => {
     // Extract YouTube video ID and return embed URL
     const patterns = [
