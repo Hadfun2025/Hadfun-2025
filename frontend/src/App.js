@@ -934,7 +934,20 @@ function App() {
                 (() => {
                   // Group fixtures by league and matchday
                   const grouped = {};
+                  
+                  // BUGFIX: Deduplicate fixtures before grouping (defensive programming)
+                  const uniqueFixtures = [];
+                  const seenIds = new Set();
                   fixtures.forEach(fixture => {
+                    if (!seenIds.has(fixture.fixture_id)) {
+                      seenIds.add(fixture.fixture_id);
+                      uniqueFixtures.push(fixture);
+                    }
+                  });
+                  
+                  console.log(`Fixtures: ${fixtures.length} total, ${uniqueFixtures.length} unique`);
+                  
+                  uniqueFixtures.forEach(fixture => {
                     const leagueName = fixture.league_name || 'Unknown League';
                     const matchdayRaw = fixture.matchday || 'Unknown';
                     // Extract just the number from "Regular Season - 12" format
