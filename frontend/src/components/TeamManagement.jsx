@@ -13,6 +13,34 @@ import { useLanguage } from '../LanguageContext';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+const getInitials = (username) => {
+  return username ? username.substring(0, 2).toUpperCase() : '??';
+};
+
+const renderMessageWithLinks = (message) => {
+  // Convert URLs in text to clickable links
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = message.split(urlRegex);
+  
+  return parts.map((part, index) => {
+    if (part.match(urlRegex)) {
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:text-blue-800 underline break-all"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {part}
+        </a>
+      );
+    }
+    return <span key={index}>{part}</span>;
+  });
+};
+
 export function TeamManagement({ currentUser, onBack }) {
   const { t } = useLanguage();
   const [userTeam, setUserTeam] = useState(null);
