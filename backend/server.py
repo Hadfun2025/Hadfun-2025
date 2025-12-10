@@ -5221,23 +5221,24 @@ async def sync_predictions_with_fixtures():
 
 async def load_todays_fixtures():
     """
-    Load today's and tomorrow's fixtures to ensure current matches are available
-    Lighter version of load_upcoming_fixtures for startup
+    Load past 7 days + next 2 days of fixtures to ensure recent results and current matches are available
+    Extended from 2 days to 9 days total to preserve historical data after deployments
     """
     try:
         from datetime import datetime, timedelta, timezone
         
-        logger.info("🔄 Loading today's and tomorrow's fixtures...")
+        logger.info("🔄 Loading past 7 days + next 2 days fixtures (9 days total)...")
         
         # Get all league IDs from SUPPORTED_LEAGUES
         league_configs = {league['id']: league['season'] for league in SUPPORTED_LEAGUES}
         service = get_active_football_service()
         
-        # Get fixtures for today and tomorrow only
+        # Get fixtures for past 7 days + today + tomorrow (9 days total)
         all_fixtures = []
         today = datetime.now(timezone.utc)
         
-        for days_offset in range(2):  # Today and tomorrow
+        # Start from 7 days ago, go through today and tomorrow
+        for days_offset in range(-7, 2):  # -7, -6, -5, -4, -3, -2, -1, 0, 1
             check_date = today + timedelta(days=days_offset)
             date_str = check_date.strftime('%Y-%m-%d')
             
@@ -5252,7 +5253,7 @@ async def load_todays_fixtures():
                     logger.warning(f"Error fetching {date_str} league {league_id}: {str(e)}")
                     continue
         
-        logger.info(f"   Retrieved {len(all_fixtures)} fixtures for today/tomorrow")
+        logger.info(f"   Retrieved {len(all_fixtures)} fixtures for past 7 days + next 2 days")
         
         if not all_fixtures:
             logger.info("   No fixtures found for today/tomorrow")
