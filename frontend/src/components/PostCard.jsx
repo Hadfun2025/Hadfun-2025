@@ -356,7 +356,7 @@ export function PostCard({ post, currentUser, onUpdate, onDelete }) {
         )}
 
         {/* Post Content */}
-        <p className="text-gray-800 whitespace-pre-wrap">{post.content}</p>
+        <p className="text-gray-800 whitespace-pre-wrap">{renderContentWithLinks(post.content)}</p>
 
         {/* Images */}
         {post.images && post.images.length > 0 && (
