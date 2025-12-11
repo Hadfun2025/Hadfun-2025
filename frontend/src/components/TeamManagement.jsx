@@ -790,7 +790,22 @@ export function TeamManagement({ currentUser, onBack }) {
                             })}
                           </span>
                         </div>
-                        <p className="text-gray-700 whitespace-pre-wrap">{renderMessageWithLinks(msg.message)}</p>
+                        {msg.message && (
+                          <p className="text-gray-700 whitespace-pre-wrap">{renderMessageWithLinks(msg.message)}</p>
+                        )}
+                        {msg.images && msg.images.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {msg.images.map((img, idx) => (
+                              <img
+                                key={idx}
+                                src={img}
+                                alt=""
+                                className="max-w-xs rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                                onClick={() => window.open(img, '_blank')}
+                              />
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ))
                   )}
