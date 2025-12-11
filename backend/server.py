@@ -5373,16 +5373,15 @@ async def startup_scheduler():
         for job in jobs:
             logger.info(f"   - {job.id}: {job.next_run_time}")
         
-        # TEMPORARILY DISABLED - Loading fixtures on startup blocks login for 15+ minutes
-        # Will be re-enabled after deployment optimization
-        # logger.info("🔧 Loading today's fixtures on startup...")
-        # await load_todays_fixtures()
+        # Load fixtures in BACKGROUND so login isn't blocked
+        logger.info("🔧 Starting background fixture loading (non-blocking)...")
+        import asyncio
+        asyncio.create_task(load_todays_fixtures())
         
-        # TEMPORARILY DISABLED - Result update also loads fixtures and blocks login
-        # Will be re-enabled after deployment optimization
-        # logger.info("🔧 Running initial result update...")
-        # await automated_result_update()
-        # logger.info("✅ Initial result update complete")
+        # Run result update in BACKGROUND
+        logger.info("🔧 Starting background result update (non-blocking)...")
+        asyncio.create_task(automated_result_update())
+        logger.info("✅ Background tasks started - backend ready for requests!")
         
     except Exception as e:
         logger.error(f"Error starting scheduler: {str(e)}")
