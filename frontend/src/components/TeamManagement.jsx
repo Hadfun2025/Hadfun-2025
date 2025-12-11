@@ -797,16 +797,37 @@ export function TeamManagement({ currentUser, onBack }) {
                 </div>
 
                 {/* New Message */}
-                <div className="flex gap-2">
-                  <Input
-                    placeholder={t.team.typeMessage}
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  />
-                  <Button onClick={handleSendMessage}>
-                    {t.team.send}
-                  </Button>
+                <div className="space-y-2">
+                  {/* Image Preview */}
+                  {messageImages.length > 0 && (
+                    <div className="flex flex-wrap gap-2 p-2 bg-gray-50 rounded">
+                      {messageImages.map((img, idx) => (
+                        <div key={idx} className="relative">
+                          <img src={img} alt="" className="h-16 w-16 object-cover rounded" />
+                          <button
+                            onClick={() => setMessageImages(messageImages.filter((_, i) => i !== idx))}
+                            className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder={`${t.team.typeMessage} 📋 Paste images with Ctrl+V`}
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onPaste={handleTeamChatPaste}
+                      onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+                      disabled={uploadingImage}
+                    />
+                    <Button onClick={handleSendMessage} disabled={uploadingImage || (!newMessage.trim() && messageImages.length === 0)}>
+                      {uploadingImage ? '⏳' : t.team.send}
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
