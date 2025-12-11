@@ -1878,6 +1878,194 @@ class BackendTester:
             print(f"❌ Post deletion failed: {result.get('data')}")
             return False
 
+    def test_fixtures_api_all_leagues_fix(self):
+        """Test the critical fix for fixtures API returning ALL leagues when no filter applied"""
+        print("\n" + "=" * 80)
+        print("🔧 TESTING FIXTURES API - ALL LEAGUES FIX")
+        print("=" * 80)
+        
+        results = {}
+        
+        # Test Case 1: Empty league_ids should return ALL leagues
+        print("\n=== Test Case 1: Empty league_ids parameter ===")
+        result1 = self.make_request("GET", "/fixtures?league_ids=&days_ahead=28")
+        
+        if result1["success"]:
+            fixtures_all = result1["data"]
+            print(f"✅ Empty league_ids request successful")
+            print(f"   Total fixtures returned: {len(fixtures_all)}")
+            
+            # Count unique leagues
+            unique_leagues = set()
+            for fixture in fixtures_all:
+                league_id = fixture.get('league_id')
+                if league_id:
+                    unique_leagues.add(league_id)
+            
+            print(f"   Unique leagues found: {len(unique_leagues)}")
+            print(f"   League IDs: {sorted(list(unique_leagues))}")
+            
+            # Expected: Should be 18+ leagues and 500+ fixtures
+            if len(fixtures_all) >= 500 and len(unique_leagues) >= 18:
+                print("   ✅ PASS: Returns fixtures from ALL leagues (18+ leagues, 500+ fixtures)")
+                results["empty_league_ids"] = True
+            else:
+                print(f"   ❌ FAIL: Expected 18+ leagues and 500+ fixtures, got {len(unique_leagues)} leagues and {len(fixtures_all)} fixtures")
+                results["empty_league_ids"] = False
+        else:
+            print(f"❌ Empty league_ids request failed: {result1.get('data')}")
+            results["empty_league_ids"] = False
+        
+        # Test Case 2: Single league filter (Premier League only)
+        print("\n=== Test Case 2: Single league filter (Premier League) ===")
+        result2 = self.make_request("GET", "/fixtures?league_ids=39&days_ahead=28")
+        
+        if result2["success"]:
+            fixtures_pl = result2["data"]
+            print(f"✅ Premier League only request successful")
+            print(f"   Total fixtures returned: {len(fixtures_pl)}")
+            
+            # Verify all fixtures are Premier League
+            non_pl_fixtures = [f for f in fixtures_pl if f.get('league_id') != 39]
+            
+            if len(non_pl_fixtures) == 0:
+                print("   ✅ PASS: All fixtures are Premier League only")
+                results["single_league_filter"] = True
+            else:
+                print(f"   ❌ FAIL: Found {len(non_pl_fixtures)} non-Premier League fixtures")
+                results["single_league_filter"] = False
+        else:
+            print(f"❌ Premier League only request failed: {result2.get('data')}")
+            results["single_league_filter"] = False
+        
+        # Test Case 3: Multiple league filter (Premier League + La Liga)
+        print("\n=== Test Case 3: Multiple league filter (Premier League + La Liga) ===")
+        result3 = self.make_request("GET", "/fixtures?league_ids=39,140&days_ahead=28")
+        
+        if result3["success"]:
+            fixtures_multi = result3["data"]
+            print(f"✅ Multiple leagues request successful")
+            print(f"   Total fixtures returned: {len(fixtures_multi)}")
+            
+            # Verify only Premier League and La Liga fixtures
+            valid_leagues = {39, 140}
+            invalid_fixtures = [f for f in fixtures_multi if f.get('league_id') not in valid_leagues]
+            
+            # Count fixtures per league
+            pl_count = len([f for f in fixtures_multi if f.get('league_id') == 39])
+            laliga_count = len([f for f in fixtures_multi if f.get('league_id') == 140])
+            
+            print(f"   Premier League fixtures: {pl_count}")
+            print(f"   La Liga fixtures: {laliga_count}")
+            
+            if len(invalid_fixtures) == 0:
+                print("   ✅ PASS: Only Premier League and La Liga fixtures returned")
+                results["multiple_league_filter"] = True
+            else:
+                print(f"   ❌ FAIL: Found {len(invalid_fixtures)} fixtures from other leagues")
+                results["multiple_league_filter"] = False
+        else:
+            print(f"❌ Multiple leagues request failed: {result3.get('data')}")
+            results["multiple_league_filter"] = False
+        
+        # Test Case 4: Verify the fix addresses the original bug
+        print("\n=== Test Case 4: Comparing empty vs default behavior ===")
+        
+        # Get fixtures with no league_ids parameter (should behave same as empty)
+        result4 = self.make_request("GET", "/fixtures?days_ahead=28")
+        
+        if result4["success"]:
+            fixtures_no_param = result4["data"]
+            print(f"✅ No league_ids parameter request successful")
+            print(f"   Total fixtures returned: {len(fixtures_no_param)}")
+            
+            # Compare with empty league_ids result
+            if results.get("empty_league_ids") and len(fixtures_no_param) >= 500:
+                print("   ✅ PASS: No parameter behaves same as empty parameter (returns all leagues)")
+                results["no_param_behavior"] = True
+            else:
+                print("   ❌ FAIL: No parameter doesn't return all leagues")
+                results["no_param_behavior"] = False
+        else:
+            print(f"❌ No league_ids parameter request failed: {result4.get('data')}")
+            results["no_param_behavior"] = False
+        
+        # Test Case 5: Verify specific leagues are included
+        print("\n=== Test Case 5: Verify specific leagues are included ===")
+        
+        if results.get("empty_league_ids") and result1["success"]:
+            fixtures_all = result1["data"]
+            
+            # Check for specific leagues mentioned in the review
+            expected_leagues = {
+                39: "Premier League",
+                140: "La Liga", 
+                78: "Bundesliga",
+                40: "Championship",
+                135: "Serie A",
+                61: "Ligue 1",
+                179: "Scottish Premiership"
+            }
+            
+            found_leagues = {}
+            for fixture in fixtures_all:
+                league_id = fixture.get('league_id')
+                league_name = fixture.get('league_name')
+                if league_id in expected_leagues:
+                    found_leagues[league_id] = league_name
+            
+            print(f"   Expected leagues found: {len(found_leagues)}/{len(expected_leagues)}")
+            for league_id, league_name in found_leagues.items():
+                print(f"   ✅ {expected_leagues[league_id]} (ID: {league_id})")
+            
+            missing_leagues = set(expected_leagues.keys()) - set(found_leagues.keys())
+            if missing_leagues:
+                for league_id in missing_leagues:
+                    print(f"   ❌ Missing: {expected_leagues[league_id]} (ID: {league_id})")
+            
+            if len(found_leagues) >= 5:  # At least 5 of the major leagues
+                print("   ✅ PASS: Major leagues are included")
+                results["major_leagues_included"] = True
+            else:
+                print("   ❌ FAIL: Missing major leagues")
+                results["major_leagues_included"] = False
+        else:
+            results["major_leagues_included"] = False
+        
+        # Summary
+        print("\n" + "=" * 80)
+        print("📊 FIXTURES API FIX TEST RESULTS")
+        print("=" * 80)
+        
+        test_cases = [
+            ("Empty league_ids returns ALL leagues", results.get("empty_league_ids", False)),
+            ("Single league filter works correctly", results.get("single_league_filter", False)),
+            ("Multiple league filter works correctly", results.get("multiple_league_filter", False)),
+            ("No parameter behaves same as empty", results.get("no_param_behavior", False)),
+            ("Major leagues are included", results.get("major_leagues_included", False))
+        ]
+        
+        passed = sum(1 for _, result in test_cases if result)
+        total = len(test_cases)
+        
+        for test_name, result in test_cases:
+            status = "✅ PASS" if result else "❌ FAIL"
+            print(f"{status} {test_name}")
+        
+        print(f"\nFixtures API Fix Tests: {passed}/{total} passed")
+        
+        # Overall assessment
+        critical_tests_passed = results.get("empty_league_ids", False) and results.get("single_league_filter", False)
+        
+        if critical_tests_passed:
+            print("🎉 CRITICAL FIX VERIFICATION: ✅ WORKING")
+            print("   The fixtures API now correctly returns ALL leagues when no filter is applied")
+        else:
+            print("🚨 CRITICAL FIX VERIFICATION: ❌ FAILING")
+            print("   The fixtures API fix is not working as expected")
+        
+        return results
+
     def run_all_tests(self):
         """Run all backend tests"""
         print("🚀 Starting HadFun Predictor Backend Tests")
