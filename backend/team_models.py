@@ -50,6 +50,7 @@ class TeamMessage(BaseModel):
     user_id: str
     username: str
     message: str
+    images: List[str] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     likes: int = 0
 
@@ -59,6 +60,7 @@ class MessageCreate(BaseModel):
     user_id: str
     username: str
     message: str
+    images: List[str] = Field(default_factory=list)
 
 
 class TeamStats(BaseModel):
