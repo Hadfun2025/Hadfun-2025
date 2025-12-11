@@ -362,8 +362,9 @@ export function PostCard({ post, currentUser, onUpdate, onDelete }) {
         {post.images && post.images.length > 0 && (
           <div className="mt-3 grid grid-cols-2 gap-2">
             {post.images.slice(0, 4).map((img, index) => {
-              // Handle relative URLs by prepending backend URL
-              const imageUrl = img.startsWith('http') ? img : `${BACKEND_URL}${img}`;
+              // Handle relative URLs - use current domain instead of BACKEND_URL
+              // This ensures images work on both preview and production
+              const imageUrl = img.startsWith('http') ? img : img;
               
               return (
                 <div key={index} className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
