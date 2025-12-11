@@ -399,7 +399,7 @@ export function TeamManagement({ currentUser, onBack }) {
   };
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim() && messageImages.length === 0) return;
+    if (!newMessage.trim() && messageImages.length === 0 && messageVideos.length === 0) return;
 
     try {
       await axios.post(`${API}/teams/${userTeam.id}/messages`, {
@@ -407,11 +407,14 @@ export function TeamManagement({ currentUser, onBack }) {
         user_id: currentUser.id,
         username: currentUser.username,
         message: newMessage,
-        images: messageImages
+        images: messageImages,
+        videos: messageVideos
       });
 
       setNewMessage('');
       setMessageImages([]);
+      setMessageVideos([]);
+      setNewVideoUrl('');
       loadTeamData();
       toast.success('Message posted!');
     } catch (error) {
