@@ -229,18 +229,64 @@ export function TeamManagement({ currentUser, onBack }) {
     }
   };
 
+  // Handle paste events for team chat images
+  const handleTeamChatPaste = async (event) => {
+    const items = event.clipboardData?.items;
+    if (!items) return;
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      
+      if (item.type.indexOf('image') !== -1) {
+        event.preventDefault();
+        
+        const file = item.getAsFile();
+        if (!file) continue;
+
+        if (messageImages.length >= 3) {
+          toast.error('Maximum 3 images per message');
+          continue;
+        }
+
+        try {
+          setUploadingImage(true);
+          toast.loading('Uploading pasted image...', { id: 'team-paste' });
+
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const response = await axios.post(`${API}/upload`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+            timeout: 120000,
+          });
+
+          setMessageImages([...messageImages, response.data.url]);
+          toast.dismiss('team-paste');
+          toast.success('Image added! 📸');
+        } catch (error) {
+          toast.dismiss('team-paste');
+          toast.error('Failed to upload image');
+        } finally {
+          setUploadingImage(false);
+        }
+      }
+    }
+  };
+
   const handleSendMessage = async () => {
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() && messageImages.length === 0) return;
 
     try {
       await axios.post(`${API}/teams/${userTeam.id}/messages`, {
         team_id: userTeam.id,
         user_id: currentUser.id,
         username: currentUser.username,
-        message: newMessage
+        message: newMessage,
+        images: messageImages
       });
 
       setNewMessage('');
+      setMessageImages([]);
       loadTeamData();
       toast.success('Message posted!');
     } catch (error) {
