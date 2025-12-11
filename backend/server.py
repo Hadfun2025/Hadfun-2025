@@ -5298,13 +5298,14 @@ async def load_data_from_json_files():
             existing_users = await db.users.count_documents({})
             if existing_users < len(users):
                 for user in users:
-                    # Convert date strings
-                    for key in ['created_at', 'updated_at', 'birthdate']:
+                    # Convert date strings to datetime EXCEPT birthdate (should stay as string)
+                    for key in ['created_at', 'updated_at']:
                         if key in user and isinstance(user[key], str):
                             try:
                                 user[key] = datetime.fromisoformat(user[key].replace('Z', '+00:00'))
                             except:
                                 pass
+                    # birthdate should remain as string (YYYY-MM-DD format)
                     
                     await db.users.update_one(
                         {"id": user.get('id')},
