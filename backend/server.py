@@ -974,7 +974,11 @@ async def get_fixtures(
         from datetime import datetime, timedelta, timezone
         
         # Parse league IDs - if single league, use direct match, otherwise use $in
-        league_id_list = [int(lid.strip()) for lid in league_ids.split(',')]
+        # Handle empty league_ids gracefully
+        if not league_ids or league_ids.strip() == '':
+            league_id_list = [39, 140, 78]  # Default to Premier League, La Liga, Bundesliga
+        else:
+            league_id_list = [int(lid.strip()) for lid in league_ids.split(',') if lid.strip()]
         
         # Build query
         if len(league_id_list) == 1:
