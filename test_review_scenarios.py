@@ -11,7 +11,7 @@ from datetime import datetime
 class ReviewScenarioTester:
     def __init__(self):
         # Get backend URL from frontend .env
-        self.base_url = "https://leaguepicks-1.preview.emergentagent.com"
+        self.base_url = "https://kickoff-oracle-9.preview.emergentagent.com"
         self.api_url = f"{self.base_url}/api"
         
         # Test user from review request
