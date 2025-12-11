@@ -231,6 +231,129 @@ export function TeamManagement({ currentUser, onBack }) {
     }
   };
 
+  // Video rendering functions (same as PostCard)
+  const getYouTubeEmbedUrl = (url) => {
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s?]+)/,
+      /youtube\.com\/embed\/([^&\s?]+)/,
+      /youtube\.com\/v\/([^&\s?]+)/,
+      /youtube\.com\/shorts\/([^&\s?]+)/
+    ];
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match && match[1]) {
+        return `https://www.youtube.com/embed/${match[1]}`;
+      }
+    }
+    return null;
+  };
+
+  const getVimeoEmbedUrl = (url) => {
+    const match = url.match(/vimeo\.com\/(\d+)/);
+    if (match && match[1]) {
+      return `https://player.vimeo.com/video/${match[1]}`;
+    }
+    return null;
+  };
+
+  const getFacebookEmbedUrl = (url) => {
+    if (url.includes('facebook.com/') && (url.includes('/videos/') || url.includes('/reel/'))) {
+      return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&width=560`;
+    }
+    return null;
+  };
+
+  const renderTeamVideo = (videoUrl, index) => {
+    const youtubeEmbed = getYouTubeEmbedUrl(videoUrl);
+    const vimeoEmbed = getVimeoEmbedUrl(videoUrl);
+    const facebookEmbed = getFacebookEmbedUrl(videoUrl);
+
+    if (youtubeEmbed) {
+      return (
+        <div key={index} className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden mt-2">
+          <iframe
+            src={youtubeEmbed}
+            className="w-full h-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            title={`Video ${index + 1}`}
+          />
+        </div>
+      );
+    }
+
+    if (vimeoEmbed) {
+      return (
+        <div key={index} className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden mt-2">
+          <iframe
+            src={vimeoEmbed}
+            className="w-full h-full"
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowFullScreen
+            title={`Video ${index + 1}`}
+          />
+        </div>
+      );
+    }
+
+    if (facebookEmbed) {
+      return (
+        <div key={index} className="relative aspect-video bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg overflow-hidden flex items-center justify-center mt-2">
+          <a
+            href={videoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-col items-center justify-center gap-3 text-white p-6 hover:scale-105 transition-transform"
+          >
+            <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+            </svg>
+            <div className="text-center">
+              <p className="font-semibold">View on Facebook</p>
+              <p className="text-xs text-blue-100">Opens in new tab</p>
+            </div>
+          </a>
+        </div>
+      );
+    }
+
+    // Direct video link
+    return (
+      <div key={index} className="mt-2">
+        <a
+          href={videoUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:underline text-sm"
+        >
+          🎥 {videoUrl}
+        </a>
+      </div>
+    );
+  };
+
+  const handleAddVideo = () => {
+    if (!newVideoUrl.trim()) {
+      toast.error('Please enter a video URL');
+      return;
+    }
+
+    if (messageVideos.length >= 2) {
+      toast.error('Maximum 2 videos per message');
+      return;
+    }
+
+    try {
+      new URL(newVideoUrl);
+      setMessageVideos([...messageVideos, newVideoUrl]);
+      setNewVideoUrl('');
+      toast.success('Video added! 📹');
+    } catch (e) {
+      toast.error('Please enter a valid URL');
+    }
+  };
+
   // Handle paste events for team chat images
   const handleTeamChatPaste = async (event) => {
     const items = event.clipboardData?.items;
