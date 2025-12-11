@@ -5241,6 +5241,107 @@ async def sync_predictions_with_fixtures():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+async def load_data_from_json_files():
+    """
+    FAST STARTUP: Load fixtures, users, and teams from pre-exported JSON files.
+    This ensures data is available IMMEDIATELY after deployment without waiting for API calls.
+    """
+    import json
+    from pathlib import Path
+    
+    try:
+        data_dir = Path(__file__).parent
+        
+        # Load fixtures from JSON
+        fixtures_file = data_dir / 'fixtures_data.json'
+        if fixtures_file.exists():
+            logger.info("📦 Loading fixtures from JSON file (FAST MODE)...")
+            with open(fixtures_file, 'r') as f:
+                fixtures = json.load(f)
+            
+            # Check if fixtures already exist in DB
+            existing_count = await db.fixtures.count_documents({})
+            if existing_count < len(fixtures):
+                # Convert date strings back to datetime objects
+                for fixture in fixtures:
+                    if 'utc_date' in fixture and isinstance(fixture['utc_date'], str):
+                        try:
+                            fixture['utc_date'] = datetime.fromisoformat(fixture['utc_date'].replace('Z', '+00:00'))
+                        except:
+                            pass
+                    if 'match_date' in fixture and isinstance(fixture['match_date'], str):
+                        try:
+                            fixture['match_date'] = datetime.fromisoformat(fixture['match_date'].replace('Z', '+00:00'))
+                        except:
+                            pass
+                
+                # Bulk insert fixtures
+                for fixture in fixtures:
+                    await db.fixtures.update_one(
+                        {"fixture_id": fixture.get('fixture_id')},
+                        {"$set": fixture},
+                        upsert=True
+                    )
+                logger.info(f"✅ Loaded {len(fixtures)} fixtures from JSON file")
+            else:
+                logger.info(f"✅ Fixtures already loaded ({existing_count} in DB)")
+        else:
+            logger.warning("⚠️ fixtures_data.json not found - will load from API")
+        
+        # Load users from JSON
+        users_file = data_dir / 'users_data.json'
+        if users_file.exists():
+            logger.info("📦 Loading users from JSON file...")
+            with open(users_file, 'r') as f:
+                users = json.load(f)
+            
+            existing_users = await db.users.count_documents({})
+            if existing_users < len(users):
+                for user in users:
+                    # Convert date strings
+                    for key in ['created_at', 'updated_at', 'birthdate']:
+                        if key in user and isinstance(user[key], str):
+                            try:
+                                user[key] = datetime.fromisoformat(user[key].replace('Z', '+00:00'))
+                            except:
+                                pass
+                    
+                    await db.users.update_one(
+                        {"id": user.get('id')},
+                        {"$set": user},
+                        upsert=True
+                    )
+                logger.info(f"✅ Loaded {len(users)} users from JSON file")
+            else:
+                logger.info(f"✅ Users already loaded ({existing_users} in DB)")
+        
+        # Load teams from JSON
+        teams_file = data_dir / 'teams_data.json'
+        if teams_file.exists():
+            logger.info("📦 Loading teams from JSON file...")
+            with open(teams_file, 'r') as f:
+                teams = json.load(f)
+            
+            existing_teams = await db.teams.count_documents({})
+            if existing_teams < len(teams):
+                for team in teams:
+                    await db.teams.update_one(
+                        {"id": team.get('id')},
+                        {"$set": team},
+                        upsert=True
+                    )
+                logger.info(f"✅ Loaded {len(teams)} teams from JSON file")
+            else:
+                logger.info(f"✅ Teams already loaded ({existing_teams} in DB)")
+        
+        logger.info("🚀 FAST STARTUP COMPLETE - Data loaded from JSON files!")
+        return True
+        
+    except Exception as e:
+        logger.error(f"❌ Error loading from JSON files: {str(e)}")
+        return False
+
+
 async def load_todays_fixtures():
     """
     Load past 7 days + next 2 days of fixtures to ensure recent results and current matches are available
