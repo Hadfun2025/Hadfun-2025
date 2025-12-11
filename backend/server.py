@@ -5378,10 +5378,11 @@ async def startup_scheduler():
         # logger.info("🔧 Loading today's fixtures on startup...")
         # await load_todays_fixtures()
         
-        # Run initial result update on startup
-        logger.info("🔧 Running initial result update...")
-        await automated_result_update()
-        logger.info("✅ Initial result update complete")
+        # TEMPORARILY DISABLED - Result update also loads fixtures and blocks login
+        # Will be re-enabled after deployment optimization
+        # logger.info("🔧 Running initial result update...")
+        # await automated_result_update()
+        # logger.info("✅ Initial result update complete")
         
     except Exception as e:
         logger.error(f"Error starting scheduler: {str(e)}")
