@@ -934,6 +934,11 @@ export function TeamManagement({ currentUser, onBack }) {
                             ))}
                           </div>
                         )}
+                        {msg.videos && msg.videos.length > 0 && (
+                          <div className="space-y-2">
+                            {msg.videos.map((video, idx) => renderTeamVideo(video, idx))}
+                          </div>
+                        )}
                       </div>
                     ))
                   )}
