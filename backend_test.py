@@ -2080,6 +2080,14 @@ class BackendTester:
             print("\n❌ API not accessible - stopping tests")
             return results
         
+        # CRITICAL PRIORITY: Test the fixtures API fix first
+        print("\n" + "=" * 60)
+        print("🔧 CRITICAL FIX VERIFICATION - FIXTURES API")
+        print("=" * 60)
+        
+        fixtures_results = self.test_fixtures_api_all_leagues_fix()
+        results.update(fixtures_results)
+        
         # NEW: Social Feature Tests (Priority)
         print("\n" + "=" * 60)
         print("🌟 TESTING SOCIAL FEATURE BACKEND ENDPOINTS")
