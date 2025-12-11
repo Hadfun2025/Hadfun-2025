@@ -62,6 +62,8 @@ export function TeamManagement({ currentUser, onBack }) {
   
   // Message form
   const [newMessage, setNewMessage] = useState('');
+  const [messageImages, setMessageImages] = useState([]);
+  const [uploadingImage, setUploadingImage] = useState(false);
   
   // Email invitation form
   const [inviteEmail, setInviteEmail] = useState('');
