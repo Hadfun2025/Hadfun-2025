@@ -29,6 +29,65 @@ export function CreatePost({ user, onPostCreated }) {
   const [uploadingFile, setUploadingFile] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
 
+  // Handle paste events for images
+  const handlePaste = async (event) => {
+    const items = event.clipboardData?.items;
+    if (!items) return;
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      
+      // Check if pasted item is an image
+      if (item.type.indexOf('image') !== -1) {
+        event.preventDefault(); // Prevent default paste behavior
+        
+        const file = item.getAsFile();
+        if (!file) continue;
+
+        console.log('Pasted image detected:', { name: file.name, type: file.type, size: file.size });
+
+        // Check file size (50MB limit)
+        const maxSize = 50 * 1024 * 1024;
+        if (file.size > maxSize) {
+          toast.error(`Image too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). Maximum size is 50MB`);
+          continue;
+        }
+
+        // Check if we've reached the limit
+        if (images.length >= 5) {
+          toast.error('Maximum 5 images allowed per post');
+          continue;
+        }
+
+        // Upload the pasted image
+        try {
+          setUploadingFile(true);
+          setUploadProgress('Uploading pasted image...');
+          toast.loading('Uploading pasted image...', { id: 'paste-upload' });
+
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const response = await axios.post(`${API}/upload`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+            timeout: 120000,
+          });
+
+          setImages([...images, response.data.url]);
+          toast.dismiss('paste-upload');
+          toast.success('Pasted image uploaded successfully! 🎉');
+        } catch (error) {
+          console.error('Pasted image upload error:', error);
+          toast.dismiss('paste-upload');
+          toast.error('Failed to upload pasted image. Please try again.');
+        } finally {
+          setUploadingFile(false);
+          setUploadProgress('');
+        }
+      }
+    }
+  };
+
   const handleAddImage = () => {
     if (!newImageUrl.trim()) {
       toast.error('Please enter an image URL');
