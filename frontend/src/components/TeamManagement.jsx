@@ -945,7 +945,7 @@ export function TeamManagement({ currentUser, onBack }) {
                 </div>
 
                 {/* New Message */}
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {/* Image Preview */}
                   {messageImages.length > 0 && (
                     <div className="flex flex-wrap gap-2 p-2 bg-gray-50 rounded">
@@ -963,6 +963,46 @@ export function TeamManagement({ currentUser, onBack }) {
                     </div>
                   )}
                   
+                  {/* Video Preview */}
+                  {messageVideos.length > 0 && (
+                    <div className="flex flex-wrap gap-2 p-2 bg-blue-50 rounded">
+                      {messageVideos.map((video, idx) => (
+                        <Badge key={idx} variant="secondary" className="pr-1 bg-blue-100 border-blue-300">
+                          <span className="max-w-[150px] truncate">📹 Video {idx + 1}</span>
+                          <button
+                            onClick={() => setMessageVideos(messageVideos.filter((_, i) => i !== idx))}
+                            className="ml-1 hover:text-red-500"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {/* Video URL Input */}
+                  {messageVideos.length < 2 && (
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="📹 Paste YouTube, Facebook, or Vimeo link..."
+                        value={newVideoUrl}
+                        onChange={(e) => setNewVideoUrl(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleAddVideo()}
+                        className="text-sm"
+                      />
+                      <Button
+                        type="button"
+                        onClick={handleAddVideo}
+                        variant="outline"
+                        size="sm"
+                        disabled={!newVideoUrl.trim()}
+                      >
+                        Add Video
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {/* Message Input */}
                   <div className="flex gap-2">
                     <Input
                       placeholder={`${t.team.typeMessage} 📋 Paste images with Ctrl+V`}
@@ -972,7 +1012,10 @@ export function TeamManagement({ currentUser, onBack }) {
                       onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
                       disabled={uploadingImage}
                     />
-                    <Button onClick={handleSendMessage} disabled={uploadingImage || (!newMessage.trim() && messageImages.length === 0)}>
+                    <Button 
+                      onClick={handleSendMessage} 
+                      disabled={uploadingImage || (!newMessage.trim() && messageImages.length === 0 && messageVideos.length === 0)}
+                    >
                       {uploadingImage ? '⏳' : t.team.send}
                     </Button>
                   </div>
