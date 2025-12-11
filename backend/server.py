@@ -5405,6 +5405,15 @@ async def load_todays_fixtures():
 async def startup_scheduler():
     """Start the automated result checker and weekly winners calculation on app startup"""
     try:
+        # FAST STARTUP: Load data from JSON files FIRST (instant, no API calls)
+        logger.info("🚀 FAST STARTUP: Loading data from JSON files...")
+        json_loaded = await load_data_from_json_files()
+        
+        if json_loaded:
+            logger.info("✅ Data loaded from JSON - backend ready for login immediately!")
+        else:
+            logger.info("⚠️ JSON loading failed - will load from API (slower)")
+        
         # Run one-time migration for Dec 2-3 scores (safe to run multiple times)
         logger.info("🔧 Running one-time Dec 2-3 score migration...")
         try:
