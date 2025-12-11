@@ -1,0 +1,14 @@
+[
+  {
+    "id": "e82606b2-0ebd-4915-b11a-506e3a80f4fe",
+    "name": "Test Team 20251211_171601",
+    "admin_user_id": "test123",
+    "admin_username": "testuser",
+    "created_at": "2025-12-11T17:16:01.894203",
+    "member_count": 1,
+    "stake_amount": 5.0,
+    "play_mode": "pot",
+    "is_private": true,
+    "join_code": "2B46CE74"
+  }
+]
