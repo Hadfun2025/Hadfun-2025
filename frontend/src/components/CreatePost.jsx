@@ -401,7 +401,8 @@ export function CreatePost({ user, onPostCreated }) {
             <Textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Share your story, support a cause, or connect with the community..."
+              onPaste={handlePaste}
+              placeholder="Share your story, support a cause, or connect with the community... 📋 Tip: You can paste images directly!"
               rows={4}
               maxLength={5000}
               className="resize-none"
