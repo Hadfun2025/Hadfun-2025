@@ -25,8 +25,12 @@ import { SocialFeed } from '@/components/SocialFeed';
 import { WorldCupGroups } from '@/components/WorldCupGroups';
 import { useLanguage } from '@/LanguageContext';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+// Use relative URL in production (when accessed via custom domain like hadfun.co.uk)
+// This ensures API calls go to the same origin, avoiding cross-origin issues
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
+const API = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && !window.location.hostname.includes('preview.emergentagent.com')
+  ? '/api'  // Production: use relative URL
+  : `${BACKEND_URL}/api`;  // Preview/local: use configured URL
 
 function App() {
   const { t } = useLanguage();
