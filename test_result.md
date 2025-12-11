@@ -437,10 +437,31 @@ frontend:
           comment: "✅ PREDICTION DISPLAY WORKING - Verified fixtures show actual team names instead of placeholders. Tested with fixtures showing 'SC Freiburg vs VfB Stuttgart' and other real team names. Prediction cards structure ready for team names display. League badges present. Score display functionality implemented for finished matches. User with no predictions shows appropriate 'No predictions yet' message. Team name display in predictions tab shows user's team (e.g., 'CHESHUNT CREW') in team selector. All prediction display functionality working as designed."
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Fixtures API - Return ALL Leagues When No Filter Applied"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
+
+backend:
+  - task: "Fixtures API - Return ALL Leagues When No Filter Applied"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "User reported fixtures not appearing on production site (hadfun.co.uk) after deployment. Investigation revealed the API was defaulting to only 3 leagues (Premier League, La Liga, Bundesliga) when league_ids parameter was empty, instead of returning ALL available leagues."
+        - working: "NA"
+          agent: "main"
+          comment: "Fixed the /api/fixtures endpoint in server.py. Changed logic so when league_ids is empty/null, it returns ALL fixtures from ALL leagues instead of defaulting to 3 leagues. Before fix: API returned 137 fixtures across 3 leagues. After fix: API returns 538 fixtures across 18 leagues. Database has 627 total fixtures."
+
+agent_communication:
+    - agent: "main"
+      message: "CRITICAL FIX DEPLOYED - Fixed fixtures API to return ALL leagues when no league filter is specified. The bug was at lines 978-979 in server.py where empty league_ids defaulted to [39, 140, 78] (only 3 leagues). Now returns all 18 leagues with 538 fixtures. Please verify: 1) /api/fixtures?league_ids=&days_ahead=28 returns all leagues, 2) Frontend shows all 18 league buttons in the Select Leagues section, 3) All fixtures load correctly when no specific league is selected."
 
 frontend:
   - task: "New Leaderboard Functionality - Winner-Takes-All Scoring System"
