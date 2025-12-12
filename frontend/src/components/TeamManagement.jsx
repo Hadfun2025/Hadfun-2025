@@ -1078,14 +1078,8 @@ export function TeamManagement({ currentUser, onBack }) {
                                 <th className="text-left p-3 font-semibold w-16">#</th>
                                 <th className="text-left p-3 font-semibold">Player</th>
                                 <th className="text-center p-3 font-semibold w-20">Wins</th>
-                                <th className="text-center p-3 font-semibold w-28">
-                                  <span className="block text-xs text-gray-500">This Matchday</span>
-                                  Correct/Total
-                                </th>
-                                <th className="text-center p-3 font-semibold w-28">
-                                  <span className="block text-xs text-gray-500">Season</span>
-                                  Correct/Total
-                                </th>
+                                <th className="text-center p-3 font-semibold w-24">Correct</th>
+                                <th className="text-center p-3 font-semibold w-24">Total</th>
                                 <th className="text-center p-3 font-semibold w-24">PTS</th>
                               </tr>
                             </thead>
@@ -1107,16 +1101,8 @@ export function TeamManagement({ currentUser, onBack }) {
                                     )}
                                   </td>
                                   <td className="p-3 text-center text-gray-700">{entry.matchday_wins}</td>
-                                  <td className="p-3 text-center text-gray-700">
-                                    <span className="text-green-600 font-medium">{entry.correct_predictions}</span>
-                                    <span className="text-gray-400">/</span>
-                                    <span>{entry.total_predictions}</span>
-                                  </td>
-                                  <td className="p-3 text-center text-gray-700">
-                                    <span className="text-green-600 font-medium">{entry.season_correct || entry.correct_predictions}</span>
-                                    <span className="text-gray-400">/</span>
-                                    <span>{entry.season_predictions || entry.total_predictions}</span>
-                                  </td>
+                                  <td className="p-3 text-center text-green-600 font-medium">{entry.correct_predictions}</td>
+                                  <td className="p-3 text-center text-gray-700">{entry.total_predictions}</td>
                                   <td className="p-3 text-center font-bold text-indigo-600 text-lg">{entry.total_points}</td>
                                 </tr>
                               ))}
