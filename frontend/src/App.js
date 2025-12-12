@@ -25,9 +25,8 @@ import { SocialFeed } from '@/components/SocialFeed';
 import { WorldCupGroups } from '@/components/WorldCupGroups';
 import { useLanguage } from '@/LanguageContext';
 
-// Always use relative /api path - works in both preview and production
-// The ingress routes /api/* to the backend automatically
-const API = '/api';
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 function App() {
   const { t } = useLanguage();
