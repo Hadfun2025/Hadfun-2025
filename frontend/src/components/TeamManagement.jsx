@@ -191,6 +191,24 @@ export function TeamManagement({ currentUser, onBack }) {
     }
   };
 
+  // Load leaderboard with specific matchday filter
+  const loadLeaderboardForMatchday = async (leagueName, matchday) => {
+    if (!userTeam) return;
+    
+    try {
+      const response = await axios.get(`${API}/teams/${userTeam.id}/leaderboard/by-league`, {
+        params: { matchday: matchday }
+      });
+      setTeamLeaderboard(response.data);
+      setSelectedMatchdays(prev => ({
+        ...prev,
+        [leagueName]: matchday
+      }));
+    } catch (error) {
+      console.error('Error loading leaderboard for matchday:', error);
+    }
+  };
+
   const handleCreateTeam = async () => {
     if (!teamName.trim()) {
       toast.error('Please enter a team name');
