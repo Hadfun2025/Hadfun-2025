@@ -1111,52 +1111,52 @@ function App() {
                                         <Button
                                           data-testid={`predict-home-${fixture.fixture_id}`}
                                           onClick={() =>
-                                            !isLocked && handlePredict(
+                                            !isLocked && !isAbandoned && handlePredict(
                                               fixture.fixture_id,
                                               'home',
                                               fixture.league_id,
                                               fixture.utc_date
                                             )
                                           }
-                                          disabled={isLocked}
+                                          disabled={isLocked || isAbandoned}
                                           className={`${
                                             userPrediction === 'home' 
                                               ? 'bg-green-700 ring-4 ring-green-300 font-bold' 
                                               : 'bg-green-600 hover:bg-green-700'
-                                          } ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                          } ${isLocked || isAbandoned ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         >
                                           {userPrediction === 'home' ? '✓ ' : ''}{t.predict.home}
                                         </Button>
                                         <Button
                                           data-testid={`predict-away-${fixture.fixture_id}`}
                                           onClick={() =>
-                                            !isLocked && handlePredict(
+                                            !isLocked && !isAbandoned && handlePredict(
                                               fixture.fixture_id,
                                               'away',
                                               fixture.league_id,
                                               fixture.utc_date
                                             )
                                           }
-                                          disabled={isLocked}
+                                          disabled={isLocked || isAbandoned}
                                           className={`${
                                             userPrediction === 'away' 
                                               ? 'bg-red-700 ring-4 ring-red-300 font-bold' 
                                               : 'bg-red-600 hover:bg-red-700'
-                                          } ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                          } ${isLocked || isAbandoned ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         >
                                           {userPrediction === 'away' ? '✓ ' : ''}{t.predict.away}
                                         </Button>
                                         <Button
                                           data-testid={`predict-draw-${fixture.fixture_id}`}
                                           onClick={() =>
-                                            !isLocked && handlePredict(
+                                            !isLocked && !isAbandoned && handlePredict(
                                               fixture.fixture_id,
                                               'draw',
                                               fixture.league_id,
                                               fixture.utc_date
                                             )
                                           }
-                                          disabled={isLocked}
+                                          disabled={isLocked || isAbandoned}
                                           className={`${
                                             userPrediction === 'draw' 
                                               ? 'bg-amber-600 ring-4 ring-amber-300 font-bold' 
