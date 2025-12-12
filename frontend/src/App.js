@@ -1305,6 +1305,11 @@ function App() {
                                             ✓ Finished
                                           </span>
                                         )}
+                                        {pred.status === 'ABANDONED' && (
+                                          <span className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded font-medium">
+                                            ⚠️ Abandoned
+                                          </span>
+                                        )}
                                       </div>
                                       <p className="text-lg font-bold text-gray-800">
                                         {pred.home_team || 'Home'} <span className="text-gray-400">vs</span> {pred.away_team || 'Away'}
@@ -1321,6 +1326,17 @@ function App() {
                                         <p className="text-2xl font-bold text-indigo-600">
                                           {pred.score.home} - {pred.score.away}
                                         </p>
+                                      </div>
+                                    )}
+                                    
+                                    {/* Abandoned Match Display */}
+                                    {pred.status === 'ABANDONED' && (
+                                      <div className="bg-orange-50 px-4 py-2 rounded-lg border border-orange-200">
+                                        <p className="text-xs text-orange-600 mb-1">Match Status</p>
+                                        <p className="text-sm font-bold text-orange-700">
+                                          ABANDONED
+                                        </p>
+                                        <p className="text-xs text-orange-600">No points awarded</p>
                                       </div>
                                     )}
                                   </div>
@@ -1341,8 +1357,8 @@ function App() {
                                     </div>
                                     
                                     <div className="flex items-center gap-3">
-                                      {/* Delete button - only show for pending predictions */}
-                                      {pred.result === 'pending' && pred.status !== 'FINISHED' && (
+                                      {/* Delete button - only show for pending predictions (not abandoned or finished) */}
+                                      {pred.result === 'pending' && pred.status !== 'FINISHED' && pred.status !== 'ABANDONED' && (
                                         <Button
                                           variant="ghost"
                                           size="sm"
