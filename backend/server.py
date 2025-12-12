@@ -174,6 +174,42 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 # Mount at /api/uploads to work with Kubernetes ingress routing
 app.mount("/api/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
+# Debug endpoint to check database state
+@app.get("/api/debug/db-status")
+async def debug_db_status():
+    """Check database status - for debugging deployment issues"""
+    try:
+        users_count = await db.users.count_documents({})
+        fixtures_count = await db.fixtures.count_documents({})
+        teams_count = await db.teams.count_documents({})
+        
+        # Check if aysin exists
+        aysin = await db.users.find_one({"username": "aysin"}, {"_id": 0, "username": 1, "email": 1})
+        
+        # Check JSON files
+        import json
+        from pathlib import Path
+        data_dir = Path(__file__).parent
+        fixtures_json_exists = (data_dir / 'fixtures_data.json').exists()
+        users_json_exists = (data_dir / 'users_data.json').exists()
+        
+        return {
+            "database": {
+                "users": users_count,
+                "fixtures": fixtures_count,
+                "teams": teams_count,
+                "aysin_exists": aysin is not None,
+                "aysin_data": aysin
+            },
+            "json_files": {
+                "fixtures_data.json": fixtures_json_exists,
+                "users_data.json": users_json_exists
+            },
+            "status": "ok" if users_count > 0 and fixtures_count > 0 else "empty_db"
+        }
+    except Exception as e:
+        return {"error": str(e), "status": "error"}
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
