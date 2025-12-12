@@ -1161,7 +1161,7 @@ function App() {
                                             userPrediction === 'draw' 
                                               ? 'bg-amber-600 ring-4 ring-amber-300 font-bold' 
                                               : 'bg-amber-500 hover:bg-amber-600'
-                                          } ${isLocked ? 'opacity-50 cursor-not-allowed' : ''} text-white`}
+                                          } ${isLocked || isAbandoned ? 'opacity-50 cursor-not-allowed' : ''} text-white`}
                                         >
                                           {userPrediction === 'draw' ? '✓ ' : ''}{t.predict.draw}
                                         </Button>
