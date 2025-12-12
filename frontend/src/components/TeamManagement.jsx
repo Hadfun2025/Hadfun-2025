@@ -67,6 +67,9 @@ export function TeamManagement({ currentUser, onBack }) {
   const [newVideoUrl, setNewVideoUrl] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
   
+  // Leaderboard matchday selection (per league)
+  const [selectedMatchdays, setSelectedMatchdays] = useState({});
+  
   // Email invitation form
   const [inviteEmail, setInviteEmail] = useState('');
   const [sendingInvite, setSendingInvite] = useState(false);
