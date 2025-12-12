@@ -1065,6 +1065,7 @@ function App() {
                                   const isLocked = isPredictionLocked(fixture.utc_date);
                                   const userPrediction = userPred?.prediction;
                                   const isFinished = fixture.status === 'FINISHED';
+                                  const isAbandoned = fixture.status === 'ABANDONED';
                                   const hasScore = fixture.score && fixture.score.home !== null && fixture.score.home !== undefined;
                                   
                                   return (
@@ -1079,13 +1080,23 @@ function App() {
                                         </div>
                                       )}
                                       
+                                      {/* Abandoned Match - Show special message */}
+                                      {isAbandoned && (
+                                        <div className="text-center p-3 bg-orange-50 rounded-lg mb-4 border border-orange-200">
+                                          <p className="text-xs text-orange-600 font-semibold mb-1">⚠️ MATCH ABANDONED</p>
+                                          <p className="text-sm text-orange-700">
+                                            This match was abandoned. No predictions will be scored.
+                                          </p>
+                                        </div>
+                                      )}
+                                      
                                       {/* Deadline info */}
-                                      {!isLocked && !isFinished && (
+                                      {!isLocked && !isFinished && !isAbandoned && (
                                         <p className="text-xs text-gray-500 text-center">
                                           💡 You can change your prediction until Wed 23:59
                                         </p>
                                       )}
-                                      {isLocked && !isFinished && (
+                                      {isLocked && !isFinished && !isAbandoned && (
                                         <p className="text-xs text-red-600 text-center font-medium">
                                           🔒 Predictions locked
                                         </p>
