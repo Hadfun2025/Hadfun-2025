@@ -1053,7 +1053,7 @@ export function TeamManagement({ currentUser, onBack }) {
                 <CardDescription>{t.team.privateToTeam}</CardDescription>
               </CardHeader>
               <CardContent>
-                {/* League-Specific Leaderboards */}
+                {/* League-Specific Leaderboards - One per matchday */}
                 {teamLeaderboard.length === 0 ? (
                   <div className="text-center text-gray-500 py-8">
                     <p>No predictions yet. Be the first to predict!</p>
@@ -1061,40 +1061,13 @@ export function TeamManagement({ currentUser, onBack }) {
                 ) : (
                   <div className="space-y-6">
                     {teamLeaderboard.map((leagueData) => (
-                      <div key={leagueData.league_name} className="bg-white rounded-lg shadow-md border-2 border-indigo-200 overflow-hidden">
-                        {/* League Header with Matchday Selector */}
+                      <div key={`${leagueData.league_name}-${leagueData.matchday}`} className="bg-white rounded-lg shadow-md border-2 border-indigo-200 overflow-hidden">
+                        {/* League + Matchday Header */}
                         <div className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white p-4">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h3 className="text-xl font-bold flex items-center gap-2">
-                                <Trophy className="h-6 w-6" />
-                                {leagueData.league_name}
-                              </h3>
-                            </div>
-                            
-                            {/* Matchday Selector */}
-                            {leagueData.available_matchdays && leagueData.available_matchdays.length > 0 && (
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm text-indigo-100">Matchday:</span>
-                                <select
-                                  value={selectedMatchdays[leagueData.league_name] || leagueData.selected_matchday || leagueData.current_matchday || ''}
-                                  onChange={(e) => loadLeaderboardForMatchday(leagueData.league_name, parseInt(e.target.value))}
-                                  className="bg-white/20 text-white border border-white/30 rounded px-3 py-1 text-sm font-medium cursor-pointer hover:bg-white/30 transition-colors"
-                                >
-                                  {leagueData.available_matchdays.map((md) => (
-                                    <option key={md} value={md} className="text-gray-900">
-                                      {md} {md === leagueData.current_matchday ? '(Current)' : ''}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-                            )}
-                          </div>
-                          
-                          <p className="text-sm text-indigo-100 mt-2">
-                            Showing: Matchday {leagueData.selected_matchday || leagueData.current_matchday}
-                            {leagueData.selected_matchday === leagueData.current_matchday && ' (Current)'}
-                          </p>
+                          <h3 className="text-xl font-bold flex items-center gap-2">
+                            <Trophy className="h-6 w-6" />
+                            {leagueData.display_name || `${leagueData.league_name} - Matchday ${leagueData.matchday}`}
+                          </h3>
                         </div>
 
                         {/* League Leaderboard Table */}
