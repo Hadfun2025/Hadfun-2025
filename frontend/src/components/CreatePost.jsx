@@ -73,7 +73,9 @@ export function CreatePost({ user, onPostCreated }) {
             timeout: 120000,
           });
 
-          setImages([...images, response.data.url]);
+          // Use full URL with BACKEND_URL prefix for consistency
+          const fileUrl = `${BACKEND_URL}${response.data.url}`;
+          setImages([...images, fileUrl]);
           toast.dismiss('paste-upload');
           toast.success('Pasted image uploaded successfully! 🎉');
         } catch (error) {
