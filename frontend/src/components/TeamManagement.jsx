@@ -1062,17 +1062,39 @@ export function TeamManagement({ currentUser, onBack }) {
                   <div className="space-y-6">
                     {teamLeaderboard.map((leagueData) => (
                       <div key={leagueData.league_name} className="bg-white rounded-lg shadow-md border-2 border-indigo-200 overflow-hidden">
-                        {/* League Header */}
+                        {/* League Header with Matchday Selector */}
                         <div className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white p-4">
-                          <h3 className="text-xl font-bold flex items-center gap-2">
-                            <Trophy className="h-6 w-6" />
-                            {leagueData.league_name}
-                          </h3>
-                          {leagueData.current_matchday && (
-                            <p className="text-sm text-indigo-100 mt-1">
-                              Matchday {leagueData.current_matchday}
-                            </p>
-                          )}
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="text-xl font-bold flex items-center gap-2">
+                                <Trophy className="h-6 w-6" />
+                                {leagueData.league_name}
+                              </h3>
+                            </div>
+                            
+                            {/* Matchday Selector */}
+                            {leagueData.available_matchdays && leagueData.available_matchdays.length > 0 && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm text-indigo-100">Matchday:</span>
+                                <select
+                                  value={selectedMatchdays[leagueData.league_name] || leagueData.selected_matchday || leagueData.current_matchday || ''}
+                                  onChange={(e) => loadLeaderboardForMatchday(leagueData.league_name, parseInt(e.target.value))}
+                                  className="bg-white/20 text-white border border-white/30 rounded px-3 py-1 text-sm font-medium cursor-pointer hover:bg-white/30 transition-colors"
+                                >
+                                  {leagueData.available_matchdays.map((md) => (
+                                    <option key={md} value={md} className="text-gray-900">
+                                      {md} {md === leagueData.current_matchday ? '(Current)' : ''}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            )}
+                          </div>
+                          
+                          <p className="text-sm text-indigo-100 mt-2">
+                            Showing: Matchday {leagueData.selected_matchday || leagueData.current_matchday}
+                            {leagueData.selected_matchday === leagueData.current_matchday && ' (Current)'}
+                          </p>
                         </div>
 
                         {/* League Leaderboard Table */}
