@@ -3168,21 +3168,29 @@ async def upload_file(file: UploadFile = File(...)):
 @api_router.get("/users/{username}", response_model=User)
 async def get_user(username: str):
     """Get user by username - used for login"""
-    user = await db.users.find_one({"username": username}, {"_id": 0})
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    # Ensure created_at is properly formatted
-    if isinstance(user.get('created_at'), str):
-        try:
-            user['created_at'] = datetime.fromisoformat(user['created_at'].replace('Z', '+00:00'))
-        except:
-            pass
-    
-    # Ensure birthdate stays as string (not converted to datetime)
-    # This is handled by the User model
-    
-    return user
+    try:
+        user = await db.users.find_one({"username": username}, {"_id": 0})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Ensure created_at is properly formatted
+        if isinstance(user.get('created_at'), str):
+            try:
+                user['created_at'] = datetime.fromisoformat(user['created_at'].replace('Z', '+00:00'))
+            except:
+                pass
+        
+        # Ensure birthdate stays as string (not converted to datetime)
+        # Convert datetime birthdate to string if needed
+        if user.get('birthdate') and not isinstance(user.get('birthdate'), str):
+            user['birthdate'] = str(user['birthdate'])[:10] if user['birthdate'] else None
+        
+        return user
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching user {username}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
 
 @api_router.get("/users/search")
