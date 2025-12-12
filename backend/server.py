@@ -2398,7 +2398,7 @@ def normalize_league_name(league_name: str) -> str:
 
 @api_router.get("/teams/{team_id}/leaderboard/by-league")
 async def get_team_leaderboard_by_league(team_id: str):
-    """SIMPLIFIED team leaderboard by league - NO DUPLICATES ALL USERS"""
+    """SIMPLIFIED team leaderboard by league - Shows predictions for CURRENT MATCHDAY only"""
     logger.info(f"📊 Leaderboard request for team: {team_id}")
     # Get team members
     members = await db.team_members.find({"team_id": team_id}, {"_id": 0}).to_list(100)
@@ -2409,7 +2409,24 @@ async def get_team_leaderboard_by_league(team_id: str):
         logger.warning("No members found, returning empty list")
         return []
     
-    # Build leaderboard by getting ALL predictions for each member
+    # First, get all leagues and their current matchdays
+    league_matchdays = {}
+    all_leagues = await db.fixtures.aggregate([
+        {"$group": {
+            "_id": "$league_name",
+            "league_id": {"$first": "$league_id"},
+            "latest_matchday": {"$max": "$matchday"}
+        }}
+    ]).to_list(100)
+    
+    for league in all_leagues:
+        league_name = normalize_league_name(league.get('_id', 'Unknown'))
+        league_matchdays[league_name] = {
+            'matchday': league.get('latest_matchday'),
+            'league_id': league.get('league_id')
+        }
+    
+    # Build leaderboard by getting predictions for each member
     leagues = {}
     
     for member_id in member_ids:
@@ -2423,20 +2440,37 @@ async def get_team_leaderboard_by_league(team_id: str):
         # Get all predictions for this user
         predictions = await db.predictions.find({"user_id": member_id}, {"_id": 0}).to_list(10000)
         
-        # Group predictions by NORMALIZED league name
+        # Group predictions by NORMALIZED league name AND matchday
         user_leagues = {}
+        user_leagues_all = {}  # For total count across all matchdays
+        
         for pred in predictions:
             league_name = normalize_league_name(pred.get('league', 'Unknown'))
+            matchday = pred.get('matchday')
             
-            if league_name not in user_leagues:
-                user_leagues[league_name] = {
+            # Track all predictions for this league (for total count)
+            if league_name not in user_leagues_all:
+                user_leagues_all[league_name] = {
                     'correct': 0,
-                    'total': 0
+                    'total': 0,
+                    'matchdays': set()
                 }
-            
-            user_leagues[league_name]['total'] += 1
+            user_leagues_all[league_name]['total'] += 1
+            user_leagues_all[league_name]['matchdays'].add(matchday)
             if pred.get('result') == 'correct':
-                user_leagues[league_name]['correct'] += 1
+                user_leagues_all[league_name]['correct'] += 1
+            
+            # Track current matchday predictions only
+            current_matchday = league_matchdays.get(league_name, {}).get('matchday')
+            if matchday == current_matchday:
+                if league_name not in user_leagues:
+                    user_leagues[league_name] = {
+                        'correct': 0,
+                        'total': 0
+                    }
+                user_leagues[league_name]['total'] += 1
+                if pred.get('result') == 'correct':
+                    user_leagues[league_name]['correct'] += 1
         
         # Get matchday wins for this user
         wins_by_league = {}
@@ -2449,19 +2483,23 @@ async def get_team_leaderboard_by_league(team_id: str):
             wins_by_league[league_name]['wins'] += 1
             wins_by_league[league_name]['points'] += lp.get('points', 0)
         
-        # Add user to each league they participated in
-        for league_name, stats in user_leagues.items():
+        # Add user to each league they participated in (use all leagues for display)
+        for league_name, all_stats in user_leagues_all.items():
             if league_name not in leagues:
                 leagues[league_name] = []
             
             wins_data = wins_by_league.get(league_name, {'wins': 0, 'points': 0})
+            current_stats = user_leagues.get(league_name, {'correct': 0, 'total': 0})
             
             leagues[league_name].append({
                 'username': username,
                 'total_points': wins_data['points'],
                 'matchday_wins': wins_data['wins'],
-                'correct_predictions': stats['correct'],
-                'total_predictions': stats['total']
+                'correct_predictions': current_stats['correct'],  # Current matchday correct
+                'total_predictions': current_stats['total'],  # Current matchday total
+                'season_predictions': all_stats['total'],  # All season predictions
+                'season_correct': all_stats['correct'],  # All season correct
+                'matchdays_played': len(all_stats['matchdays'])  # Number of matchdays participated
             })
     
     # Build result with current matchday info
@@ -2474,13 +2512,8 @@ async def get_team_leaderboard_by_league(team_id: str):
         for idx, member in enumerate(members_data):
             member['rank'] = idx + 1
         
-        # Get current matchday for this league (most recent matchday with fixtures)
-        latest_fixture = await db.fixtures.find_one(
-            {"league_name": {"$regex": league_name.split("(")[0].strip(), "$options": "i"}},
-            {"_id": 0, "matchday": 1},
-            sort=[("utc_date", -1)]
-        )
-        current_matchday = latest_fixture.get('matchday') if latest_fixture else None
+        # Get current matchday for this league
+        current_matchday = league_matchdays.get(league_name, {}).get('matchday')
         
         result.append({
             'league_name': league_name,
