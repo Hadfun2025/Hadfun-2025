@@ -2429,8 +2429,18 @@ async def get_team_leaderboard_by_league(team_id: str):
             league_name = normalize_league_name(pred.get('league', 'Unknown'))
             matchday = pred.get('matchday')
             
+            # If matchday is not set, try to get it from the fixture
             if matchday is None:
-                continue
+                fixture = await db.fixtures.find_one(
+                    {"fixture_id": pred.get('fixture_id')}, 
+                    {"_id": 0, "matchday": 1}
+                )
+                if fixture:
+                    matchday = fixture.get('matchday')
+            
+            # Use "Current" as default if still no matchday
+            if matchday is None:
+                matchday = "Current"
             
             if league_name not in leagues_matchdays:
                 leagues_matchdays[league_name] = {}
