@@ -2509,8 +2509,18 @@ async def get_team_leaderboard_by_league(team_id: str):
                 'leaderboard': leaderboard
             })
     
-    # Sort by league name, then by matchday (descending - most recent first)
-    result.sort(key=lambda x: (x['league_name'], -x['matchday']))
+    # Sort by league name, then by matchday (handle string matchdays like "Current")
+    def sort_key(x):
+        league = x['league_name']
+        md = x['matchday']
+        # Convert matchday to number for sorting, use 9999 for non-numeric (will appear first when reversed)
+        try:
+            md_num = int(md) if md != "Current" else 9999
+        except (ValueError, TypeError):
+            md_num = 9999
+        return (league, -md_num)
+    
+    result.sort(key=sort_key)
     
     return result
 
