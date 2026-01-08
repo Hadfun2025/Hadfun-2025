@@ -1050,37 +1050,48 @@ export function TeamManagement({ currentUser, onBack }) {
             <Card>
               <CardHeader>
                 <CardTitle>{t.team.teamLeaderboard}</CardTitle>
-                <CardDescription>{t.team.privateToTeam}</CardDescription>
+                <CardDescription>
+                  {t.team.privateToTeam}
+                  <span className="block text-xs mt-1 text-gray-500">
+                    Scoring: 3 pts for matchday winner • 1 pt each if tied • 0 pts otherwise
+                  </span>
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                {/* League-Specific Leaderboards - One per matchday */}
+                {/* League-Specific Leaderboards with matchday columns */}
                 {teamLeaderboard.length === 0 ? (
                   <div className="text-center text-gray-500 py-8">
                     <p>No predictions yet. Be the first to predict!</p>
                   </div>
                 ) : (
-                  <div className="space-y-6">
+                  <div className="space-y-8">
                     {teamLeaderboard.map((leagueData) => (
-                      <div key={`${leagueData.league_name}-${leagueData.matchday}`} className="bg-white rounded-lg shadow-md border-2 border-indigo-200 overflow-hidden">
-                        {/* League + Matchday Header */}
+                      <div key={leagueData.league_name} className="bg-white rounded-lg shadow-md border-2 border-indigo-200 overflow-hidden">
+                        {/* League Header */}
                         <div className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white p-4">
                           <h3 className="text-xl font-bold flex items-center gap-2">
                             <Trophy className="h-6 w-6" />
-                            {leagueData.display_name || `${leagueData.league_name} - Matchday ${leagueData.matchday}`}
+                            {leagueData.league_name}
                           </h3>
                         </div>
 
-                        {/* League Leaderboard Table */}
+                        {/* League Leaderboard Table with Matchday Columns */}
                         <div className="overflow-x-auto">
-                          <table className="w-full border-collapse">
+                          <table className="w-full border-collapse min-w-max">
                             <thead>
                               <tr className="bg-gray-100 border-b-2 border-gray-300">
-                                <th className="text-left p-3 font-semibold w-16">#</th>
-                                <th className="text-left p-3 font-semibold">Player</th>
-                                <th className="text-center p-3 font-semibold w-20">Wins</th>
-                                <th className="text-center p-3 font-semibold w-24">Correct</th>
-                                <th className="text-center p-3 font-semibold w-24">Total</th>
-                                <th className="text-center p-3 font-semibold w-24">PTS</th>
+                                <th className="text-left p-2 sm:p-3 font-semibold w-10 sticky left-0 bg-gray-100 z-10">#</th>
+                                <th className="text-left p-2 sm:p-3 font-semibold min-w-[100px] sticky left-10 bg-gray-100 z-10">Player</th>
+                                <th className="text-center p-2 sm:p-3 font-semibold w-16 bg-indigo-100 border-l-2 border-indigo-300">
+                                  <span className="text-indigo-700">PTS</span>
+                                </th>
+                                {/* Matchday columns */}
+                                {leagueData.matchdays && leagueData.matchdays.map((md) => (
+                                  <th key={md} className="text-center p-2 sm:p-3 font-semibold w-14 text-xs">
+                                    <span className="block text-gray-500">MD</span>
+                                    <span className="text-gray-800">{md}</span>
+                                  </th>
+                                ))}
                               </tr>
                             </thead>
                             <tbody>
@@ -1091,23 +1102,73 @@ export function TeamManagement({ currentUser, onBack }) {
                                     currentUser && entry.username === currentUser.username ? 'bg-indigo-50 font-semibold' : ''
                                   }`}
                                 >
-                                  <td className="p-3 text-gray-600">
+                                  <td className="p-2 sm:p-3 text-gray-600 sticky left-0 bg-inherit z-10">
                                     {entry.rank === 1 ? '🥇' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : entry.rank}
                                   </td>
-                                  <td className="p-3 font-medium text-gray-900">
-                                    {entry.username}
+                                  <td className="p-2 sm:p-3 font-medium text-gray-900 sticky left-10 bg-inherit z-10">
+                                    <span className="whitespace-nowrap">{entry.username}</span>
                                     {currentUser && entry.username === currentUser.username && (
-                                      <span className="ml-2 text-xs bg-indigo-500 text-white px-2 py-0.5 rounded">You</span>
+                                      <span className="ml-1 text-xs bg-indigo-500 text-white px-1.5 py-0.5 rounded">You</span>
                                     )}
                                   </td>
-                                  <td className="p-3 text-center text-gray-700">{entry.matchday_wins}</td>
-                                  <td className="p-3 text-center text-green-600 font-medium">{entry.correct_predictions}</td>
-                                  <td className="p-3 text-center text-gray-700">{entry.total_predictions}</td>
-                                  <td className="p-3 text-center font-bold text-indigo-600 text-lg">{entry.total_points}</td>
+                                  <td className="p-2 sm:p-3 text-center font-bold text-indigo-700 text-lg bg-indigo-50 border-l-2 border-indigo-300">
+                                    {entry.total_points}
+                                  </td>
+                                  {/* Matchday scores */}
+                                  {leagueData.matchdays && leagueData.matchdays.map((md) => {
+                                    const mdScore = entry.matchday_scores?.[md];
+                                    const pts = mdScore?.points || 0;
+                                    const correct = mdScore?.correct || 0;
+                                    const total = mdScore?.total || 0;
+                                    const isWinner = mdScore?.is_winner;
+                                    const isTie = mdScore?.is_tie;
+                                    
+                                    return (
+                                      <td 
+                                        key={md} 
+                                        className={`p-2 sm:p-3 text-center text-sm ${
+                                          isWinner && !isTie ? 'bg-green-100' : 
+                                          isTie ? 'bg-yellow-50' : ''
+                                        }`}
+                                        title={`${correct}/${total} correct`}
+                                      >
+                                        {total > 0 ? (
+                                          <div className="flex flex-col items-center">
+                                            <span className={`font-bold ${
+                                              pts === 3 ? 'text-green-600' : 
+                                              pts === 1 ? 'text-yellow-600' : 
+                                              'text-gray-400'
+                                            }`}>
+                                              {pts === 3 ? '3★' : pts === 1 ? '1' : '-'}
+                                            </span>
+                                            <span className="text-xs text-gray-500">{correct}/{total}</span>
+                                          </div>
+                                        ) : (
+                                          <span className="text-gray-300">-</span>
+                                        )}
+                                      </td>
+                                    );
+                                  })}
                                 </tr>
                               ))}
                             </tbody>
                           </table>
+                        </div>
+                        
+                        {/* Legend */}
+                        <div className="px-4 py-2 bg-gray-50 border-t text-xs text-gray-500 flex flex-wrap gap-4">
+                          <span className="flex items-center gap-1">
+                            <span className="w-3 h-3 rounded bg-green-100 border border-green-300"></span>
+                            <span>3★ = Sole Winner</span>
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="w-3 h-3 rounded bg-yellow-50 border border-yellow-300"></span>
+                            <span>1 = Tied Winner</span>
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="text-gray-400">-</span>
+                            <span>= No win</span>
+                          </span>
                         </div>
                       </div>
                     ))}
