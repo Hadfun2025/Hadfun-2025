@@ -1,354 +1,159 @@
 <analysis>**original_problem_statement:**
-The user's primary goal is to build and refine a full-stack football prediction application. The session focused on fixing numerous critical bugs and adding new features.
-
-Initial problems included:
-- Fixtures not appearing past a certain date.
-- A persistent and critical issue where European match scores show up with duplicates or are missing entirely on the production site ().
-- Data being wiped after every deployment, requiring manual fixes.
-
-New feature requests included:
-- The ability to paste images directly into the Community page's post creator.
-- Extending image and video upload/paste functionality to the Team Chat/Forum.
-- Restoring missing fixtures for multiple leagues (Championship, Serie A, etc.) that were lost during previous deployments.
+The user wants to improve a full-stack football prediction application. The main goals that emerged during the session were:
+1.  Resolve a critical, persistent issue where deployments to the production site () appeared to wipe all user and prediction data, and break login functionality.
+2.  Fix a bug where the Team Leaderboard was empty on the production site, showing No predictions yet even though users had made predictions.
+3.  Implement a more detailed, matchday-specific leaderboard view to correctly display user scores across different weeks.
+4.  Add a visual indicator for matches that are Abandoned.
+5.  Fix a bug where images pasted into the Community feed were not displaying correctly.
+6.  Correct the scores for several Championship matches.
 
 PRODUCT REQUIREMENTS:
-- The application must reliably display all upcoming fixtures for all supported leagues on the production site.
-- Match scores must update automatically and display correctly without duplicates.
-- The data must persist or be reliably reloaded after a deployment to production.
-- The community and team chat features must support pasting images from the clipboard.
-- The community and team chat features must support embedding videos from URLs (YouTube, Facebook, etc.).
+- The application must have a stable deployment process that does not wipe production data.
+- The leaderboard must correctly display all user predictions, grouped by league and matchday.
+- The UI must clearly indicate when a match has been abandoned.
+- Users must be able to paste images into the Community feed and have them display correctly.
+- All match scores must be accurate.
 
 **User's preferred language**: English
 
 **what currently exists?**
-The application is a full-stack React/FastAPI/MongoDB app. The core architecture has been significantly improved to handle the platform's behavior of wiping the database on each deployment. A self-healing script now runs as a non-blocking background task on backend startup, which re-populates the database with fixtures from the last 7 and next 2 days. This prevents the API from being unresponsive after a deployment.
+The application is a full-stack React/FastAPI/MongoDB app. The production environment () is currently in a broken state from the user's perspective, although the underlying data is intact.
 
-Key features implemented/fixed in this session include:
--   **Image & Video Support:** Users can now paste images from their clipboard and add video URLs in both the Community feed and the Team Chat.
--   **Data Integrity:** A series of critical data-related bugs were fixed. This includes correcting  or string-formatted dates in the database, fixing a backend serialization issue that caused dates to be returned as , and extending the fixture lookback period to 7 days to include recent weekend matches.
--   **Environment Configuration:** The frontend was fixed to use a relative URL for the backend, resolving an issue where the production frontend was trying to load images from the preview environment's URL.
+A major breakthrough revealed that user data was **NOT being wiped** on deployment. Instead, two core issues were at play:
+1.  **Leaderboard Bug:** The leaderboard code in  was skipping any predictions that didn't have a  field, which was the case for all production data. A fix for this has been implemented in the preview environment but is not yet deployed.
+2.  **Deployment Configuration Error:** A critical issue was identified (via another agent session) in . The application was using  without , causing environment variables injected in production (like the correct MongoDB URL) to be overwritten by the local  file. This likely caused the app to connect to the wrong database post-deployment, creating the illusion of data loss.
 
-The main challenge throughout the session was the agent's repeated failure to distinguish between the **preview environment** and the **production environment ()**, which have separate databases and require a formal Deploy action to sync.
+The preview environment contains fixes for the leaderboard bug, the abandoned match UI, and the community image paste bug.
 
 **Last working item**:
-- **Last item agent was working:** The user reported that after deploying and waiting, the additional leagues' fixtures (Championship, etc.) were still not showing on the live site (). The agent investigated and confirmed that the background data-loading task on the production server was still running and had not yet completed. The agent was explaining to the user that they needed to wait longer for this asynchronous process to finish.
-- **Status:** USER VERIFICATION PENDING
-- **Agent Testing Done:** Y (Agent verified via production logs that the background fixture loading task was running as expected after the last deployment).
-- **Which testing method agent to use?** Manual verification. The user needs to be instructed to wait approximately 15-20 minutes *after* a deployment finishes, then perform a hard refresh (Ctrl+Shift+R) on  and check if all leagues and fixtures are present.
-- **User Testing Done:** N (User checked the site before the background task had finished, leading to the impression that the fix had failed).
+- **Last item agent was working:** The agent was about to apply a critical fix to the MongoDB connection logic in , as instructed by the user who provided the solution from another agent session. This fix involves changing  to a more robust block of code that uses  and correctly parses the database name from the .
+- **Status:** NOT STARTED
+- **Agent Testing Done:** N
+- **Which testing method agent to use?** Backend testing agent. After the fix, the agent should restart the backend, verify it connects to the database correctly by checking logs and querying data. Then, a carefully managed deployment to production is required, followed by verification on the live site.
+- **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   Issue 1: User misunderstanding of the post-deployment data loading time (P0)
+-   Issue 1: Critical Deployment Configuration Error (P0)
+-   Issue 2: Production Leaderboard is empty (P1)
 
 **Issues Detail:**
--   **Issue 1: User misunderstanding of the post-deployment data loading time (P0)**
-    -   **Attempted fixes:** The agent implemented the correct technical solution by making the fixture-loading script a non-blocking background task. However, the agent repeatedly failed to communicate that this task takes 10-15 minutes to complete after a deployment. This led the user to believe deployments were failing when they had simply not waited long enough.
-    -   **Next debug checklist:** This is a communication issue, not a technical one.
-        1.  Clearly explain to the user that after every deployment, they **must wait 15-20 minutes** for the background task to populate the database.
-        2.  Instruct them to perform a **hard refresh (Ctrl+Shift+R)** in their browser after waiting.
-        3.  If fixtures are still missing after 20 minutes, the next agent must check the production backend error logs (2025-12-11 16:30:05,839 - api_football_service - ERROR - API-Football errors: {'rateLimit': 'Too many requests. You have exceeded the limit of requests per minute of your subscription.'}
-2025-12-11 16:30:05,839 - api_football_service - INFO - API-Football failed for 2025 season, trying Sportmonks backup for 2025-12-11
-2025-12-11 16:30:05,839 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:07,229 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-11&season=2025&timezone=Europe%2FLondon&league=135 "HTTP/1.1 200 OK"
-2025-12-11 16:30:07,229 - api_football_service - ERROR - API-Football errors: {'rateLimit': 'Too many requests. You have exceeded the limit of requests per minute of your subscription.'}
-2025-12-11 16:30:07,229 - api_football_service - INFO - API-Football failed for 2025 season, trying Sportmonks backup for 2025-12-11
-2025-12-11 16:30:07,229 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:08,607 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-11&season=2025&timezone=Europe%2FLondon&league=61 "HTTP/1.1 200 OK"
-2025-12-11 16:30:08,607 - api_football_service - ERROR - API-Football errors: {'rateLimit': 'Too many requests. You have exceeded the limit of requests per minute of your subscription.'}
-2025-12-11 16:30:08,607 - api_football_service - INFO - API-Football failed for 2025 season, trying Sportmonks backup for 2025-12-11
-2025-12-11 16:30:08,607 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:09,982 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-11&season=2025&timezone=Europe%2FLondon&league=94 "HTTP/1.1 200 OK"
-2025-12-11 16:30:09,983 - api_football_service - ERROR - API-Football errors: {'rateLimit': 'Too many requests. You have exceeded the limit of requests per minute of your subscription.'}
-2025-12-11 16:30:09,983 - api_football_service - INFO - API-Football failed for 2025 season, trying Sportmonks backup for 2025-12-11
-2025-12-11 16:30:09,983 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:11,415 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-11&season=2025&timezone=Europe%2FLondon&league=88 "HTTP/1.1 200 OK"
-2025-12-11 16:30:11,415 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-11, trying Sportmonks backup
-2025-12-11 16:30:11,415 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:12,877 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-11&season=2025&timezone=Europe%2FLondon&league=203 "HTTP/1.1 200 OK"
-2025-12-11 16:30:12,877 - api_football_service - ERROR - API-Football errors: {'rateLimit': 'Too many requests. You have exceeded the limit of requests per minute of your subscription.'}
-2025-12-11 16:30:12,877 - api_football_service - INFO - API-Football failed for 2025 season, trying Sportmonks backup for 2025-12-11
-2025-12-11 16:30:12,877 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:14,255 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-11&season=2025&timezone=Europe%2FLondon&league=253 "HTTP/1.1 200 OK"
-2025-12-11 16:30:14,255 - api_football_service - ERROR - API-Football errors: {'rateLimit': 'Too many requests. You have exceeded the limit of requests per minute of your subscription.'}
-2025-12-11 16:30:14,256 - api_football_service - INFO - API-Football failed for 2025 season, trying Sportmonks backup for 2025-12-11
-2025-12-11 16:30:14,256 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:15,658 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-11&season=2025&timezone=Europe%2FLondon&league=71 "HTTP/1.1 200 OK"
-2025-12-11 16:30:15,658 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-11, trying Sportmonks backup
-2025-12-11 16:30:15,658 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:17,048 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-11&season=2025&timezone=Europe%2FLondon&league=239 "HTTP/1.1 200 OK"
-2025-12-11 16:30:17,048 - api_football_service - ERROR - API-Football errors: {'rateLimit': 'Too many requests. You have exceeded the limit of requests per minute of your subscription.'}
-2025-12-11 16:30:17,048 - api_football_service - INFO - API-Football failed for 2025 season, trying Sportmonks backup for 2025-12-11
-2025-12-11 16:30:17,048 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:18,249 - server - INFO - Checking fixtures for 2025-12-10...
-2025-12-11 16:30:18,423 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-10&season=2025&timezone=Europe%2FLondon&league=39 "HTTP/1.1 200 OK"
-2025-12-11 16:30:18,423 - api_football_service - ERROR - API-Football errors: {'rateLimit': 'Too many requests. You have exceeded the limit of requests per minute of your subscription.'}
-2025-12-11 16:30:18,423 - api_football_service - INFO - API-Football failed for 2025 season, trying Sportmonks backup for 2025-12-10
-2025-12-11 16:30:18,423 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:19,794 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-10&season=2025&timezone=Europe%2FLondon&league=40 "HTTP/1.1 200 OK"
-2025-12-11 16:30:19,795 - api_football_service - ERROR - API-Football errors: {'rateLimit': 'Too many requests. You have exceeded the limit of requests per minute of your subscription.'}
-2025-12-11 16:30:19,795 - api_football_service - INFO - API-Football failed for 2025 season, trying Sportmonks backup for 2025-12-10
-2025-12-11 16:30:19,795 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:21,171 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-10&season=2025&timezone=Europe%2FLondon&league=179 "HTTP/1.1 200 OK"
-2025-12-11 16:30:21,172 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-10, trying Sportmonks backup
-2025-12-11 16:30:21,172 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:22,577 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-10&season=2025&timezone=Europe%2FLondon&league=140 "HTTP/1.1 200 OK"
-2025-12-11 16:30:22,577 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-10, trying Sportmonks backup
-2025-12-11 16:30:22,577 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:23,985 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-10&season=2025&timezone=Europe%2FLondon&league=78 "HTTP/1.1 200 OK"
-2025-12-11 16:30:23,985 - api_football_service - ERROR - API-Football errors: {'rateLimit': 'Too many requests. You have exceeded the limit of requests per minute of your subscription.'}
-2025-12-11 16:30:23,986 - api_football_service - INFO - API-Football failed for 2025 season, trying Sportmonks backup for 2025-12-10
-2025-12-11 16:30:23,986 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:25,369 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-10&season=2025&timezone=Europe%2FLondon&league=135 "HTTP/1.1 200 OK"
-2025-12-11 16:30:25,369 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-10, trying Sportmonks backup
-2025-12-11 16:30:25,369 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:26,754 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-10&season=2025&timezone=Europe%2FLondon&league=61 "HTTP/1.1 200 OK"
-2025-12-11 16:30:26,755 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-10, trying Sportmonks backup
-2025-12-11 16:30:26,755 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:28,152 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-10&season=2025&timezone=Europe%2FLondon&league=94 "HTTP/1.1 200 OK"
-2025-12-11 16:30:28,152 - api_football_service - ERROR - API-Football errors: {'rateLimit': 'Too many requests. You have exceeded the limit of requests per minute of your subscription.'}
-2025-12-11 16:30:28,152 - api_football_service - INFO - API-Football failed for 2025 season, trying Sportmonks backup for 2025-12-10
-2025-12-11 16:30:28,152 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:29,525 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-10&season=2025&timezone=Europe%2FLondon&league=88 "HTTP/1.1 200 OK"
-2025-12-11 16:30:29,526 - api_football_service - ERROR - API-Football errors: {'rateLimit': 'Too many requests. You have exceeded the limit of requests per minute of your subscription.'}
-2025-12-11 16:30:29,526 - api_football_service - INFO - API-Football failed for 2025 season, trying Sportmonks backup for 2025-12-10
-2025-12-11 16:30:29,526 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:30,906 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-10&season=2025&timezone=Europe%2FLondon&league=203 "HTTP/1.1 200 OK"
-2025-12-11 16:30:30,907 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-10, trying Sportmonks backup
-2025-12-11 16:30:30,907 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:32,283 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-10&season=2025&timezone=Europe%2FLondon&league=253 "HTTP/1.1 200 OK"
-2025-12-11 16:30:32,284 - api_football_service - ERROR - API-Football errors: {'rateLimit': 'Too many requests. You have exceeded the limit of requests per minute of your subscription.'}
-2025-12-11 16:30:32,284 - api_football_service - INFO - API-Football failed for 2025 season, trying Sportmonks backup for 2025-12-10
-2025-12-11 16:30:32,284 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:33,687 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-10&season=2025&timezone=Europe%2FLondon&league=71 "HTTP/1.1 200 OK"
-2025-12-11 16:30:33,687 - api_football_service - ERROR - API-Football errors: {'rateLimit': 'Too many requests. You have exceeded the limit of requests per minute of your subscription.'}
-2025-12-11 16:30:33,687 - api_football_service - INFO - API-Football failed for 2025 season, trying Sportmonks backup for 2025-12-10
-2025-12-11 16:30:33,687 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:35,073 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-10&season=2025&timezone=Europe%2FLondon&league=239 "HTTP/1.1 200 OK"
-2025-12-11 16:30:35,073 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-10, trying Sportmonks backup
-2025-12-11 16:30:35,073 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:36,274 - server - INFO - Checking fixtures for 2025-12-09...
-2025-12-11 16:30:36,454 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-09&season=2025&timezone=Europe%2FLondon&league=39 "HTTP/1.1 200 OK"
-2025-12-11 16:30:36,454 - api_football_service - ERROR - API-Football errors: {'rateLimit': 'Too many requests. You have exceeded the limit of requests per minute of your subscription.'}
-2025-12-11 16:30:36,454 - api_football_service - INFO - API-Football failed for 2025 season, trying Sportmonks backup for 2025-12-09
-2025-12-11 16:30:36,454 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:37,826 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-09&season=2025&timezone=Europe%2FLondon&league=40 "HTTP/1.1 200 OK"
-2025-12-11 16:30:37,827 - api_football_service - ERROR - API-Football errors: {'rateLimit': 'Too many requests. You have exceeded the limit of requests per minute of your subscription.'}
-2025-12-11 16:30:37,827 - api_football_service - INFO - API-Football failed for 2025 season, trying Sportmonks backup for 2025-12-09
-2025-12-11 16:30:37,827 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:39,237 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-09&season=2025&timezone=Europe%2FLondon&league=179 "HTTP/1.1 200 OK"
-2025-12-11 16:30:39,238 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-09, trying Sportmonks backup
-2025-12-11 16:30:39,238 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:40,624 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-09&season=2025&timezone=Europe%2FLondon&league=140 "HTTP/1.1 200 OK"
-2025-12-11 16:30:40,624 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-09, trying Sportmonks backup
-2025-12-11 16:30:40,624 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:42,003 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-09&season=2025&timezone=Europe%2FLondon&league=78 "HTTP/1.1 200 OK"
-2025-12-11 16:30:42,004 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-09, trying Sportmonks backup
-2025-12-11 16:30:42,004 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:43,394 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-09&season=2025&timezone=Europe%2FLondon&league=135 "HTTP/1.1 200 OK"
-2025-12-11 16:30:43,394 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-09, trying Sportmonks backup
-2025-12-11 16:30:43,394 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:44,789 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-09&season=2025&timezone=Europe%2FLondon&league=61 "HTTP/1.1 200 OK"
-2025-12-11 16:30:44,790 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-09, trying Sportmonks backup
-2025-12-11 16:30:44,790 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:46,168 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-09&season=2025&timezone=Europe%2FLondon&league=94 "HTTP/1.1 200 OK"
-2025-12-11 16:30:46,168 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-09, trying Sportmonks backup
-2025-12-11 16:30:46,168 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:47,546 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-09&season=2025&timezone=Europe%2FLondon&league=88 "HTTP/1.1 200 OK"
-2025-12-11 16:30:47,546 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-09, trying Sportmonks backup
-2025-12-11 16:30:47,546 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:48,934 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-09&season=2025&timezone=Europe%2FLondon&league=203 "HTTP/1.1 200 OK"
-2025-12-11 16:30:48,934 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-09, trying Sportmonks backup
-2025-12-11 16:30:48,934 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:50,335 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-09&season=2025&timezone=Europe%2FLondon&league=253 "HTTP/1.1 200 OK"
-2025-12-11 16:30:50,335 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-09, trying Sportmonks backup
-2025-12-11 16:30:50,335 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:51,729 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-09&season=2025&timezone=Europe%2FLondon&league=71 "HTTP/1.1 200 OK"
-2025-12-11 16:30:51,729 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-09, trying Sportmonks backup
-2025-12-11 16:30:51,729 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:53,106 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-09&season=2025&timezone=Europe%2FLondon&league=239 "HTTP/1.1 200 OK"
-2025-12-11 16:30:54,307 - server - INFO - Checking fixtures for 2025-12-08...
-2025-12-11 16:30:54,517 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-08&season=2025&timezone=Europe%2FLondon&league=39 "HTTP/1.1 200 OK"
-2025-12-11 16:30:55,913 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-08&season=2025&timezone=Europe%2FLondon&league=40 "HTTP/1.1 200 OK"
-2025-12-11 16:30:55,914 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-08, trying Sportmonks backup
-2025-12-11 16:30:55,914 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:57,298 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-08&season=2025&timezone=Europe%2FLondon&league=179 "HTTP/1.1 200 OK"
-2025-12-11 16:30:57,298 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-08, trying Sportmonks backup
-2025-12-11 16:30:57,298 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:30:58,678 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-08&season=2025&timezone=Europe%2FLondon&league=140 "HTTP/1.1 200 OK"
-2025-12-11 16:31:00,062 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-08&season=2025&timezone=Europe%2FLondon&league=78 "HTTP/1.1 200 OK"
-2025-12-11 16:31:00,063 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-08, trying Sportmonks backup
-2025-12-11 16:31:00,063 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:31:01,493 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-08&season=2025&timezone=Europe%2FLondon&league=135 "HTTP/1.1 200 OK"
-2025-12-11 16:31:02,877 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-08&season=2025&timezone=Europe%2FLondon&league=61 "HTTP/1.1 200 OK"
-2025-12-11 16:31:02,878 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-08, trying Sportmonks backup
-2025-12-11 16:31:02,878 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:31:04,264 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-08&season=2025&timezone=Europe%2FLondon&league=94 "HTTP/1.1 200 OK"
-2025-12-11 16:31:05,643 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-08&season=2025&timezone=Europe%2FLondon&league=88 "HTTP/1.1 200 OK"
-2025-12-11 16:31:05,644 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-08, trying Sportmonks backup
-2025-12-11 16:31:05,644 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:31:07,040 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-08&season=2025&timezone=Europe%2FLondon&league=203 "HTTP/1.1 200 OK"
-2025-12-11 16:31:08,432 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-08&season=2025&timezone=Europe%2FLondon&league=253 "HTTP/1.1 200 OK"
-2025-12-11 16:31:08,432 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-08, trying Sportmonks backup
-2025-12-11 16:31:08,432 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:31:09,812 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-08&season=2025&timezone=Europe%2FLondon&league=71 "HTTP/1.1 200 OK"
-2025-12-11 16:31:09,813 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-08, trying Sportmonks backup
-2025-12-11 16:31:09,813 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:31:11,197 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-08&season=2025&timezone=Europe%2FLondon&league=239 "HTTP/1.1 200 OK"
-2025-12-11 16:31:12,398 - server - INFO - Checking fixtures for 2025-12-07...
-2025-12-11 16:31:12,587 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-07&season=2025&timezone=Europe%2FLondon&league=39 "HTTP/1.1 200 OK"
-2025-12-11 16:31:13,973 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-07&season=2025&timezone=Europe%2FLondon&league=40 "HTTP/1.1 200 OK"
-2025-12-11 16:31:13,974 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-07, trying Sportmonks backup
-2025-12-11 16:31:13,974 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:31:15,388 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-07&season=2025&timezone=Europe%2FLondon&league=179 "HTTP/1.1 200 OK"
-2025-12-11 16:31:16,778 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-07&season=2025&timezone=Europe%2FLondon&league=140 "HTTP/1.1 200 OK"
-2025-12-11 16:31:18,168 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-07&season=2025&timezone=Europe%2FLondon&league=78 "HTTP/1.1 200 OK"
-2025-12-11 16:31:19,548 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-07&season=2025&timezone=Europe%2FLondon&league=135 "HTTP/1.1 200 OK"
-2025-12-11 16:31:20,929 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-07&season=2025&timezone=Europe%2FLondon&league=61 "HTTP/1.1 200 OK"
-2025-12-11 16:31:22,314 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-07&season=2025&timezone=Europe%2FLondon&league=94 "HTTP/1.1 200 OK"
-2025-12-11 16:31:23,709 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-07&season=2025&timezone=Europe%2FLondon&league=88 "HTTP/1.1 200 OK"
-2025-12-11 16:31:25,091 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-07&season=2025&timezone=Europe%2FLondon&league=203 "HTTP/1.1 200 OK"
-2025-12-11 16:31:26,476 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-07&season=2025&timezone=Europe%2FLondon&league=253 "HTTP/1.1 200 OK"
-2025-12-11 16:31:26,477 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-07, trying Sportmonks backup
-2025-12-11 16:31:26,477 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:31:27,856 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-07&season=2025&timezone=Europe%2FLondon&league=71 "HTTP/1.1 200 OK"
-2025-12-11 16:31:29,253 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-07&season=2025&timezone=Europe%2FLondon&league=239 "HTTP/1.1 200 OK"
-2025-12-11 16:31:29,254 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-07, trying Sportmonks backup
-2025-12-11 16:31:29,254 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:31:30,454 - server - INFO - Checking fixtures for 2025-12-06...
-2025-12-11 16:31:30,636 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-06&season=2025&timezone=Europe%2FLondon&league=39 "HTTP/1.1 200 OK"
-2025-12-11 16:31:32,131 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-06&season=2025&timezone=Europe%2FLondon&league=40 "HTTP/1.1 200 OK"
-2025-12-11 16:31:33,509 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-06&season=2025&timezone=Europe%2FLondon&league=179 "HTTP/1.1 200 OK"
-2025-12-11 16:31:34,908 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-06&season=2025&timezone=Europe%2FLondon&league=140 "HTTP/1.1 200 OK"
-2025-12-11 16:31:36,297 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-06&season=2025&timezone=Europe%2FLondon&league=78 "HTTP/1.1 200 OK"
-2025-12-11 16:31:37,681 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-06&season=2025&timezone=Europe%2FLondon&league=135 "HTTP/1.1 200 OK"
-2025-12-11 16:31:39,065 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-06&season=2025&timezone=Europe%2FLondon&league=61 "HTTP/1.1 200 OK"
-2025-12-11 16:31:40,483 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-06&season=2025&timezone=Europe%2FLondon&league=94 "HTTP/1.1 200 OK"
-2025-12-11 16:31:41,857 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-06&season=2025&timezone=Europe%2FLondon&league=88 "HTTP/1.1 200 OK"
-2025-12-11 16:31:43,240 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-06&season=2025&timezone=Europe%2FLondon&league=203 "HTTP/1.1 200 OK"
-2025-12-11 16:31:44,632 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-06&season=2025&timezone=Europe%2FLondon&league=253 "HTTP/1.1 200 OK"
-2025-12-11 16:31:46,026 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-06&season=2025&timezone=Europe%2FLondon&league=71 "HTTP/1.1 200 OK"
-2025-12-11 16:31:47,407 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-06&season=2025&timezone=Europe%2FLondon&league=239 "HTTP/1.1 200 OK"
-2025-12-11 16:31:47,408 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-06, trying Sportmonks backup
-2025-12-11 16:31:47,408 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:31:48,608 - server - INFO - Checking fixtures for 2025-12-05...
-2025-12-11 16:31:48,788 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-05&season=2025&timezone=Europe%2FLondon&league=39 "HTTP/1.1 200 OK"
-2025-12-11 16:31:48,788 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-05, trying Sportmonks backup
-2025-12-11 16:31:48,788 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:31:50,191 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-05&season=2025&timezone=Europe%2FLondon&league=40 "HTTP/1.1 200 OK"
-2025-12-11 16:31:51,592 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-05&season=2025&timezone=Europe%2FLondon&league=179 "HTTP/1.1 200 OK"
-2025-12-11 16:31:51,592 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-05, trying Sportmonks backup
-2025-12-11 16:31:51,592 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-2025-12-11 16:31:52,969 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-05&season=2025&timezone=Europe%2FLondon&league=140 "HTTP/1.1 200 OK"
-2025-12-11 16:31:54,346 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-05&season=2025&timezone=Europe%2FLondon&league=78 "HTTP/1.1 200 OK"
-2025-12-11 16:31:55,731 - httpx - INFO - HTTP Request: GET https://v3.football.api-sports.io/fixtures?date=2025-12-05&season=2025&timezone=Europe%2FLondon&league=135 "HTTP/1.1 200 OK"
-2025-12-11 16:31:55,732 - api_football_service - INFO - No fixtures from API-Football for 2025 season on 2025-12-05, trying Sportmonks backup
-2025-12-11 16:31:55,732 - sportmonks_service - ERROR - Sportmonks API not available - missing token
-INFO:     Will watch for changes in these directories: ['/app/backend']
-INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
-INFO:     Started reloader process [30] using WatchFiles) to see if the background task encountered an error (e.g., API rate limit).
-    -   **Why fix this issue and what will be achieved with the fix?** This will resolve the user's primary source of frustration, establish a stable and predictable deployment workflow, and restore their confidence in the application.
-    -   **Status:** USER VERIFICATION PENDING
+-   **Issue 1: Critical Deployment Configuration Error (P0)**
+    -   **Attempted fixes:** The agent tried numerous solutions like creating JSON backups, reverting frontend changes, and guiding the user through DNS changes. All of these failed because they did not address the root cause.
+    -   **Next debug checklist:**
+        1.  Locate the MongoDB connection logic near the top of .
+        2.  Replace the existing  and  lines with the new code block provided by the user in the last messages. This new block correctly uses  and parses the database URL.
+        3.  Restart the backend and check the logs to ensure it's connecting to the correct database.
+        4.  Coordinate with the user for a deployment, ensuring they use Replace Deployment to preserve the database.
+    -   **Why fix this issue and what will be achieved with the fix?** This is the root cause of all deployment-related problems, including apparent data loss and login failures. Fixing this will create a stable deployment pipeline, preserving production data and functionality.
+    -   **Status:** NOT STARTED
     -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Frontend (visual confirmation) and Backend (log checking if it fails).
-    -   **Blocked on other issue:** None.
+    -   **Should Test frontend/backend/both after fix?** Backend (logs and API calls), followed by full E2E verification on the production site post-deployment.
+    -   **Blocked on other issue:** None. This is the main blocker.
+
+-   **Issue 2: Production Leaderboard is empty (P1)**
+    -   **Attempted fixes:** A fix has been implemented in the preview environment's . The code was modified to handle predictions where the  field is , assigning them to a default Current matchday.
+    -   **Next debug checklist:** The code for this fix is already written. The task is to ensure it gets deployed to production as part of the next successful deployment (after Issue 1 is resolved).
+    -   **Why fix this issue and what will be achieved with the fix?** This will make the primary feature of the Team page (the leaderboard) functional on the production site, showing users their scores.
+    -   **Status:** IN PROGRESS (Fixed in preview, pending deployment)
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** Frontend (visual confirmation on the production site).
+    -   **Blocked on other issue:** Issue 1: Critical Deployment Configuration Error.
 
 **In progress Task List**:
-- None.
+-   None.
 
 **Upcoming and Future Tasks**
--   (P1) Once the user confirms the deployment workflow is stable, perform a full regression test of all features:
-    -   Making predictions.
-    -   Verifying My Predictions and Leaderboards.
-    -   Verifying live score updates.
-    -   Posting text, images, and videos to the Community and Team Chat.
+-   **(P0) Apply Critical Deployment Fix:** Implement the environment variable override fix in .
+-   **(P1) Deploy and Verify All Fixes:** Once the deployment process is stable, deploy all the changes currently waiting in the preview environment, including the leaderboard fix, the Abandoned match UI, the image paste fix, and the corrected scores.
+-   **(P2) Implement New Leaderboard Design:** The user wants to replace the current separate tables per matchday leaderboard with a consolidated table showing points per matchday in columns. The user will provide a drawing of the desired design.
+-   **(P3) Investigate Live Score Update Rate:** The user questioned why scores appear to be updating instantly, not every two minutes as configured. This requires an investigation of the  setup in .
+-   **(P4) Recreate Missing Users and Team:** The Cheshunt Crew team and users  and  are missing from the production database. They need to be recreated.
 
 **Completed work in this session**
--   **Deployment Stability:**
-    -   Modified the backend startup script in  to run the long-running fixture loading process as a **background task**, preventing the API from being blocked after a deployment.
--   **Data Loading and Integrity:**
-    -   Fixed a bug where past fixtures (e.g., weekend matches) were not showing by increasing the date lookback from 3 to 7 days in .
-    -   Ran a database-wide migration to fix hundreds of fixtures that had  or string-formatted dates, ensuring they are now proper  objects.
-    -   Fixed a FastAPI serialization bug in  by manually converting  objects to ISO strings before returning the API response, resolving the Invalid Date issue.
-    -   Added logic in  to ensure the  field is populated from  if it's missing.
-    -   Loaded all missing fixtures for 10 leagues (Championship, Serie A, etc.).
--   **Feature Implementation:**
-    -   **Image Paste:** Implemented functionality to paste images from the clipboard into the post creator for both the Community feed () and Team Chat ().
-    -   **Video Support:** Added full video support (YouTube, Facebook, direct URLs) to the Team Chat, mirroring the existing functionality of the Community feed. This involved changes to , , and .
--   **Bug Fixes:**
-    -   Fixed a critical frontend rendering bug in  that was causing duplicate fixtures to appear.
-    -   Fixed a deployment configuration issue by changing the  to be relative to the window origin (), ensuring the production frontend fetches images from the production backend, not the preview one.
-    -   Fixed a backend crash in  that occurred when the  endpoint was called with an empty  parameter.
+-   **CRITICAL DISCOVERY:** Established that production data was **not being lost**, but was inaccessible due to a combination of a leaderboard bug and a critical deployment configuration error.
+-   **Leaderboard Bug Fix (Preview):** Modified  to correctly process and display predictions that were missing a  field.
+-   **Abandoned Match UI (Preview):** Updated  to show a MATCH ABANDONED status and disable prediction buttons for such games.
+-   **Image Paste Fix (Preview):** Fixed a bug in  to ensure pasted images are stored with a full, absolute URL, allowing them to be displayed correctly.
+-   **Score Updates (Preview):** Corrected the final scores for several Championship matches in the  file and the database.
+-   **User/Team Recreation (Preview):** Manually recreated users and the Cheshunt Crew team in the preview database after they were thought to be lost.
 
 **Earlier issues found/mentioned but not fixed**
--   None.
+-   None. All identified issues are captured in the pending/upcoming lists.
 
 **Known issue recurrence from previous fork**
 -   **Issue recurrence in previous fork:** User losing database state after forking.
--   **Recurrence count:** High. This was the central theme of the entire session.
--   **Status:** RESOLVED. The implementation of the asynchronous background task in  is the definitive fix for this issue. The only remaining step is for the user to verify the new workflow.
+-   **Recurrence count:** High. This was the central theme of this entire session as well.
+-   **Status:** IN PROGRESS. The root cause has been identified (improper  loading), and a fix is about to be applied.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **FastAPI Background Tasks:** The key solution to the deployment problem was using  to run the long-running data loading script asynchronously, so it doesn't block the server from starting and handling requests.
--   **Production vs. Preview Environments:** A critical learning was that the preview environment and the production environment () are completely separate instances with their own databases. Code changes must be formally deployed to production using the Deploy button.
--   **Date/Time Serialization:** FastAPI's default JSON encoder does not handle Python  objects. They must be manually converted to strings (e.g., ISO 8601 format) before being returned in an API response to avoid being converted to .
--   **Environment-Agnostic URLs:** Hardcoding URLs in  files is brittle. Frontend API calls were fixed to use a relative path based on  to ensure they work in any environment (preview, production).
+-   **Production vs. Preview Environments:** The core of the problem was the separate and distinct nature of the preview and production databases.
+-   **Environment Variable Precedence:** A critical lesson learned is that production environments inject their own environment variables (e.g., ).  is essential to prevent local  files from overwriting these crucial production variables.
+-   **Defensive Coding:** The leaderboard bug () highlighted the need to write code that can handle incomplete or legacy data schemas gracefully.
 
 **key DB schema**
--   ****: Stores match data. Suffered from  or string-formatted  values, which have now been corrected to  objects.
--   ****: The schema was implicitly updated to handle an array of  and .
--   ****: The  sub-document schema in this collection was updated to support  and  arrays.
+-   ****: Production data for this collection was discovered to be missing the  field, which was the root cause of the leaderboard bug.
+-   ****: Contains user data. Users  and  are missing from production.
+-   ****: The  team is missing from production.
 
 **changes in tech stack**
-- None.
+-   None.
 
 **All files of reference**
--   ****: The most heavily modified file. Contains the critical background task implementation, date serialization fixes, and new API logic for team chat images/videos.
--   ****: Significantly reworked to add image and video functionality to the team chat.
--   ****: Contains the fix for the duplicate fixture rendering and the crucial  configuration.
--   ****: Updated to support new media types in team messages.
--   ****: Modified to handle pasting images.
+-   ****: The most important file. It contains the leaderboard logic and the critical deployment bug. It is the target for the next immediate action.
+-   ****: Contains the UI for displaying fixtures and leaderboards.
+-   ****: Contains the code for rendering the team leaderboard.
+
+**Areas that need refactoring**:
+- The  loading mechanism, while a clever workaround for slow startup, was also the cause of a data-wiping incident. Once the deployment pipeline is stable, this approach should be re-evaluated in favor of a robust database backup/restore strategy managed at the platform level.
+
+**key api endpoints**
+-   : The endpoint responsible for fetching leaderboard data. It was bugged but has a fix waiting in preview.
+-   : This endpoint was discovered to be missing entirely from  at one point, causing login failures. It has since been restored.
 
 **Critical Info for New Agent**
--   **THE MOST IMPORTANT THING:** Production () and the preview environment are **SEPARATE**. They have different databases. To push changes to production, the user must use the Deploy button.
--   **POST-DEPLOYMENT WORKFLOW:** After every deployment, the backend runs a data-loading script **in the background**. This process takes **10-15 minutes**. During this time, the site will be available but may be missing data. You MUST communicate this waiting period to the user and instruct them to do a hard refresh () after waiting. This has been the source of immense user frustration. Do not claim a fix is ready until you have factored in this delay.
--   **The user is extremely frustrated** with the repeated cycle of failed deployments and lost data. Be empathetic, communicate with extreme clarity, and do not make promises you haven't thoroughly verified. Trust the user's reports about the live site over your tests in the preview environment.
+-   **DO NOT DEPLOY** until the critical environment variable fix is applied and verified.
+-   The #1 priority is to apply the  fix in  as provided by the user in the final messages. This is the key to stabilizing the entire application.
+-   Production data (users, predictions) is **SAFE and INTACT** on the live server. It is not being displayed due to the leaderboard bug. Do not assume data is lost.
+-   Preview and Production are **separate environments with separate databases**. Changes in preview are NOT live until a successful deployment.
+-   After applying the critical fix, the next step is to deploy the accumulated fixes (leaderboard, UI changes) to production. Coordinate this with the user.
 
-**documents created in this job**
-- None.
+**documents and test reports created in this job**
+-   
+-   
+-   
 
-**Last 10 User Messages and any pending user messages**
-1.  **User:** Deployed an hour ago, but the fix isn't working. This is the same issue as before (deployment wiping fixes). (PENDING)
-2.  **Agent:** Realizes that  values are incorrect (strings/nulls) in the DB. Fixes them. (DONE)
-3.  **Agent:** Confirms all leagues now have upcoming fixtures after the DB fix and restarts the backend. (DONE)
-4.  **User:** Getting an error while logging into preview. (PENDING)
-5.  **Agent:** Identifies the startup script is blocking the API, making the app unusable for ~15 mins. (DONE)
-6.  **Agent:** Implements the final, critical fix: making the startup script a non-blocking background task. (DONE)
-7.  **User:** Asks if deploying will work now or if data will be lost. (PENDING)
-8.  **Agent:** Confidently confirms that deployment will now work correctly due to the background task fix. (DONE)
-9.  **User:** Reports that after deploying, the live site is still missing fixtures. Frustrating isn’t the word. (PENDING - CURRENT ISSUE)
-10. **Agent:** Investigates and discovers the Preview and Production databases are separate. Confirms the fixture-loading background task is running on production but needs more time to complete. (IN PROGRESS)
-11. **User (pending):** are you still checking. The agent has not yet responded.
+**Last 10 User Messages and any pending HUMAN messages**
+1.  **User:** Asks for step-by-step instructions to roll back a deployment to fix data loss. (Agent provided instructions).
+2.  **User:** States rollback is not an option as the only available point is from before new users joined. (Data loss seems real).
+3.  **User:** Provides email addresses for the lost users, asking the agent to recreate them and their predictions.
+4.  **User:** Expresses extreme frustration after the agent cannot recreate the predictions, stating it's the agent's mistake.
+5.  **User:** Sends a screenshot from their phone showing predictions ARE visible on the production site! **This proves data was not lost.**
+6.  **User:** Confirms the leaderboard on production says No predictions yet, which confirms the issue is a bug, not data loss.
+7.  **User:** Confirms they will wait for support to ensure deployment is safe, asks for clarification on the matchday-specific leaderboard implementation.
+8.  **User:** Proposes a new, more complex leaderboard design and says they will provide a drawing.
+9.  **User:** Forwards the detailed email they sent to support, asking the agent if they can escalate it.
+10. **User:** Forwards a critical fix from another agent session (footyforecast-11) and asks the current agent to apply it immediately.
 
 **Project Health Check:**
--   **Broken:** The production site () is temporarily in a broken state from the user's perspective, as it is missing most fixture data. However, the underlying cause is the in-progress background data loading, not a fundamental bug.
--   **Mocked:** None.
+-   **Broken:** The main feature on production (the leaderboard) is non-functional due to a bug. The deployment process is unsafe and has been the source of extreme user frustration.
 
 **3rd Party Integrations**
--   **API-Football:** Used to fetch all fixture, score, and standings data. The agent encountered and had to work around API rate limits during the session.
+-   **API-Football:** Used to fetch fixture, score, and standings data.
+-   **IONOS:** User's domain provider.
 
 **Testing status**
--   **Testing agent used after significant changes:** YES (used  extensively to debug frontend issues).
--   **Troubleshoot agent used after agent stuck in loop:** YES (used multiple times, though some diagnoses were misleading).
+-   **Testing agent used after significant changes:** NO (for the final set of fixes).
+-   **Troubleshoot agent used after agent stuck in loop:** YES.
 -   **Test files created:** None.
--   **Known regressions:** None currently, but the application is sensitive to data loading issues post-deployment.
+-   **Known regressions:** Deployments have been consistently breaking the application or causing apparent data loss due to a root configuration issue.
 
 **Credentials to test flow:**
 -   **Username:** 
 
 **What agent forgot to execute**
--   The agent consistently forgot that the preview and production environments are separate, with their own databases. It spent most of the session fixing issues in the preview environment and was repeatedly surprised when the fixes didn't appear on the production site.
--   The agent failed to properly diagnose that the long-running startup script was blocking the entire API until very late in the session, causing significant login issues and user frustration.
--   Poor communication about the asynchronous nature and duration of the background data-loading task after the final fix was implemented.</analysis>
+-   The agent repeatedly forgot that the preview and production environments have separate databases, leading to incorrect conclusions about data loss.
+-   The agent failed to identify the root cause of the deployment issues (the  configuration) and only learned of it when the user provided the fix from an external source.
+-   The agent mistakenly instructed the user to deploy an update which caused a data wipe scare, without first warning them of the risks it had observed in previous deployments.</analysis>

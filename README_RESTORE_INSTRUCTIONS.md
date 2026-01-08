@@ -24,7 +24,7 @@ sudo supervisorctl restart all
 ```
 
 ### Your app will be live at:
-https://kickoff-oracle-9.preview.emergentagent.com
+https://goaltracker-208.preview.emergentagent.com
 
 ---
 

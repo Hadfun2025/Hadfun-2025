@@ -13,7 +13,7 @@ The login issue on your production site (`hadfun.co.uk`) is caused by a **miscon
 ### The Issue:
 Your production deployment has:
 ```
-REACT_APP_BACKEND_URL=https://kickoff-oracle-9.preview.emergentagent.com
+REACT_APP_BACKEND_URL=https://goaltracker-208.preview.emergentagent.com
 ```
 
 But it should have:
@@ -36,7 +36,7 @@ REACT_APP_BACKEND_URL=https://hadfun.co.uk
 2. Find the variable: `REACT_APP_BACKEND_URL`
 3. Change its value from:
    ```
-   https://kickoff-oracle-9.preview.emergentagent.com
+   https://goaltracker-208.preview.emergentagent.com
    ```
    To:
    ```
@@ -84,8 +84,8 @@ const API = `${BACKEND_URL}/api`;
 4. If not → Create new user with POST request
 
 **Current Situation:**
-- Preview: `https://kickoff-oracle-9.preview.emergentagent.com/api/users/aysindjemil` ✅ Works
-- Production: `https://kickoff-oracle-9.preview.emergentagent.com/api/users/aysindjemil` ❌ Wrong URL
+- Preview: `https://goaltracker-208.preview.emergentagent.com/api/users/aysindjemil` ✅ Works
+- Production: `https://goaltracker-208.preview.emergentagent.com/api/users/aysindjemil` ❌ Wrong URL
 - Should be: `https://hadfun.co.uk/api/users/aysindjemil` ✅ Will work after fix
 
 ---
