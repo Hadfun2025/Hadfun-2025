@@ -1081,14 +1081,9 @@ async def get_fixtures(
                     "$ne": None
                 }
         
-        # Get fixtures from database - sort by date, with current/future matches first
-        if upcoming_only:
-            fixtures_cursor = db.fixtures.find(query).sort("utc_date", 1)
-        else:
-            # For current week view, prioritize recent and upcoming fixtures
-            fixtures_cursor = db.fixtures.find(query).sort([
-                ("utc_date", 1),  # Sort by date ascending
-            ])
+        # Get fixtures from database - sort by date descending (most recent first)
+        # This shows upcoming/recent matches at the top, older matches as you scroll down
+        fixtures_cursor = db.fixtures.find(query).sort("utc_date", -1)  # Descending order
         fixtures = await fixtures_cursor.to_list(length=None)  # Convert to list asynchronously
         
         # Convert MongoDB _id and datetime objects to strings
