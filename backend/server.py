@@ -404,7 +404,7 @@ async def get_world_cup_groups():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@api_router.post("/admin/seed-fa-cup")
+@api_router.get("/admin/seed-fa-cup")
 async def seed_fa_cup_fixtures():
     """Manually seed FA Cup Third Round fixtures"""
     try:
