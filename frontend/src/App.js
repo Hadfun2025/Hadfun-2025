@@ -969,18 +969,18 @@ function App() {
                     if (a.leagueName !== b.leagueName) {
                       return a.leagueName.localeCompare(b.leagueName);
                     }
-                    // Sort by earliest date in each group to maintain chronological order
-                    const earliestDateA = new Date(Math.min(...a.fixtures.map(f => new Date(f.utc_date))));
-                    const earliestDateB = new Date(Math.min(...b.fixtures.map(f => new Date(f.utc_date))));
-                    return earliestDateA - earliestDateB;
+                    // Sort by latest date in each group (most recent matchday first)
+                    const latestDateA = new Date(Math.max(...a.fixtures.map(f => new Date(f.utc_date))));
+                    const latestDateB = new Date(Math.max(...b.fixtures.map(f => new Date(f.utc_date))));
+                    return latestDateB - latestDateA; // Descending: newest matchday first
                   });
 
-                  // Sort fixtures within each group by date (earliest first)
+                  // Sort fixtures within each group by date (most recent first)
                   sortedGroups.forEach(group => {
                     group.fixtures.sort((a, b) => {
                       const dateA = new Date(a.utc_date);
                       const dateB = new Date(b.utc_date);
-                      return dateA - dateB; // Ascending order: 24th, 25th, 26th
+                      return dateB - dateA; // Descending order: newest first
                     });
                   });
 
