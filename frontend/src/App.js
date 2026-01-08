@@ -965,22 +965,40 @@ function App() {
                   });
 
                   // Sort groups by league and earliest date (chronological order)
+                  // Determine if league is a tournament (World Cup, FA Cup) - show chronologically
+                  // Regular leagues (Premier League, etc.) - show most recent first
+                  const tournamentLeagues = ['World Cup', 'FA Cup', 'UEFA Champions League', 'UEFA Europa League', 'UEFA Conference League'];
+                  
                   const sortedGroups = Object.values(grouped).sort((a, b) => {
                     if (a.leagueName !== b.leagueName) {
                       return a.leagueName.localeCompare(b.leagueName);
                     }
-                    // Sort by latest date in each group (most recent matchday first)
-                    const latestDateA = new Date(Math.max(...a.fixtures.map(f => new Date(f.utc_date))));
-                    const latestDateB = new Date(Math.max(...b.fixtures.map(f => new Date(f.utc_date))));
-                    return latestDateB - latestDateA; // Descending: newest matchday first
+                    
+                    // Check if this is a tournament league
+                    const isTournament = tournamentLeagues.some(t => a.leagueName.includes(t));
+                    
+                    if (isTournament) {
+                      // Tournaments: chronological order (Group Stage 1, 2, 3 or Round 1, 2, etc.)
+                      const earliestDateA = new Date(Math.min(...a.fixtures.map(f => new Date(f.utc_date))));
+                      const earliestDateB = new Date(Math.min(...b.fixtures.map(f => new Date(f.utc_date))));
+                      return earliestDateA - earliestDateB; // Ascending: earliest matchday first
+                    } else {
+                      // Regular leagues: most recent matchday first
+                      const latestDateA = new Date(Math.max(...a.fixtures.map(f => new Date(f.utc_date))));
+                      const latestDateB = new Date(Math.max(...b.fixtures.map(f => new Date(f.utc_date))));
+                      return latestDateB - latestDateA; // Descending: newest matchday first
+                    }
                   });
 
-                  // Sort fixtures within each group by date (most recent first)
+                  // Sort fixtures within each group
                   sortedGroups.forEach(group => {
+                    const isTournament = tournamentLeagues.some(t => group.leagueName.includes(t));
+                    
                     group.fixtures.sort((a, b) => {
                       const dateA = new Date(a.utc_date);
                       const dateB = new Date(b.utc_date);
-                      return dateB - dateA; // Descending order: newest first
+                      // Tournaments: earliest first, Regular leagues: most recent first
+                      return isTournament ? dateA - dateB : dateB - dateA;
                     });
                   });
 
