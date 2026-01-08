@@ -24,12 +24,27 @@ from routes import posts as posts_router
 from routes import auth as auth_router
 
 ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
+load_dotenv(ROOT_DIR / '.env', override=False)
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
+# MongoDB connection - use environment variable (injected in production, from .env in dev)
+mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
+
+# Try to extract database name from URL first (Atlas URLs often include it)
+import re
+db_from_url = None
+url_match = re.search(r'mongodb(?:\+srv)?://[^/]+/([^?]+)', mongo_url)
+if url_match:
+    db_from_url = url_match.group(1)
+
+# Use DB from URL if found, otherwise fall back to DB_NAME env var, then default
+db_name = db_from_url or os.environ.get('DB_NAME', 'predictions')
+
+# Log connection info (masked for security)
+masked_url = mongo_url[:20] + '...' if len(mongo_url) > 20 else mongo_url
+print(f"🔌 Connecting to MongoDB: {masked_url}, DB: {db_name} (from_url: {db_from_url is not None})")
+
 client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+db = client[db_name]
 
 # Initialize services
 api_football = APIFootballService()  # Ready for use when paid plan is available
