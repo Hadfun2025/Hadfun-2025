@@ -5586,6 +5586,30 @@ async def startup_scheduler():
         else:
             logger.info("⚠️ JSON loading failed - will load from API (slower)")
         
+        # Seed World Cup 2026 groups if not present
+        logger.info("🌍 Checking World Cup 2026 groups...")
+        existing_groups = await db.world_cup_groups.count_documents({})
+        if existing_groups == 0:
+            logger.info("📥 Seeding World Cup 2026 groups...")
+            world_cup_groups = [
+                {"group": "A", "group_name": "A", "teams": ["Mexico", "South Africa", "South Korea", "Winner of UEFA play-off D"]},
+                {"group": "B", "group_name": "B", "teams": ["Canada", "Italy", "Costa Rica", "France"]},
+                {"group": "C", "group_name": "C", "teams": ["Brazil", "Morocco", "Haiti", "Scotland"]},
+                {"group": "D", "group_name": "D", "teams": ["Qatar", "Switzerland", "Germany", "Curaçao"]},
+                {"group": "E", "group_name": "E", "teams": ["Ivory Coast", "Ecuador", "Netherlands", "Japan"]},
+                {"group": "F", "group_name": "F", "teams": ["Belgium", "Egypt", "Iran", "New Zealand"]},
+                {"group": "G", "group_name": "G", "teams": ["USA", "Paraguay", "Uruguay", "Nigeria"]},
+                {"group": "H", "group_name": "H", "teams": ["Argentina", "Poland", "Peru", "Australia"]},
+                {"group": "I", "group_name": "I", "teams": ["Spain", "Denmark", "Colombia", "Saudi Arabia"]},
+                {"group": "J", "group_name": "J", "teams": ["Portugal", "Algeria", "Cameroon", "Ukraine"]},
+                {"group": "K", "group_name": "K", "teams": ["Senegal", "Serbia", "Chile", "Tunisia"]},
+                {"group": "L", "group_name": "L", "teams": ["England", "Croatia", "Ghana", "Panama"]}
+            ]
+            await db.world_cup_groups.insert_many(world_cup_groups)
+            logger.info("✅ World Cup 2026 groups seeded (12 groups)")
+        else:
+            logger.info(f"✅ World Cup groups already exist ({existing_groups} groups)")
+        
         # Run one-time migration for Dec 2-3 scores (safe to run multiple times)
         logger.info("🔧 Running one-time Dec 2-3 score migration...")
         try:
