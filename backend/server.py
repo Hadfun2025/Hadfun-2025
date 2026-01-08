@@ -5610,6 +5610,41 @@ async def startup_scheduler():
         else:
             logger.info(f"✅ World Cup groups already exist ({existing_groups} groups)")
         
+        # Seed FA Cup Third Round fixtures if not present
+        logger.info("🏆 Checking FA Cup fixtures...")
+        existing_fa_cup = await db.fixtures.count_documents({"league_name": "FA Cup"})
+        if existing_fa_cup == 0:
+            logger.info("📥 Seeding FA Cup Third Round fixtures...")
+            from datetime import datetime
+            fa_cup_fixtures = [
+                {"fixture_id": 9000000, "home_team": "Preston North End", "away_team": "Wigan Athletic", "utc_date": datetime(2026, 1, 9, 19, 30), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "home_logo": "", "away_logo": ""},
+                {"fixture_id": 9000001, "home_team": "Milton Keynes Dons", "away_team": "Oxford United", "utc_date": datetime(2026, 1, 9, 19, 30), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "home_logo": "", "away_logo": ""},
+                {"fixture_id": 9000002, "home_team": "Port Vale", "away_team": "Fleetwood Town", "utc_date": datetime(2026, 1, 9, 19, 30), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "home_logo": "", "away_logo": ""},
+                {"fixture_id": 9000003, "home_team": "Wrexham", "away_team": "Nottingham Forest", "utc_date": datetime(2026, 1, 9, 19, 30), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "home_logo": "", "away_logo": ""},
+                {"fixture_id": 9000004, "home_team": "Cheltenham Town", "away_team": "Leicester City", "utc_date": datetime(2026, 1, 10, 12, 15), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "home_logo": "", "away_logo": ""},
+                {"fixture_id": 9000005, "home_team": "Everton", "away_team": "Sunderland", "utc_date": datetime(2026, 1, 10, 12, 15), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "home_logo": "", "away_logo": ""},
+                {"fixture_id": 9000006, "home_team": "Macclesfield FC", "away_team": "Crystal Palace", "utc_date": datetime(2026, 1, 10, 12, 15), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "home_logo": "", "away_logo": ""},
+                {"fixture_id": 9000007, "home_team": "Wolverhampton Wanderers", "away_team": "Shrewsbury Town", "utc_date": datetime(2026, 1, 10, 12, 15), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "home_logo": "", "away_logo": ""},
+                {"fixture_id": 9000008, "home_team": "Manchester City", "away_team": "Exeter City", "utc_date": datetime(2026, 1, 10, 15, 0), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "home_logo": "", "away_logo": ""},
+                {"fixture_id": 9000009, "home_team": "Burnley", "away_team": "Millwall", "utc_date": datetime(2026, 1, 10, 15, 0), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "home_logo": "", "away_logo": ""},
+                {"fixture_id": 9000010, "home_team": "Boreham Wood", "away_team": "Burton Albion", "utc_date": datetime(2026, 1, 10, 15, 0), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "home_logo": "", "away_logo": ""},
+                {"fixture_id": 9000011, "home_team": "Salford City", "away_team": "Swindon Town", "utc_date": datetime(2026, 1, 10, 15, 0), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "home_logo": "", "away_logo": ""},
+                {"fixture_id": 9000012, "home_team": "Cambridge United", "away_team": "Birmingham City", "utc_date": datetime(2026, 1, 10, 17, 45), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "home_logo": "", "away_logo": ""},
+                {"fixture_id": 9000013, "home_team": "Tottenham Hotspur", "away_team": "Aston Villa", "utc_date": datetime(2026, 1, 10, 17, 45), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "home_logo": "", "away_logo": ""},
+                {"fixture_id": 9000014, "home_team": "Bristol City", "away_team": "Watford", "utc_date": datetime(2026, 1, 10, 17, 45), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "home_logo": "", "away_logo": ""},
+                {"fixture_id": 9000015, "home_team": "Grimsby Town", "away_team": "Weston-super-Mare", "utc_date": datetime(2026, 1, 10, 17, 45), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "home_logo": "", "away_logo": ""},
+                {"fixture_id": 9000016, "home_team": "Charlton Athletic", "away_team": "Chelsea", "utc_date": datetime(2026, 1, 10, 20, 0), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "home_logo": "", "away_logo": ""},
+                {"fixture_id": 9000017, "home_team": "Derby County", "away_team": "Leeds United", "utc_date": datetime(2026, 1, 11, 12, 0), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "home_logo": "", "away_logo": ""},
+                {"fixture_id": 9000018, "home_team": "Portsmouth", "away_team": "Arsenal", "utc_date": datetime(2026, 1, 11, 14, 0), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "home_logo": "", "away_logo": ""},
+                {"fixture_id": 9000019, "home_team": "West Ham United", "away_team": "Queens Park Rangers", "utc_date": datetime(2026, 1, 11, 14, 30), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "home_logo": "", "away_logo": ""},
+                {"fixture_id": 9000020, "home_team": "Manchester United", "away_team": "Brighton & Hove Albion", "utc_date": datetime(2026, 1, 11, 16, 30), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "home_logo": "", "away_logo": ""},
+                {"fixture_id": 9000021, "home_team": "Liverpool", "away_team": "Barnsley", "utc_date": datetime(2026, 1, 12, 19, 45), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "home_logo": "", "away_logo": ""},
+            ]
+            await db.fixtures.insert_many(fa_cup_fixtures)
+            logger.info("✅ FA Cup Third Round fixtures seeded (22 matches)")
+        else:
+            logger.info(f"✅ FA Cup fixtures already exist ({existing_fa_cup} fixtures)")
+        
         # Run one-time migration for Dec 2-3 scores (safe to run multiple times)
         logger.info("🔧 Running one-time Dec 2-3 score migration...")
         try:
