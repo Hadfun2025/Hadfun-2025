@@ -2413,8 +2413,15 @@ def normalize_league_name(league_name: str) -> str:
 
 @api_router.get("/teams/{team_id}/leaderboard/by-league")
 async def get_team_leaderboard_by_league(team_id: str):
-    """Team leaderboard by league - Shows SEPARATE leaderboards for EACH matchday"""
+    """
+    Team leaderboard by league with new scoring system:
+    - 3 pts for sole winner of a matchday (most correct predictions)
+    - 1 pt each if multiple users tie for most correct predictions
+    - 0 pts for others
+    Returns consolidated leaderboard per league with matchday breakdown
+    """
     logger.info(f"📊 Leaderboard request for team: {team_id}")
+    
     # Get team members
     members = await db.team_members.find({"team_id": team_id}, {"_id": 0}).to_list(100)
     member_ids = [m['user_id'] for m in members]
@@ -2424,118 +2431,175 @@ async def get_team_leaderboard_by_league(team_id: str):
         logger.warning("No members found, returning empty list")
         return []
     
-    # Build leaderboard by getting predictions for each member
-    # Structure: { "Premier League": { 16: [...], 17: [...] }, "Championship": { 21: [...] } }
+    # Build user map
+    user_map = {}
+    for member_id in member_ids:
+        user = await db.users.find_one({"id": member_id}, {"_id": 0})
+        if user:
+            user_map[member_id] = user.get('username', 'Unknown')
+    
+    # Structure: { "Premier League": { 16: { "username": {correct: X, total: Y} }, 17: {...} } }
     leagues_matchdays = {}
     
-    for member_id in member_ids:
-        # Get user info
-        user = await db.users.find_one({"id": member_id}, {"_id": 0})
-        if not user:
-            continue
-        
-        username = user.get('username', 'Unknown')
-        
-        # Get all predictions for this user
-        predictions = await db.predictions.find({"user_id": member_id}, {"_id": 0}).to_list(10000)
-        
-        # Group predictions by league AND matchday
-        for pred in predictions:
-            league_name = normalize_league_name(pred.get('league', 'Unknown'))
-            matchday = pred.get('matchday')
-            
-            # If matchday is not set, try to get it from the fixture
-            if matchday is None:
-                fixture = await db.fixtures.find_one(
-                    {"fixture_id": pred.get('fixture_id')}, 
-                    {"_id": 0, "matchday": 1}
-                )
-                if fixture:
-                    matchday = fixture.get('matchday')
-            
-            # Use "Current" as default if still no matchday
-            if matchday is None:
-                matchday = "Current"
-            
-            if league_name not in leagues_matchdays:
-                leagues_matchdays[league_name] = {}
-            
-            if matchday not in leagues_matchdays[league_name]:
-                leagues_matchdays[league_name][matchday] = {}
-            
-            if username not in leagues_matchdays[league_name][matchday]:
-                leagues_matchdays[league_name][matchday][username] = {
-                    'username': username,
-                    'correct': 0,
-                    'total': 0
-                }
-            
-            leagues_matchdays[league_name][matchday][username]['total'] += 1
-            if pred.get('result') == 'correct':
-                leagues_matchdays[league_name][matchday][username]['correct'] += 1
+    # Get all predictions for team members
+    all_predictions = await db.predictions.find(
+        {"user_id": {"$in": member_ids}}, 
+        {"_id": 0}
+    ).to_list(50000)
     
-    # Get matchday wins for all users
-    wins_by_user_league = {}
-    for member_id in member_ids:
-        user = await db.users.find_one({"id": member_id}, {"_id": 0})
-        if not user:
+    # Group predictions by league, matchday, and user
+    for pred in all_predictions:
+        user_id = pred.get('user_id')
+        username = user_map.get(user_id)
+        if not username:
             continue
-        username = user.get('username', 'Unknown')
+            
+        league_name = normalize_league_name(pred.get('league', 'Unknown'))
+        matchday = pred.get('matchday')
         
-        league_points_docs = await db.user_league_points.find({"user_id": member_id}, {"_id": 0}).to_list(10000)
+        # If matchday not set, try to get from fixture
+        if matchday is None:
+            fixture = await db.fixtures.find_one(
+                {"fixture_id": pred.get('fixture_id')}, 
+                {"_id": 0, "matchday": 1}
+            )
+            if fixture:
+                matchday = fixture.get('matchday')
         
-        if username not in wins_by_user_league:
-            wins_by_user_league[username] = {}
+        # Skip predictions without a matchday (can't score them properly)
+        if matchday is None:
+            matchday = "Current"
         
-        for lp in league_points_docs:
-            league_name = normalize_league_name(lp.get('league_name', 'Unknown'))
-            if league_name not in wins_by_user_league[username]:
-                wins_by_user_league[username][league_name] = {'wins': 0, 'points': 0}
-            wins_by_user_league[username][league_name]['wins'] += 1
-            wins_by_user_league[username][league_name]['points'] += lp.get('points', 0)
+        # Initialize structures
+        if league_name not in leagues_matchdays:
+            leagues_matchdays[league_name] = {}
+        if matchday not in leagues_matchdays[league_name]:
+            leagues_matchdays[league_name][matchday] = {}
+        if username not in leagues_matchdays[league_name][matchday]:
+            leagues_matchdays[league_name][matchday][username] = {'correct': 0, 'total': 0}
+        
+        leagues_matchdays[league_name][matchday][username]['total'] += 1
+        if pred.get('result') == 'correct':
+            leagues_matchdays[league_name][matchday][username]['correct'] += 1
     
-    # Build result - one entry per league+matchday combination
-    result = []
+    # Calculate points per league
+    # Structure: { "Premier League": { "username": { total_pts: X, matchdays: { 16: {pts, correct, total}, 17: {...} } } } }
+    league_results = {}
+    
     for league_name, matchdays_data in leagues_matchdays.items():
-        for matchday, users_data in sorted(matchdays_data.items(), key=lambda x: x[0], reverse=True):
-            # Convert users dict to list
-            leaderboard = []
+        if league_name not in league_results:
+            league_results[league_name] = {}
+        
+        # Get all usernames who have predictions in this league
+        all_users_in_league = set()
+        for md_data in matchdays_data.values():
+            all_users_in_league.update(md_data.keys())
+        
+        # Initialize user data for this league
+        for username in all_users_in_league:
+            if username not in league_results[league_name]:
+                league_results[league_name][username] = {
+                    'total_points': 0,
+                    'matchdays': {},
+                    'total_correct': 0,
+                    'total_predictions': 0
+                }
+        
+        # Process each matchday
+        for matchday, users_data in matchdays_data.items():
+            # Find the max correct predictions for this matchday
+            max_correct = 0
             for username, stats in users_data.items():
-                user_wins = wins_by_user_league.get(username, {}).get(league_name, {'wins': 0, 'points': 0})
-                leaderboard.append({
-                    'username': username,
-                    'total_points': user_wins['points'],
-                    'matchday_wins': user_wins['wins'],
-                    'correct_predictions': stats['correct'],
-                    'total_predictions': stats['total']
-                })
+                if stats['correct'] > max_correct:
+                    max_correct = stats['correct']
             
-            # Sort by correct predictions (for this matchday), then by total predictions
-            leaderboard.sort(key=lambda x: (x['correct_predictions'], x['total_predictions']), reverse=True)
+            # Count how many users have the max (to determine if tie)
+            users_with_max = [u for u, s in users_data.items() if s['correct'] == max_correct]
+            is_tie = len(users_with_max) > 1
             
-            # Assign ranks
-            for idx, member in enumerate(leaderboard):
-                member['rank'] = idx + 1
-            
-            result.append({
-                'league_name': league_name,
-                'matchday': matchday,
-                'display_name': f"{league_name} - Matchday {matchday}",
-                'leaderboard': leaderboard
-            })
+            # Assign points: 3 for sole winner, 1 each for tie
+            for username, stats in users_data.items():
+                pts_this_matchday = 0
+                if stats['correct'] == max_correct and max_correct > 0:
+                    pts_this_matchday = 1 if is_tie else 3
+                
+                # Store matchday result
+                league_results[league_name][username]['matchdays'][matchday] = {
+                    'points': pts_this_matchday,
+                    'correct': stats['correct'],
+                    'total': stats['total'],
+                    'is_winner': stats['correct'] == max_correct and max_correct > 0,
+                    'is_tie': is_tie and stats['correct'] == max_correct
+                }
+                league_results[league_name][username]['total_points'] += pts_this_matchday
+                league_results[league_name][username]['total_correct'] += stats['correct']
+                league_results[league_name][username]['total_predictions'] += stats['total']
     
-    # Sort by league name, then by matchday (handle string matchdays like "Current")
-    def sort_key(x):
-        league = x['league_name']
-        md = x['matchday']
-        # Convert matchday to number for sorting, use 9999 for non-numeric (will appear first when reversed)
-        try:
-            md_num = int(md) if md != "Current" else 9999
-        except (ValueError, TypeError):
-            md_num = 9999
-        return (league, -md_num)
+    # Build final result - one entry per league with consolidated leaderboard
+    result = []
+    for league_name, users_data in league_results.items():
+        # Build leaderboard for this league
+        leaderboard = []
+        
+        # Get all matchdays for this league (sorted)
+        all_matchdays = set()
+        for user_data in users_data.values():
+            all_matchdays.update(user_data['matchdays'].keys())
+        
+        # Sort matchdays numerically (handle "Current" as highest)
+        def matchday_sort_key(md):
+            try:
+                return int(md)
+            except (ValueError, TypeError):
+                return 9999
+        sorted_matchdays = sorted(all_matchdays, key=matchday_sort_key)
+        
+        for username, data in users_data.items():
+            entry = {
+                'username': username,
+                'total_points': data['total_points'],
+                'total_correct': data['total_correct'],
+                'total_predictions': data['total_predictions'],
+                'matchday_scores': {}
+            }
+            
+            # Add score for each matchday
+            for md in sorted_matchdays:
+                if md in data['matchdays']:
+                    md_data = data['matchdays'][md]
+                    entry['matchday_scores'][md] = {
+                        'points': md_data['points'],
+                        'correct': md_data['correct'],
+                        'total': md_data['total'],
+                        'is_winner': md_data['is_winner'],
+                        'is_tie': md_data['is_tie']
+                    }
+                else:
+                    entry['matchday_scores'][md] = {
+                        'points': 0,
+                        'correct': 0,
+                        'total': 0,
+                        'is_winner': False,
+                        'is_tie': False
+                    }
+            
+            leaderboard.append(entry)
+        
+        # Sort by total points, then by total correct
+        leaderboard.sort(key=lambda x: (x['total_points'], x['total_correct']), reverse=True)
+        
+        # Assign ranks
+        for idx, entry in enumerate(leaderboard):
+            entry['rank'] = idx + 1
+        
+        result.append({
+            'league_name': league_name,
+            'matchdays': sorted_matchdays,
+            'leaderboard': leaderboard
+        })
     
-    result.sort(key=sort_key)
+    # Sort by league name
+    result.sort(key=lambda x: x['league_name'])
     
     return result
 
