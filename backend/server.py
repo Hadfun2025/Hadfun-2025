@@ -367,6 +367,8 @@ SUPPORTED_LEAGUES = [
     {"id": 2, "name": "UEFA Champions League", "country": "Europe", "season": 2025},
     {"id": 3, "name": "UEFA Europa League", "country": "Europe", "season": 2025},
     {"id": 848, "name": "UEFA Conference League", "country": "Europe", "season": 2025},
+    # Domestic Cups
+    {"id": 45, "name": "FA Cup", "country": "England", "season": 2025},
     # International Tournaments
     {"id": 1, "name": "World Cup", "country": "World", "season": 2026},
 ]
