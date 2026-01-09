@@ -1392,11 +1392,11 @@ function App() {
                                         <p className="text-xs text-gray-600 mb-1">Result</p>
                                         {pred.result === 'correct' ? (
                                           <Badge className="bg-green-600">
-                                            ✓ Correct (+{pred.points || 3} pts)
+                                            ✓ Correct
                                           </Badge>
                                         ) : pred.result === 'incorrect' ? (
                                           <Badge className="bg-red-600">
-                                            ✗ Incorrect
+                                            ✗ Wrong
                                           </Badge>
                                         ) : (
                                           <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
