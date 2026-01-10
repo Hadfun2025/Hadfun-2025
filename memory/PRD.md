@@ -1,77 +1,74 @@
-# HADFUN Predictor - Product Requirements Document
+# HADfun Predictor - Football Prediction App
 
 ## Original Problem Statement
-Football prediction app (hadfun.co.uk) that allows users to:
-- Predict match results from leagues around the world
-- Compete with team members on leaderboards
-- View World Cup 2026 tournament groups and fixtures
-- Participate in community features
+A full-stack football prediction application where users can predict match results from various leagues around the world. The app includes a new leaderboard system (3 points for sole winner, 1 point for ties), support for FA Cup and World Cup 2026, and an admin analytics dashboard.
 
-## Core Requirements
-1. **Stable deployment** - Environment variables correctly loaded with `load_dotenv(override=False)`
-2. **Team Leaderboards** - Per-league leaderboards with new scoring system
-3. **World Cup 2026** - Display 48-team tournament groups (A-L)
-4. **Match predictions** - Users can predict Home/Away/Draw for fixtures
-5. **Community features** - Team chat, community feed, image sharing
-
-## Scoring System (Implemented)
-- **3 points** - Sole winner of matchday (most correct predictions alone)
-- **1 point each** - Multiple users tie for most correct predictions
-- **0 points** - Other participants
-- Leaderboards are **per league separately**
-- Matchdays tracked individually (16, 17, 18 etc.)
+## Current Tech Stack
+- **Frontend:** React + Tailwind CSS + Shadcn/UI + Recharts
+- **Backend:** FastAPI (Python)
+- **Database:** MongoDB
 
 ## What's Been Implemented
 
-### Session: January 8, 2026
-1. **Critical Deployment Fix** - Already applied from previous session
-   - `load_dotenv(override=False)` prevents production env vars being overwritten
-   - Database name extracted from MongoDB URL correctly
+### Core Features
+- User authentication (username/email login)
+- Multi-league support (Premier League, FA Cup, World Cup, etc.)
+- Match predictions (Home/Away/Draw)
+- Real-time fixture updates via API-Football
+- Team management and leaderboards
+- Weekly pot competitions
 
-2. **New Leaderboard Design** - COMPLETED
-   - Consolidated table per league showing total points
-   - Per-matchday breakdown columns (MD 14, MD 15, etc.)
-   - Visual indicators: 3★ for sole winner, 1 for tied winner, - for no win
-   - Legend explaining scoring system
-   - Backend: `/api/teams/{team_id}/leaderboard/by-league`
-   - Frontend: `TeamManagement.jsx` leaderboard tab
+### Recent Additions (January 2026)
+- **POSTPONED Match Status:** UI now correctly displays "📅 MATCH POSTPONED" for postponed games instead of showing "Predictions locked"
+- **3/1 Leaderboard System:** 3 points for matchday's sole winner, 1 point for tied users
+- **FA Cup Integration:** Third Round fixtures with manual seeding
+- **World Cup 2026 Groups:** Seeded at startup
+- **Admin Analytics Dashboard:** DAU, WAU, retention, feature usage metrics
+- **Penalty Shootout Handling:** Knockout matches correctly scored
 
-3. **World Cup 2026 Groups** - VERIFIED
-   - All 12 groups (A-L) with 4 teams each
-   - Database: `world_cup_groups` collection
-   - API: `/api/world-cup/groups`
-   - Frontend: World Cup tab with tournament info
+## Key Files
+- `/app/backend/server.py` - Monolith backend (6000+ lines, needs refactoring)
+- `/app/frontend/src/App.js` - Main frontend component
+- `/app/frontend/src/components/AdminDashboard.jsx` - Analytics dashboard
+- `/app/frontend/src/components/TeamManagement.jsx` - Team/leaderboard views
 
-## Test Results
-- **Backend Tests**: 20/20 passed (100%)
-- **Frontend Tests**: All UI elements verified
-- Test file: `/app/tests/test_leaderboard_and_worldcup.py`
+## Completed Tasks This Session
+- ✅ Added `isPostponed` status check in frontend
+- ✅ Added POSTPONED UI component with gray styling
+- ✅ Updated Salford City vs Swindon Town fixture to POSTPONED status
+- ✅ Disabled prediction buttons for postponed matches
+- ✅ Updated conditional display logic to exclude postponed from "Predictions locked" message
+
+## Pending Issues
+1. **FA Cup Score Automation (P1):** API-Football integration unreliable for manually-seeded fixtures
+2. **Admin Dashboard Button Visibility (P2):** May be hidden behind other elements
+
+## Upcoming Tasks
+1. **Refactor server.py (P1):** Break 6000+ line monolith into modules:
+   - `/app/backend/routes/` - API endpoints
+   - `/app/backend/services/` - Business logic
+   - `/app/backend/data/` - Seeding data
+2. **Investigate Score Update Interval (P2):** Check why scores update instantly vs. every 2 minutes
+
+## Future/Backlog
+- Admin Score Update UI for manual score management
+- Improved FA Cup API integration
 
 ## API Endpoints
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/teams/{team_id}/leaderboard/by-league` | GET | Team leaderboard with matchday scores |
-| `/api/world-cup/groups` | GET | World Cup 2026 group stage draw |
-| `/api/fixtures` | GET | Match fixtures by league |
-| `/api/predictions` | POST | Submit prediction |
-| `/api/users/{username}` | GET | User profile |
+- `GET /api/fixtures?league_ids=45` - Get fixtures by league
+- `GET /api/teams/{team_id}/leaderboard_v2` - New leaderboard
+- `GET /api/admin/seed-fa-cup` - Manual FA Cup seeding
+- `GET /api/admin/analytics/*` - Analytics endpoints
 
 ## Database Collections
-- `users` - User accounts
-- `teams` - Team information
-- `team_members` - Team membership
+- `fixtures` - Match data (includes `status`, `penalty_winner`)
 - `predictions` - User predictions
-- `fixtures` - Match fixtures
-- `world_cup_groups` - World Cup 2026 groups
+- `users` - User accounts
+- `teams` - Team groups
+- `user_league_points` - Leaderboard points
+- `world_cup_groups` - World Cup group data
 
-## Tech Stack
-- **Frontend**: React + Tailwind CSS + Shadcn/UI
-- **Backend**: FastAPI (Python)
-- **Database**: MongoDB
-- **External APIs**: API-Football for live scores
-
-## Backlog / Future Tasks
-1. **P1** - Deploy and verify on production (hadfun.co.uk)
-2. **P2** - Recreate missing users (Davidwhu, DavidKaye) and team (Cheshunt Crew) on production
-3. **P3** - Investigate live score update rate (apscheduler config)
-4. **P4** - Add more matchday fixtures for World Cup 2026
+## Known Constraints
+- Separate databases for preview/production environments
+- User self-deploys via "Re-Deploy" button
+- Post-deployment may require visiting admin seeding URLs
