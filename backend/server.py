@@ -484,9 +484,9 @@ async def seed_fa_cup_manual():
         fa_cup_fixtures = [
             # Friday 9 January - COMPLETED
             {"fixture_id": 9000000, "home_team": "Preston North End", "away_team": "Wigan Athletic", "utc_date": datetime(2026, 1, 9, 19, 30), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "FINISHED", "home_score": 0, "away_score": 1, "penalty_winner": None, "home_logo": "", "away_logo": ""},
-            {"fixture_id": 9000001, "home_team": "Milton Keynes Dons", "away_team": "Oxford United", "utc_date": datetime(2026, 1, 9, 19, 30), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "FINISHED", "home_score": 1, "away_score": 4, "penalty_winner": None, "home_logo": "", "away_logo": ""},
+            {"fixture_id": 9000001, "home_team": "Milton Keynes Dons", "away_team": "Oxford United", "utc_date": datetime(2026, 1, 9, 19, 30), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "FINISHED_AET", "home_score": 1, "away_score": 1, "penalty_winner": "away", "home_logo": "", "away_logo": ""},
             {"fixture_id": 9000002, "home_team": "Port Vale", "away_team": "Fleetwood Town", "utc_date": datetime(2026, 1, 9, 19, 30), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "FINISHED", "home_score": 1, "away_score": 0, "penalty_winner": None, "home_logo": "", "away_logo": ""},
-            {"fixture_id": 9000003, "home_team": "Wrexham", "away_team": "Nottingham Forest", "utc_date": datetime(2026, 1, 9, 19, 30), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "FINISHED", "home_score": 3, "away_score": 4, "penalty_winner": None, "home_logo": "", "away_logo": ""},
+            {"fixture_id": 9000003, "home_team": "Wrexham", "away_team": "Nottingham Forest", "utc_date": datetime(2026, 1, 9, 19, 30), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "FINISHED_AET", "home_score": 3, "away_score": 3, "penalty_winner": "home", "home_logo": "", "away_logo": ""},
             # Saturday 10 January - COMPLETED
             {"fixture_id": 9000004, "home_team": "Cheltenham Town", "away_team": "Leicester City", "utc_date": datetime(2026, 1, 10, 12, 15), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "FINISHED", "home_score": 0, "away_score": 2, "penalty_winner": None, "home_logo": "", "away_logo": ""},
             {"fixture_id": 9000005, "home_team": "Everton", "away_team": "Sunderland", "utc_date": datetime(2026, 1, 10, 12, 15), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "FINISHED_AET", "home_score": 1, "away_score": 1, "penalty_winner": "away", "home_logo": "", "away_logo": ""},
@@ -501,7 +501,7 @@ async def seed_fa_cup_manual():
             {"fixture_id": 9000014, "home_team": "Bristol City", "away_team": "Watford", "utc_date": datetime(2026, 1, 10, 17, 45), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "FINISHED", "home_score": 2, "away_score": 1, "penalty_winner": None, "home_logo": "", "away_logo": ""},
             {"fixture_id": 9000015, "home_team": "Grimsby Town", "away_team": "Weston-super-Mare", "utc_date": datetime(2026, 1, 10, 17, 45), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "FINISHED", "home_score": 2, "away_score": 0, "penalty_winner": None, "home_logo": "", "away_logo": ""},
             {"fixture_id": 9000016, "home_team": "Charlton Athletic", "away_team": "Chelsea", "utc_date": datetime(2026, 1, 10, 20, 0), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "FINISHED", "home_score": 0, "away_score": 2, "penalty_winner": None, "home_logo": "", "away_logo": ""},
-            # Sunday 11 January - SCHEDULED
+            # Sunday 11 January - SCHEDULED (update when results come in)
             {"fixture_id": 9000017, "home_team": "Derby County", "away_team": "Leeds United", "utc_date": datetime(2026, 1, 11, 12, 0), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "penalty_winner": None, "home_logo": "", "away_logo": ""},
             {"fixture_id": 9000018, "home_team": "Portsmouth", "away_team": "Arsenal", "utc_date": datetime(2026, 1, 11, 14, 0), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "penalty_winner": None, "home_logo": "", "away_logo": ""},
             {"fixture_id": 9000019, "home_team": "West Ham United", "away_team": "Queens Park Rangers", "utc_date": datetime(2026, 1, 11, 14, 30), "league_id": 45, "league_name": "FA Cup", "matchday": "Third Round", "status": "SCHEDULED", "home_score": None, "away_score": None, "penalty_winner": None, "home_logo": "", "away_logo": ""},
@@ -513,7 +513,7 @@ async def seed_fa_cup_manual():
         result = await db.fixtures.insert_many(fa_cup_fixtures)
         logger.info(f"✅ Manually seeded {len(result.inserted_ids)} FA Cup fixtures")
         
-        return {"success": True, "message": f"Manually seeded {len(result.inserted_ids)} FA Cup Third Round fixtures with Saturday results"}
+        return {"success": True, "message": f"Seeded {len(result.inserted_ids)} FA Cup fixtures - Wrexham 3-3 Forest (Wrexham pens), MK Dons 1-1 Oxford (Oxford pens)"}
     except Exception as e:
         logger.error(f"Error seeding FA Cup fixtures: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
