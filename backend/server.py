@@ -3863,6 +3863,25 @@ async def get_unread_count(user_id: str):
     return {"count": count}
 
 
+@api_router.post("/notifications/test/{user_id}")
+async def create_test_notification(user_id: str):
+    """Create a test notification for a user (for testing purposes)"""
+    notification = await create_notification(
+        user_id=user_id,
+        notification_type="match_rescheduled",
+        title="Match Rescheduled! 📅",
+        message="Salford City vs Swindon Town has been rescheduled to Saturday 25 January at 15:00. Your prediction is still valid!",
+        data={
+            "fixture_id": 9000011,
+            "home_team": "Salford City",
+            "away_team": "Swindon Town",
+            "new_date": "2026-01-25T15:00:00",
+            "league": "FA Cup"
+        }
+    )
+    return {"message": "Test notification created", "notification_id": notification['id']}
+
+
 async def create_notification(user_id: str, notification_type: str, title: str, message: str, data: dict = None):
     """Helper function to create a notification"""
     from uuid import uuid4
