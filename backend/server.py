@@ -768,7 +768,7 @@ async def update_match_results():
         
         # Fetch all fixtures from API to get latest scores
         # British Isles, European, then Rest of World
-        league_ids = [39, 40, 179, 140, 78, 135, 61, 94, 88, 203, 253, 71, 239]  # All leagues including new ones
+        league_ids = [39, 40, 179, 140, 78, 135, 61, 94, 88, 203, 253, 71, 239, 45]  # All leagues including FA Cup
         service = get_active_football_service()
         
         # Get fixtures for actual season dates (not simulated future dates)
