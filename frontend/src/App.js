@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Toaster } from '@/components/ui/sonner';
-import { Trophy, Calendar, TrendingUp, Users } from 'lucide-react';
+import { Trophy, Calendar, TrendingUp, Users, BarChart3 } from 'lucide-react';
 import { AboutPage } from '@/components/AboutPage';
 import { TermsPage } from '@/components/TermsPage';
 import { RulesPage } from '@/components/RulesPage';
@@ -23,16 +23,21 @@ import { PaymentModal } from '@/components/PaymentModal';
 import { ProfileSetup } from '@/components/ProfileSetup';
 import { SocialFeed } from '@/components/SocialFeed';
 import { WorldCupGroups } from '@/components/WorldCupGroups';
+import { AdminDashboard } from '@/components/AdminDashboard';
 import { useLanguage } from '@/LanguageContext';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+
+// Admin usernames who can access the dashboard
+const ADMIN_USERS = ['aysin', 'admin'];
 
 function App() {
   const { t } = useLanguage();
   const [currentUser, setCurrentUser] = useState(null);
   const [leagues, setLeagues] = useState([]);
   const [fixtures, setFixtures] = useState([]);
+  const [showAdminDashboard, setShowAdminDashboard] = useState(false);
   const [selectedLeagues, setSelectedLeagues] = useState([]); // No leagues selected by default - user must click to select
   const [predictions, setPredictions] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
