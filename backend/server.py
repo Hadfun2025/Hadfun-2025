@@ -406,7 +406,72 @@ async def get_world_cup_groups():
 
 @api_router.get("/admin/seed-fa-cup")
 async def seed_fa_cup_fixtures():
-    """Manually seed FA Cup Third Round fixtures"""
+    """Fetch FA Cup fixtures from API-Football and seed them with real fixture IDs"""
+    try:
+        import aiohttp
+        from datetime import datetime
+        
+        api_key = os.environ.get('FOOTBALL_API_KEY')
+        if not api_key:
+            # Fallback to manual seeding if no API key
+            return await seed_fa_cup_manual()
+        
+        # Delete existing FA Cup fixtures
+        deleted = await db.fixtures.delete_many({"league_name": "FA Cup"})
+        logger.info(f"Deleted {deleted.deleted_count} existing FA Cup fixtures")
+        
+        # Fetch FA Cup fixtures from API-Football
+        headers = {
+            "x-apisports-key": api_key,
+            "x-rapidapi-host": "v3.football.api-sports.io"
+        }
+        
+        async with aiohttp.ClientSession() as session:
+            # FA Cup league_id = 45, season = 2025
+            url = f"https://v3.football.api-sports.io/fixtures?league=45&season=2025"
+            async with session.get(url, headers=headers) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    fixtures = data.get('response', [])
+                    
+                    inserted_count = 0
+                    for fixture in fixtures:
+                        fixture_data = {
+                            "fixture_id": fixture['fixture']['id'],
+                            "home_team": fixture['teams']['home']['name'],
+                            "away_team": fixture['teams']['away']['name'],
+                            "home_logo": fixture['teams']['home'].get('logo', ''),
+                            "away_logo": fixture['teams']['away'].get('logo', ''),
+                            "home_score": fixture['goals']['home'],
+                            "away_score": fixture['goals']['away'],
+                            "league_id": 45,
+                            "league_name": "FA Cup",
+                            "matchday": fixture['league'].get('round', 'Unknown'),
+                            "status": fixture['fixture']['status']['short'],
+                            "utc_date": datetime.fromisoformat(fixture['fixture']['date'].replace('Z', '+00:00'))
+                        }
+                        
+                        await db.fixtures.update_one(
+                            {"fixture_id": fixture_data["fixture_id"]},
+                            {"$set": fixture_data},
+                            upsert=True
+                        )
+                        inserted_count += 1
+                    
+                    logger.info(f"✅ Fetched {inserted_count} FA Cup fixtures from API")
+                    return {"success": True, "message": f"Fetched {inserted_count} FA Cup fixtures from API-Football"}
+                else:
+                    logger.error(f"API-Football error: {response.status}")
+                    return await seed_fa_cup_manual()
+                    
+    except Exception as e:
+        logger.error(f"Error fetching FA Cup fixtures: {str(e)}")
+        # Fallback to manual seeding
+        return await seed_fa_cup_manual()
+
+
+async def seed_fa_cup_manual():
+    """Fallback: Manually seed FA Cup Third Round fixtures"""
     try:
         from datetime import datetime
         
@@ -448,9 +513,12 @@ async def seed_fa_cup_fixtures():
         ]
         
         result = await db.fixtures.insert_many(fa_cup_fixtures)
-        logger.info(f"✅ Seeded {len(result.inserted_ids)} FA Cup fixtures")
+        logger.info(f"✅ Manually seeded {len(result.inserted_ids)} FA Cup fixtures")
         
-        return {"success": True, "message": f"Seeded {len(result.inserted_ids)} FA Cup Third Round fixtures (4 with Friday results, 2 with penalty winners)"}
+        return {"success": True, "message": f"Manually seeded {len(result.inserted_ids)} FA Cup Third Round fixtures"}
+    except Exception as e:
+        logger.error(f"Error seeding FA Cup fixtures: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         logger.error(f"Error seeding FA Cup fixtures: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
