@@ -3882,6 +3882,62 @@ async def create_test_notification(user_id: str):
     return {"message": "Test notification created", "notification_id": notification['id']}
 
 
+@api_router.post("/admin/update-fixture-status/{fixture_id}")
+async def update_fixture_status(fixture_id: int, status: str):
+    """
+    Admin endpoint to update a fixture's status directly.
+    Use this to mark fixtures as POSTPONED, SCHEDULED, FINISHED, etc.
+    
+    Example: POST /api/admin/update-fixture-status/9000011?status=POSTPONED
+    """
+    valid_statuses = ['SCHEDULED', 'POSTPONED', 'CANCELLED', 'FINISHED', 'ABANDONED', 'TIMED', 'NOT_STARTED']
+    if status.upper() not in valid_statuses:
+        raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {valid_statuses}")
+    
+    result = await db.fixtures.update_one(
+        {"fixture_id": fixture_id},
+        {"$set": {"status": status.upper()}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail=f"Fixture {fixture_id} not found")
+    
+    logger.info(f"✅ Updated fixture {fixture_id} status to {status.upper()}")
+    return {
+        "success": True,
+        "message": f"Fixture {fixture_id} status updated to {status.upper()}",
+        "modified": result.modified_count
+    }
+
+
+@api_router.get("/admin/fix-postponed-fixtures")
+async def fix_postponed_fixtures():
+    """
+    One-time fix: Update Salford City vs Swindon Town to POSTPONED status.
+    Call this endpoint after deployment to fix the production database.
+    """
+    # Update the specific fixture that should be POSTPONED
+    result = await db.fixtures.update_one(
+        {"fixture_id": 9000011},  # Salford City vs Swindon Town
+        {"$set": {
+            "status": "POSTPONED",
+            "home_score": None,
+            "away_score": None
+        }}
+    )
+    
+    if result.matched_count == 0:
+        return {"success": False, "message": "Fixture 9000011 not found in database"}
+    
+    logger.info("✅ Fixed Salford City vs Swindon Town fixture to POSTPONED")
+    return {
+        "success": True,
+        "message": "Salford City vs Swindon Town has been marked as POSTPONED",
+        "fixture_id": 9000011,
+        "modified": result.modified_count
+    }
+
+
 async def create_notification(user_id: str, notification_type: str, title: str, message: str, data: dict = None):
     """Helper function to create a notification"""
     from uuid import uuid4
