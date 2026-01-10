@@ -93,6 +93,7 @@ export function Navbar({ onShowAbout, onShowTerms, onShowRules, onShowTwitter, c
             </Button>
             {currentUser && (
               <>
+                <NotificationBell userId={currentUser.username} />
                 <div className="text-right border-l pl-4 border-white/30 bg-white/10 rounded-lg px-3 py-1">
                   <p className="text-xs text-white font-medium">{t.nav.welcome}, {currentUser.username}</p>
                   <p className="text-sm font-bold text-yellow-300">⚽ {currentUser.total_points} {t.nav.pts}</p>
