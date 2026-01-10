@@ -706,9 +706,12 @@ async def score_all_pending_predictions():
             if fixture.get('status') == 'FINISHED' and fixture.get('home_score') is not None:
                 home_score = fixture.get('home_score')
                 away_score = fixture.get('away_score')
+                penalty_winner = fixture.get('penalty_winner')  # "home", "away", or None
                 
-                # Determine actual result
-                if home_score > away_score:
+                # Determine actual result - check penalty_winner first for knockout matches
+                if penalty_winner:
+                    actual_result = penalty_winner  # "home" or "away" based on penalty shootout
+                elif home_score > away_score:
                     actual_result = 'home'
                 elif away_score > home_score:
                     actual_result = 'away'
@@ -725,7 +728,8 @@ async def score_all_pending_predictions():
                         "result": "correct" if is_correct else "incorrect",
                         "actual_result": actual_result,
                         "home_score": home_score,
-                        "away_score": away_score
+                        "away_score": away_score,
+                        "penalty_winner": penalty_winner
                     }}
                 )
                 scored_count += 1
