@@ -1127,7 +1127,7 @@ function App() {
                                       )}
                                       
                                       {/* Deadline info */}
-                                      {!isLocked && !isFinished && !isAbandoned && (
+                                      {!isLocked && !isFinished && !isAbandoned && !isPostponed && (
                                         <p className="text-xs text-gray-500 text-center">
                                           💡 You can change your prediction until Wed 23:59
                                         </p>
