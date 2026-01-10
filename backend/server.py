@@ -3975,6 +3975,48 @@ async def fix_postponed_fixtures():
     }
 
 
+@api_router.get("/admin/debug-predictions/{user_id}")
+async def debug_user_predictions(user_id: str):
+    """
+    Debug endpoint to see raw prediction data for a user.
+    Helps troubleshoot why predictions might not be showing.
+    """
+    # Get raw predictions without any joins
+    raw_preds = await db.predictions.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
+    
+    # Get FA Cup predictions specifically
+    fa_cup_preds = [p for p in raw_preds if p.get('league_id') == 45]
+    
+    # Check if fixtures exist for these predictions
+    fixture_ids = [p.get('fixture_id') for p in raw_preds]
+    existing_fixtures = await db.fixtures.find(
+        {"fixture_id": {"$in": fixture_ids}},
+        {"_id": 0, "fixture_id": 1, "home_team": 1, "away_team": 1, "league_id": 1, "status": 1}
+    ).to_list(1000)
+    
+    existing_fixture_ids = set(f['fixture_id'] for f in existing_fixtures)
+    missing_fixture_ids = [fid for fid in fixture_ids if fid not in existing_fixture_ids]
+    
+    return {
+        "user_id": user_id,
+        "total_predictions": len(raw_preds),
+        "fa_cup_predictions": len(fa_cup_preds),
+        "fa_cup_details": fa_cup_preds,
+        "predictions_with_missing_fixtures": missing_fixture_ids,
+        "all_predictions_summary": [
+            {
+                "fixture_id": p.get('fixture_id'),
+                "league_id": p.get('league_id'),
+                "prediction": p.get('prediction'),
+                "home_team": p.get('home_team'),
+                "away_team": p.get('away_team'),
+                "fixture_exists": p.get('fixture_id') in existing_fixture_ids
+            }
+            for p in raw_preds
+        ]
+    }
+
+
 async def create_notification(user_id: str, notification_type: str, title: str, message: str, data: dict = None):
     """Helper function to create a notification"""
     from uuid import uuid4
