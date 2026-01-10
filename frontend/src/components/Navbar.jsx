@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, Info, FileText, Twitter, Trophy } from 'lucide-react';
 import { useLanguage } from '@/LanguageContext';
+import { NotificationBell } from '@/components/NotificationBell';
 
 export function Navbar({ onShowAbout, onShowTerms, onShowRules, onShowTwitter, currentUser, onLogout }) {
   const [open, setOpen] = useState(false);
