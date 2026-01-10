@@ -406,15 +406,18 @@ async def get_world_cup_groups():
 
 @api_router.get("/admin/seed-fa-cup")
 async def seed_fa_cup_fixtures():
-    """Fetch FA Cup fixtures from API-Football and seed them with real fixture IDs"""
+    """Fetch FA Cup fixtures from API-Football and seed them with real fixture IDs for auto-updates"""
     try:
         import aiohttp
         from datetime import datetime
         
-        api_key = os.environ.get('FOOTBALL_API_KEY')
+        # Try both possible API key variable names
+        api_key = os.environ.get('API_FOOTBALL_KEY') or os.environ.get('FOOTBALL_API_KEY')
         if not api_key:
-            # Fallback to manual seeding if no API key
+            logger.warning("No API key found, using manual seeding")
             return await seed_fa_cup_manual()
+        
+        logger.info(f"🔑 Using API key to fetch FA Cup fixtures...")
         
         # Delete existing FA Cup fixtures
         deleted = await db.fixtures.delete_many({"league_name": "FA Cup"})
@@ -429,39 +432,60 @@ async def seed_fa_cup_fixtures():
         async with aiohttp.ClientSession() as session:
             # FA Cup league_id = 45, season = 2025
             url = f"https://v3.football.api-sports.io/fixtures?league=45&season=2025"
+            logger.info(f"Fetching from: {url}")
+            
             async with session.get(url, headers=headers) as response:
                 if response.status == 200:
                     data = await response.json()
                     fixtures = data.get('response', [])
                     
+                    if not fixtures:
+                        logger.warning("API returned no fixtures, using manual seeding")
+                        return await seed_fa_cup_manual()
+                    
                     inserted_count = 0
                     for fixture in fixtures:
-                        fixture_data = {
-                            "fixture_id": fixture['fixture']['id'],
-                            "home_team": fixture['teams']['home']['name'],
-                            "away_team": fixture['teams']['away']['name'],
-                            "home_logo": fixture['teams']['home'].get('logo', ''),
-                            "away_logo": fixture['teams']['away'].get('logo', ''),
-                            "home_score": fixture['goals']['home'],
-                            "away_score": fixture['goals']['away'],
-                            "league_id": 45,
-                            "league_name": "FA Cup",
-                            "matchday": fixture['league'].get('round', 'Unknown'),
-                            "status": fixture['fixture']['status']['short'],
-                            "utc_date": datetime.fromisoformat(fixture['fixture']['date'].replace('Z', '+00:00'))
-                        }
-                        
-                        await db.fixtures.update_one(
-                            {"fixture_id": fixture_data["fixture_id"]},
-                            {"$set": fixture_data},
-                            upsert=True
-                        )
-                        inserted_count += 1
+                        try:
+                            # Determine penalty winner from fixture data if available
+                            penalty_winner = None
+                            penalties = fixture.get('score', {}).get('penalty', {})
+                            if penalties.get('home') is not None and penalties.get('away') is not None:
+                                if penalties['home'] > penalties['away']:
+                                    penalty_winner = 'home'
+                                elif penalties['away'] > penalties['home']:
+                                    penalty_winner = 'away'
+                            
+                            fixture_data = {
+                                "fixture_id": fixture['fixture']['id'],
+                                "home_team": fixture['teams']['home']['name'],
+                                "away_team": fixture['teams']['away']['name'],
+                                "home_logo": fixture['teams']['home'].get('logo', ''),
+                                "away_logo": fixture['teams']['away'].get('logo', ''),
+                                "home_score": fixture['goals']['home'],
+                                "away_score": fixture['goals']['away'],
+                                "league_id": 45,
+                                "league_name": "FA Cup",
+                                "matchday": fixture['league'].get('round', 'Unknown'),
+                                "status": fixture['fixture']['status']['short'],
+                                "penalty_winner": penalty_winner,
+                                "utc_date": datetime.fromisoformat(fixture['fixture']['date'].replace('Z', '+00:00'))
+                            }
+                            
+                            await db.fixtures.update_one(
+                                {"fixture_id": fixture_data["fixture_id"]},
+                                {"$set": fixture_data},
+                                upsert=True
+                            )
+                            inserted_count += 1
+                        except Exception as fix_err:
+                            logger.error(f"Error processing fixture: {fix_err}")
+                            continue
                     
-                    logger.info(f"✅ Fetched {inserted_count} FA Cup fixtures from API")
-                    return {"success": True, "message": f"Fetched {inserted_count} FA Cup fixtures from API-Football"}
+                    logger.info(f"✅ Fetched {inserted_count} FA Cup fixtures from API with REAL IDs - will auto-update!")
+                    return {"success": True, "message": f"Fetched {inserted_count} FA Cup fixtures from API-Football with real IDs. Results will now auto-update!"}
                 else:
-                    logger.error(f"API-Football error: {response.status}")
+                    error_text = await response.text()
+                    logger.error(f"API-Football error: {response.status} - {error_text}")
                     return await seed_fa_cup_manual()
                     
     except Exception as e:
