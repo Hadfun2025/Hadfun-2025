@@ -1571,6 +1571,22 @@ function App() {
           onProfileCompleted={handleProfileCompleted}
         />
       )}
+
+      {/* Admin Dashboard Modal */}
+      {showAdminDashboard && (
+        <AdminDashboard onClose={() => setShowAdminDashboard(false)} />
+      )}
+
+      {/* Admin Button - Only visible to admin users */}
+      {currentUser && ADMIN_USERS.includes(currentUser.username?.toLowerCase()) && (
+        <button
+          onClick={() => setShowAdminDashboard(true)}
+          className="fixed bottom-4 right-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all z-40"
+          title="Admin Dashboard"
+        >
+          <BarChart3 className="h-6 w-6" />
+        </button>
+      )}
     </div>
   );
 }
