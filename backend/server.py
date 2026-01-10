@@ -811,8 +811,12 @@ async def update_match_results():
                     # Determine actual result
                     home_score = fixture['home_score']
                     away_score = fixture['away_score']
+                    penalty_winner = fixture.get('penalty_winner')  # "home", "away", or None
                     
-                    if home_score > away_score:
+                    # Check penalty_winner first for knockout matches
+                    if penalty_winner:
+                        actual_result = penalty_winner
+                    elif home_score > away_score:
                         actual_result = 'home'
                     elif away_score > home_score:
                         actual_result = 'away'
@@ -828,7 +832,7 @@ async def update_match_results():
                     # Score each prediction
                     for pred in predictions:
                         is_correct = pred['prediction'] == actual_result
-                        points = 3 if is_correct else 0
+                        points = 0  # No points per prediction - only matchday winners get points
                         
                         await db.predictions.update_one(
                             {"id": pred['id']},
