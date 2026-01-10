@@ -3863,6 +3863,140 @@ async def create_notification(user_id: str, notification_type: str, title: str, 
     return notification
 
 
+# ========== MATCH RESCHEDULING WITH NOTIFICATIONS ==========
+
+@api_router.post("/admin/reschedule-match/{fixture_id}")
+async def reschedule_postponed_match(fixture_id: int, new_date: str, new_time: str = None):
+    """
+    Reschedule a postponed match and notify all users who have predictions on it.
+    
+    Args:
+        fixture_id: The fixture ID to reschedule
+        new_date: New date in format YYYY-MM-DD
+        new_time: Optional new time in format HH:MM (24-hour format). If not provided, keeps original time.
+    """
+    try:
+        # Find the fixture
+        fixture = await db.fixtures.find_one({"fixture_id": fixture_id})
+        if not fixture:
+            raise HTTPException(status_code=404, detail="Fixture not found")
+        
+        # Check if it was postponed
+        old_status = fixture.get('status', '')
+        if old_status != 'POSTPONED':
+            logger.warning(f"Rescheduling fixture {fixture_id} that wasn't POSTPONED (was {old_status})")
+        
+        # Parse the new date
+        from datetime import datetime as dt
+        old_date = fixture.get('utc_date')
+        
+        # Parse new datetime
+        if new_time:
+            new_datetime = dt.strptime(f"{new_date} {new_time}", "%Y-%m-%d %H:%M")
+        else:
+            # Keep original time if available
+            if isinstance(old_date, datetime):
+                original_time = old_date.strftime("%H:%M")
+            elif isinstance(old_date, str):
+                original_time = old_date.split('T')[1][:5] if 'T' in old_date else "15:00"
+            else:
+                original_time = "15:00"
+            new_datetime = dt.strptime(f"{new_date} {original_time}", "%Y-%m-%d %H:%M")
+        
+        # Update the fixture
+        result = await db.fixtures.update_one(
+            {"fixture_id": fixture_id},
+            {"$set": {
+                "utc_date": new_datetime,
+                "status": "SCHEDULED",
+                "rescheduled_from": old_date.isoformat() if isinstance(old_date, datetime) else old_date
+            }}
+        )
+        
+        if result.modified_count == 0:
+            raise HTTPException(status_code=400, detail="Failed to update fixture")
+        
+        # Find all users who have predictions on this fixture
+        predictions = await db.predictions.find({"fixture_id": fixture_id}).to_list(1000)
+        users_to_notify = set(pred['user_id'] for pred in predictions)
+        
+        # Also notify all users who have selected this league
+        # (they might want to make predictions on the rescheduled match)
+        home_team = fixture.get('home_team', 'Team A')
+        away_team = fixture.get('away_team', 'Team B')
+        league_name = fixture.get('league_name', 'League')
+        
+        # Format the new date nicely
+        formatted_date = new_datetime.strftime("%A %d %B at %H:%M")
+        
+        # Create notifications for users with predictions
+        notification_count = 0
+        for user_id in users_to_notify:
+            await create_notification(
+                user_id=user_id,
+                notification_type="match_rescheduled",
+                title="Match Rescheduled! 📅",
+                message=f"{home_team} vs {away_team} has been rescheduled to {formatted_date}. Your prediction is still valid!",
+                data={
+                    "fixture_id": fixture_id,
+                    "home_team": home_team,
+                    "away_team": away_team,
+                    "new_date": new_datetime.isoformat(),
+                    "league": league_name
+                }
+            )
+            notification_count += 1
+        
+        logger.info(f"✅ Rescheduled fixture {fixture_id} to {new_datetime} and notified {notification_count} users")
+        
+        return {
+            "success": True,
+            "message": f"Match rescheduled to {formatted_date}",
+            "fixture_id": fixture_id,
+            "new_date": new_datetime.isoformat(),
+            "users_notified": notification_count
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error rescheduling match: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+async def notify_users_of_rescheduled_match(fixture_id: int, home_team: str, away_team: str, new_date: datetime, league_name: str):
+    """
+    Helper function to notify users when a postponed match is rescheduled.
+    Called automatically when fixture status changes from POSTPONED to SCHEDULED.
+    """
+    try:
+        # Find all users who have predictions on this fixture
+        predictions = await db.predictions.find({"fixture_id": fixture_id}).to_list(1000)
+        users_to_notify = set(pred['user_id'] for pred in predictions)
+        
+        formatted_date = new_date.strftime("%A %d %B at %H:%M")
+        
+        for user_id in users_to_notify:
+            await create_notification(
+                user_id=user_id,
+                notification_type="match_rescheduled",
+                title="Match Rescheduled! 📅",
+                message=f"{home_team} vs {away_team} has been rescheduled to {formatted_date}. Your prediction is still valid!",
+                data={
+                    "fixture_id": fixture_id,
+                    "home_team": home_team,
+                    "away_team": away_team,
+                    "new_date": new_date.isoformat(),
+                    "league": league_name
+                }
+            )
+        
+        return len(users_to_notify)
+    except Exception as e:
+        logger.error(f"Error notifying users of rescheduled match: {str(e)}")
+        return 0
+
+
 # ========== STRIPE PAYMENT ENDPOINTS ==========
 
 @api_router.post("/stripe/create-checkout")
