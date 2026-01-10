@@ -956,7 +956,7 @@ async def update_all_historical_results():
         scored_predictions = 0
         
         # All supported leagues
-        league_ids = [39, 40, 179, 140, 78, 135, 61, 94, 88, 203, 253, 71, 239]
+        league_ids = [39, 40, 179, 140, 78, 135, 61, 94, 88, 203, 253, 71, 239, 45]
         service = get_active_football_service()
         
         # Season start: August 1, 2024 through today
@@ -4500,7 +4500,7 @@ async def live_match_update():
         logger.info("🔴 Checking for live matches...")
         
         # All leagues
-        league_ids = [39, 40, 179, 140, 78, 135, 61, 94, 88, 203, 253, 71, 239]
+        league_ids = [39, 40, 179, 140, 78, 135, 61, 94, 88, 203, 253, 71, 239, 45]
         
         service = get_active_football_service()
         
@@ -4564,7 +4564,7 @@ async def automated_result_update():
         # ALL leagues including NEW ones: Premier League, La Liga, Bundesliga, Serie A, Ligue 1, 
         # Eredivisie, Primeira Liga, Championship, Scottish Premiership, Turkish Süper Lig, MLS, Brazilian Serie A, Colombian Liga
         # British Isles, European, then Rest of World
-        league_ids = [39, 40, 179, 140, 78, 135, 61, 94, 88, 203, 253, 71, 239]
+        league_ids = [39, 40, 179, 140, 78, 135, 61, 94, 88, 203, 253, 71, 239, 45]
         
         updated_count = 0
         scored_predictions = 0
