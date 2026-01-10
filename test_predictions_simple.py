@@ -11,7 +11,7 @@ def test_prediction_functionality():
     """Test prediction creation and update with fixture details"""
     print("=== Testing Prediction Functionality ===")
     
-    base_url = "https://goaltracker-208.preview.emergentagent.com"
+    base_url = "https://gameforecast-4.preview.emergentagent.com"
     api_url = f"{base_url}/api"
     
     try:

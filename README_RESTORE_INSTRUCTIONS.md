@@ -24,7 +24,7 @@ sudo supervisorctl restart all
 ```
 
 ### Your app will be live at:
-https://goaltracker-208.preview.emergentagent.com
+https://gameforecast-4.preview.emergentagent.com
 
 ---
 

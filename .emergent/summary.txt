@@ -1,159 +1,181 @@
 <analysis>**original_problem_statement:**
-The user wants to improve a full-stack football prediction application. The main goals that emerged during the session were:
-1.  Resolve a critical, persistent issue where deployments to the production site () appeared to wipe all user and prediction data, and break login functionality.
-2.  Fix a bug where the Team Leaderboard was empty on the production site, showing No predictions yet even though users had made predictions.
-3.  Implement a more detailed, matchday-specific leaderboard view to correctly display user scores across different weeks.
-4.  Add a visual indicator for matches that are Abandoned.
-5.  Fix a bug where images pasted into the Community feed were not displaying correctly.
-6.  Correct the scores for several Championship matches.
+The user's primary goal is to enhance and stabilize a full-stack football prediction application.
 
-PRODUCT REQUIREMENTS:
-- The application must have a stable deployment process that does not wipe production data.
-- The leaderboard must correctly display all user predictions, grouped by league and matchday.
-- The UI must clearly indicate when a match has been abandoned.
-- Users must be able to paste images into the Community feed and have them display correctly.
-- All match scores must be accurate.
+Key objectives from the previous session included resolving critical deployment issues causing apparent data loss and fixing a broken production leaderboard.
+
+During this session, the user requested several new features and fixes:
+- Implement a new leaderboard scoring system: 3 points for a matchday's sole winner, 1 point for each user in a tie.
+- Add support for the FA Cup, including fixtures for the current weekend.
+- Add support for the World Cup 2026, including group information.
+- Clear all existing user predictions to start fresh.
+- Sort league fixtures to show the most recent matchday first.
+- Handle knockout tournament fixtures (like the FA Cup) by treating the penalty shootout winner as the match winner for predictions.
+- Correctly display a POSTPONED status for matches that are not played.
+- Implement an admin-only analytics dashboard to track key metrics like DAU, WAU, user retention, and feature usage.
+- Ensure FA Cup results are updated automatically without manual intervention.
 
 **User's preferred language**: English
 
 **what currently exists?**
-The application is a full-stack React/FastAPI/MongoDB app. The production environment () is currently in a broken state from the user's perspective, although the underlying data is intact.
-
-A major breakthrough revealed that user data was **NOT being wiped** on deployment. Instead, two core issues were at play:
-1.  **Leaderboard Bug:** The leaderboard code in  was skipping any predictions that didn't have a  field, which was the case for all production data. A fix for this has been implemented in the preview environment but is not yet deployed.
-2.  **Deployment Configuration Error:** A critical issue was identified (via another agent session) in . The application was using  without , causing environment variables injected in production (like the correct MongoDB URL) to be overwritten by the local  file. This likely caused the app to connect to the wrong database post-deployment, creating the illusion of data loss.
-
-The preview environment contains fixes for the leaderboard bug, the abandoned match UI, and the community image paste bug.
+A full-stack application using React, FastAPI, and MongoDB. The critical deployment bug from the previous session ( override) was confirmed to be resolved. The application now includes:
+- A new leaderboard system with the 3/1 point scoring logic.
+- Startup seeding logic in  that automatically adds World Cup groups and FA Cup fixtures to the database if they are missing. This was implemented to ensure data consistency between preview and production environments.
+- An admin endpoint () to manually trigger the FA Cup fixture seeding.
+- Backend and frontend logic to correctly score predictions for knockout matches that go to penalties.
+- An admin-only analytics dashboard accessible via a button in the UI, displaying various user engagement metrics using Recharts/Chart.js.
+- Conditional sorting for fixtures: regular leagues show the newest matchday first, while tournaments (World Cup, FA Cup) are shown in chronological order.
 
 **Last working item**:
-- **Last item agent was working:** The agent was about to apply a critical fix to the MongoDB connection logic in , as instructed by the user who provided the solution from another agent session. This fix involves changing  to a more robust block of code that uses  and correctly parses the database name from the .
+- **Last item agent was working:** The user reported that a postponed match (Salford City vs Swindon Town) was incorrectly showing as Predictions locked. The agent acknowledged the need to add a MATCH POSTPONED status to the UI.
 - **Status:** NOT STARTED
 - **Agent Testing Done:** N
-- **Which testing method agent to use?** Backend testing agent. After the fix, the agent should restart the backend, verify it connects to the database correctly by checking logs and querying data. Then, a carefully managed deployment to production is required, followed by verification on the live site.
+- **Which testing method agent to use?** Frontend testing agent. The agent should verify that after updating the fixture status in the database to POSTPONED, the frontend UI correctly displays MATCH POSTPONED instead of the prediction buttons or a locked status.
 - **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   Issue 1: Critical Deployment Configuration Error (P0)
--   Issue 2: Production Leaderboard is empty (P1)
+-   Issue 1: Display MATCH POSTPONED status for postponed games (P0)
+-   Issue 2: FA Cup score automation is unreliable (P1)
+-   Issue 3: Admin Analytics Dashboard button may be hidden (P2)
 
 **Issues Detail:**
--   **Issue 1: Critical Deployment Configuration Error (P0)**
-    -   **Attempted fixes:** The agent tried numerous solutions like creating JSON backups, reverting frontend changes, and guiding the user through DNS changes. All of these failed because they did not address the root cause.
+-   **Issue 1: Display MATCH POSTPONED status for postponed games (P0)**
+    -   **Attempted fixes:** None. The agent was about to start this when the session ended.
     -   **Next debug checklist:**
-        1.  Locate the MongoDB connection logic near the top of .
-        2.  Replace the existing  and  lines with the new code block provided by the user in the last messages. This new block correctly uses  and parses the database URL.
-        3.  Restart the backend and check the logs to ensure it's connecting to the correct database.
-        4.  Coordinate with the user for a deployment, ensuring they use Replace Deployment to preserve the database.
-    -   **Why fix this issue and what will be achieved with the fix?** This is the root cause of all deployment-related problems, including apparent data loss and login failures. Fixing this will create a stable deployment pipeline, preserving production data and functionality.
+        1.  Modify the fixture data for Salford City vs Swindon Town in  to include a status of POSTPONED.
+        2.  Update the frontend component (likely ) that renders fixtures. Add conditional logic to check for .
+        3.  If the status is POSTPONED, render a clear visual indicator like a disabled badge saying MATCH POSTPONED instead of the prediction buttons.
+    -   **Why fix this issue and what will be achieved with the fix?** To provide users with accurate and clear information about the status of matches, avoiding confusion.
     -   **Status:** NOT STARTED
-    -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Backend (logs and API calls), followed by full E2E verification on the production site post-deployment.
-    -   **Blocked on other issue:** None. This is the main blocker.
-
--   **Issue 2: Production Leaderboard is empty (P1)**
-    -   **Attempted fixes:** A fix has been implemented in the preview environment's . The code was modified to handle predictions where the  field is , assigning them to a default Current matchday.
-    -   **Next debug checklist:** The code for this fix is already written. The task is to ensure it gets deployed to production as part of the next successful deployment (after Issue 1 is resolved).
-    -   **Why fix this issue and what will be achieved with the fix?** This will make the primary feature of the Team page (the leaderboard) functional on the production site, showing users their scores.
-    -   **Status:** IN PROGRESS (Fixed in preview, pending deployment)
     -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** Frontend (visual confirmation on the production site).
-    -   **Blocked on other issue:** Issue 1: Critical Deployment Configuration Error.
+    -   **Should Test frontend/backend/both after fix?** Frontend.
+    -   **Blocked on other issue:** None.
+
+-   **Issue 2: FA Cup score automation is unreliable (P1)**
+    -   **Attempted fixes:** The agent attempted to make FA Cup results update automatically by fetching real fixture IDs from API-Football. However, due to the API key not being immediately available or configured under the expected variable name, the system defaulted to a manual seeding mechanism. The user repeatedly had to ask for results to be updated.
+    -   **Next debug checklist:**
+        1.  Verify that the  is correctly read from  in the  function in .
+        2.  Ensure the code successfully fetches fixtures from API-Football and replaces the manually seeded ones (with fixture IDs starting at 9000000).
+        3.  Confirm that the  for FA Cup (45) is included in the list of leagues processed by the automated score-checking scheduler ().
+    -   **Why fix this issue and what will be achieved with the fix?** This will eliminate the need for manual intervention to update FA Cup scores, making the app more reliable and reducing user frustration.
+    -   **Status:** IN PROGRESS
+    -   **Is recurring issue?** Y
+    -   **Should Test frontend/backend/both after fix?** Backend.
+    -   **Blocked on other issue:** None.
+
+-   **Issue 3: Admin Analytics Dashboard button may be hidden (P2)**
+    -   **Attempted fixes:** None. The agent implemented the dashboard but the final screenshot test was inconclusive about the button's visibility, with the agent speculating it was hidden behind other elements.
+    -   **Next debug checklist:**
+        1.  Log in as an admin user ().
+        2.  Take a screenshot of the main application page.
+        3.  If the admin button is not visible, inspect the CSS (z-index, position) of the button and surrounding elements in .
+        4.  Adjust the styling to ensure the button is always visible and clickable for admin users.
+    -   **Why fix this issue and what will be achieved with the fix?** To make the newly implemented analytics feature accessible to the admin.
+    -   **Status:** USER VERIFICATION PENDING
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** Frontend.
+    -   **Blocked on other issue:** None.
 
 **In progress Task List**:
 -   None.
 
 **Upcoming and Future Tasks**
--   **(P0) Apply Critical Deployment Fix:** Implement the environment variable override fix in .
--   **(P1) Deploy and Verify All Fixes:** Once the deployment process is stable, deploy all the changes currently waiting in the preview environment, including the leaderboard fix, the Abandoned match UI, the image paste fix, and the corrected scores.
--   **(P2) Implement New Leaderboard Design:** The user wants to replace the current separate tables per matchday leaderboard with a consolidated table showing points per matchday in columns. The user will provide a drawing of the desired design.
--   **(P3) Investigate Live Score Update Rate:** The user questioned why scores appear to be updating instantly, not every two minutes as configured. This requires an investigation of the  setup in .
--   **(P4) Recreate Missing Users and Team:** The Cheshunt Crew team and users  and  are missing from the production database. They need to be recreated.
+- **Upcoming Tasks:**
+  - **Refactor  (P1):** The  file has grown to over 6,000 lines. It should be broken down into smaller, more focused modules (e.g., a  directory for endpoints, a  directory for business logic, and a  directory for seeding information).
+- **Future Tasks:**
+  - **Investigate score update rate (P2):** A previous user request to investigate why scores appear to update instantly instead of every two minutes (as configured in ) was not addressed.
+  - **Admin Score Update UI (P3):** The agent suggested creating a simple admin UI to update individual match scores directly, which would be a more robust solution than repeatedly modifying the backend code.
 
 **Completed work in this session**
--   **CRITICAL DISCOVERY:** Established that production data was **not being lost**, but was inaccessible due to a combination of a leaderboard bug and a critical deployment configuration error.
--   **Leaderboard Bug Fix (Preview):** Modified  to correctly process and display predictions that were missing a  field.
--   **Abandoned Match UI (Preview):** Updated  to show a MATCH ABANDONED status and disable prediction buttons for such games.
--   **Image Paste Fix (Preview):** Fixed a bug in  to ensure pasted images are stored with a full, absolute URL, allowing them to be displayed correctly.
--   **Score Updates (Preview):** Corrected the final scores for several Championship matches in the  file and the database.
--   **User/Team Recreation (Preview):** Manually recreated users and the Cheshunt Crew team in the preview database after they were thought to be lost.
+- **New Leaderboard Implemented:** A new leaderboard with a 3/1 point scoring system (3 for sole winner, 1 for tied) was created and is functional.
+- **Data Reset:** All user predictions were successfully cleared from the database for a fresh start, while preserving user accounts and teams.
+- **FA Cup Integration:** Added the FA Cup league and fixtures. Implemented a seeding mechanism and an admin endpoint to add/update match data. Logic to handle penalty shootout winners was also added.
+- **World Cup Integration:** Added World Cup 2026 groups via a startup seeding script.
+- **Fixture Sorting Reworked:** Fixtures for regular leagues are now sorted with the most recent matchday first, while tournament fixtures are sorted chronologically.
+- **Admin Analytics Dashboard:** A comprehensive, admin-only analytics dashboard was created, including backend endpoints to aggregate data and a new frontend component using  to display metrics.
+- **UI/UX Fixes:** Removed incorrect point display on individual predictions and added display logic for penalty shootout results.
 
 **Earlier issues found/mentioned but not fixed**
--   None. All identified issues are captured in the pending/upcoming lists.
+- **Score update rate:** An issue from the previous handoff regarding the score update interval was never investigated.
 
 **Known issue recurrence from previous fork**
--   **Issue recurrence in previous fork:** User losing database state after forking.
--   **Recurrence count:** High. This was the central theme of this entire session as well.
--   **Status:** IN PROGRESS. The root cause has been identified (improper  loading), and a fix is about to be applied.
+- **Issue recurrence in previous fork:** User losing database state after forking.
+- **Recurrence count:** High in previous sessions.
+- **Status:** RESOLVED. The root cause was identified as an  file override issue and confirmed fixed. A related but different issue of data missing in production (due to separate databases) was also resolved in this session by implementing startup data seeding.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Production vs. Preview Environments:** The core of the problem was the separate and distinct nature of the preview and production databases.
--   **Environment Variable Precedence:** A critical lesson learned is that production environments inject their own environment variables (e.g., ).  is essential to prevent local  files from overwriting these crucial production variables.
--   **Defensive Coding:** The leaderboard bug () highlighted the need to write code that can handle incomplete or legacy data schemas gracefully.
+- **Startup Data Seeding:** A pattern was established to add data (World Cup groups, FA Cup fixtures) to the database on application startup if it's not already present. This solves the problem of data being available in the preview environment but not in production after a deployment.
+- **Admin Endpoints:** Specialized API routes (e.g., ) were created to allow for manual administrative actions on the production server without needing to modify code.
+- **Monolithic Backend:** The  file acts as a single monolith containing the entire backend application, which is becoming difficult to maintain.
+- **Conditional Sorting:** Frontend logic was implemented to sort fixtures differently based on whether they belong to a regular league (newest first) or a knockout tournament (chronological).
 
 **key DB schema**
--   ****: Production data for this collection was discovered to be missing the  field, which was the root cause of the leaderboard bug.
--   ****: Contains user data. Users  and  are missing from production.
--   ****: The  team is missing from production.
+- ****: Added  field to handle knockout matches.
+- ****: New collection to store World Cup group data.
+- ****: New collection to store aggregated points for the new leaderboard system.
 
 **changes in tech stack**
--   None.
+- **Frontend:** Added , , and  for the analytics dashboard.
 
 **All files of reference**
--   ****: The most important file. It contains the leaderboard logic and the critical deployment bug. It is the target for the next immediate action.
--   ****: Contains the UI for displaying fixtures and leaderboards.
--   ****: Contains the code for rendering the team leaderboard.
+- : The most critical and most modified file. Contains all backend logic.
+- : The main frontend component, heavily modified for UI changes.
+- : The new analytics dashboard component.
+- : The component that renders the team leaderboard.
 
-**Areas that need refactoring**:
-- The  loading mechanism, while a clever workaround for slow startup, was also the cause of a data-wiping incident. Once the deployment pipeline is stable, this approach should be re-evaluated in favor of a robust database backup/restore strategy managed at the platform level.
+**Areas that need refactoring**
+- **:** This file is critically oversized and complex. It urgently needs to be broken down into a proper structure with separate files/directories for routes, services, data models, and database connections. This will improve maintainability and reduce the risk of introducing bugs.
 
 **key api endpoints**
--   : The endpoint responsible for fetching leaderboard data. It was bugged but has a fix waiting in preview.
--   : This endpoint was discovered to be missing entirely from  at one point, causing login failures. It has since been restored.
+- : The new endpoint for the redesigned leaderboard.
+- : Manually triggers seeding of FA Cup fixtures.
+- : Endpoint for the user analytics overview.
+- : Endpoint for user retention data.
+- : Endpoint for feature usage data.
+- : Endpoint for peak usage times.
 
 **Critical Info for New Agent**
--   **DO NOT DEPLOY** until the critical environment variable fix is applied and verified.
--   The #1 priority is to apply the  fix in  as provided by the user in the final messages. This is the key to stabilizing the entire application.
--   Production data (users, predictions) is **SAFE and INTACT** on the live server. It is not being displayed due to the leaderboard bug. Do not assume data is lost.
--   Preview and Production are **separate environments with separate databases**. Changes in preview are NOT live until a successful deployment.
--   After applying the critical fix, the next step is to deploy the accumulated fixes (leaderboard, UI changes) to production. Coordinate this with the user.
+- The user now self-deploys via a Re-Deploy button. Your instructions must be clear. Post-deployment actions, like visiting a seeding URL, are sometimes required.
+- The FA Cup automation is not fully reliable. The system has a fallback to manually hardcoded fixtures in . The primary goal should be to make the API-Football integration robust so manual updates are no longer needed.
+- The  file is a monolith. Be extremely careful when editing it. The next major task should be to propose a refactoring plan to the user.
+- The application uses separate databases for preview and production. Any data added in the preview environment must be explicitly seeded into production using the startup scripts or an admin endpoint.
 
 **documents and test reports created in this job**
--   
--   
--   
+- 
+- 
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Asks for step-by-step instructions to roll back a deployment to fix data loss. (Agent provided instructions).
-2.  **User:** States rollback is not an option as the only available point is from before new users joined. (Data loss seems real).
-3.  **User:** Provides email addresses for the lost users, asking the agent to recreate them and their predictions.
-4.  **User:** Expresses extreme frustration after the agent cannot recreate the predictions, stating it's the agent's mistake.
-5.  **User:** Sends a screenshot from their phone showing predictions ARE visible on the production site! **This proves data was not lost.**
-6.  **User:** Confirms the leaderboard on production says No predictions yet, which confirms the issue is a bug, not data loss.
-7.  **User:** Confirms they will wait for support to ensure deployment is safe, asks for clarification on the matchday-specific leaderboard implementation.
-8.  **User:** Proposes a new, more complex leaderboard design and says they will provide a drawing.
-9.  **User:** Forwards the detailed email they sent to support, asking the agent if they can escalate it.
-10. **User:** Forwards a critical fix from another agent session (footyforecast-11) and asks the current agent to apply it immediately.
+1.  **User:** Asks if FA Cup results can be automated without them prompting. (Agent agrees and attempts to implement automation).
+2.  **User:** Reports the automation didn't work and results are not showing.
+3.  **User:** Reports more results are in, but a specific FA Cup match (Newcastle vs Bournemouth) is missing.
+4.  **User:** Clarifies that Newcastle vs Bournemouth was an FA Cup match, not a league match.
+5.  **User:** Reports that more results are in and some are incorrect on the app (Salford game not showing as postponed, another score missing).
+6.  **User:** Acknowledges results are showing now but points out that the Salford vs Swindon game should say Match postponed. (This is the current task).
+7.  **User:** Asks to integrate key performance metrics for app engagement and retention. (Agent agrees).
+8.  **User:** Confirms the analytics should be admin-only and include all suggested metrics. (Agent implements).
+9.  **User:** Reports the latest FA cup results are not showing in the app. (Agent investigates and provides manual update steps).
+10. **User:** Corrects the agent on penalty shootout results that were wrongly updated (Wrexham/Oxford games).
 
 **Project Health Check:**
--   **Broken:** The main feature on production (the leaderboard) is non-functional due to a bug. The deployment process is unsafe and has been the source of extreme user frustration.
+- **Broken:** The UI does not correctly handle POSTPONED match statuses.
+- **Mocked:** The FA Cup fixture/score update process is brittle and not fully automated. It relies on a manual seeding process and hardcoded data in , which has repeatedly required user prompting and agent intervention.
 
 **3rd Party Integrations**
--   **API-Football:** Used to fetch fixture, score, and standings data.
--   **IONOS:** User's domain provider.
+- **API-Football:** Used for fetching live scores and fixture data. The integration is functional for most leagues but has proven unreliable for the manually-added FA Cup fixtures.
+- **Recharts / Chart.js:** Newly added to the frontend to render graphs for the admin analytics dashboard.
 
 **Testing status**
--   **Testing agent used after significant changes:** NO (for the final set of fixes).
--   **Troubleshoot agent used after agent stuck in loop:** YES.
--   **Test files created:** None.
--   **Known regressions:** Deployments have been consistently breaking the application or causing apparent data loss due to a root configuration issue.
+- **Testing agent used after significant changes:** YES, once at the beginning for the new leaderboard feature.
+- **Troubleshoot agent used after agent stuck in loop:** NO.
+- **Test files created:** None.
+- **Known regressions:** None.
 
 **Credentials to test flow:**
--   **Username:** 
+- **Admin User:**  (password is known from previous sessions, but can be reset if needed).
+- **API Key:** The  is present in .
 
 **What agent forgot to execute**
--   The agent repeatedly forgot that the preview and production environments have separate databases, leading to incorrect conclusions about data loss.
--   The agent failed to identify the root cause of the deployment issues (the  configuration) and only learned of it when the user provided the fix from an external source.
--   The agent mistakenly instructed the user to deploy an update which caused a data wipe scare, without first warning them of the risks it had observed in previous deployments.</analysis>
+- The agent did not investigate the score update interval issue (instant vs. every 2 minutes) that was carried over from the previous handoff summary.
+- The agent did not conclusively verify that the admin dashboard button was visible and functional in the UI, leaving its status as possibly hidden.</analysis>
