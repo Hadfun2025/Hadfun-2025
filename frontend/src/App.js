@@ -1116,13 +1116,23 @@ function App() {
                                         </div>
                                       )}
                                       
+                                      {/* Postponed Match - Show special message */}
+                                      {isPostponed && (
+                                        <div className="text-center p-3 bg-gray-100 rounded-lg mb-4 border border-gray-300">
+                                          <p className="text-xs text-gray-600 font-semibold mb-1">📅 MATCH POSTPONED</p>
+                                          <p className="text-sm text-gray-600">
+                                            This match has been postponed. A new date will be announced.
+                                          </p>
+                                        </div>
+                                      )}
+                                      
                                       {/* Deadline info */}
                                       {!isLocked && !isFinished && !isAbandoned && (
                                         <p className="text-xs text-gray-500 text-center">
                                           💡 You can change your prediction until Wed 23:59
                                         </p>
                                       )}
-                                      {isLocked && !isFinished && !isAbandoned && (
+                                      {isLocked && !isFinished && !isAbandoned && !isPostponed && (
                                         <p className="text-xs text-red-600 text-center font-medium">
                                           🔒 Predictions locked
                                         </p>
