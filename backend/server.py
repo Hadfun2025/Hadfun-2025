@@ -6295,3 +6295,7 @@ async def get_peak_usage_times():
         logger.error(f"Peak times error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
+# Include main API router at the END after all endpoints are defined
+app.include_router(api_router)
+
