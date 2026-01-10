@@ -4475,9 +4475,6 @@ async def get_team_invitations(team_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# Include main API router
-app.include_router(api_router)
-
 # Include new modular routes for social features
 posts_router.set_db(db)
 auth_router.set_db(db)
