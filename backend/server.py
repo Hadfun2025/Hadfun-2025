@@ -4620,8 +4620,12 @@ async def automated_result_update():
                 # Determine actual result
                 home_score = fixture['home_score']
                 away_score = fixture['away_score']
+                penalty_winner = fixture.get('penalty_winner')  # "home", "away", or None
                 
-                if home_score > away_score:
+                # Check penalty_winner first for knockout matches
+                if penalty_winner:
+                    actual_result = penalty_winner
+                elif home_score > away_score:
                     actual_result = 'home'
                 elif away_score > home_score:
                     actual_result = 'away'
