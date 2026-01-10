@@ -5934,3 +5934,367 @@ async def emergency_restore_data():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+# ============================================
+# ADMIN ANALYTICS DASHBOARD ENDPOINTS
+# ============================================
+
+@api_router.get("/admin/analytics/overview")
+async def get_analytics_overview():
+    """Get comprehensive analytics overview - Admin only"""
+    try:
+        now = datetime.now(timezone.utc)
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        week_ago = now - timedelta(days=7)
+        month_ago = now - timedelta(days=30)
+        
+        # Total users
+        total_users = await db.users.count_documents({})
+        
+        # Daily Active Users (users who made predictions today)
+        dau = await db.predictions.distinct("user_id", {
+            "created_at": {"$gte": today_start.isoformat()}
+        })
+        
+        # Weekly Active Users
+        wau = await db.predictions.distinct("user_id", {
+            "created_at": {"$gte": week_ago.isoformat()}
+        })
+        
+        # Monthly Active Users
+        mau = await db.predictions.distinct("user_id", {
+            "created_at": {"$gte": month_ago.isoformat()}
+        })
+        
+        # Total predictions
+        total_predictions = await db.predictions.count_documents({})
+        predictions_today = await db.predictions.count_documents({
+            "created_at": {"$gte": today_start.isoformat()}
+        })
+        predictions_this_week = await db.predictions.count_documents({
+            "created_at": {"$gte": week_ago.isoformat()}
+        })
+        
+        # Total teams
+        total_teams = await db.teams.count_documents({})
+        
+        # Prediction accuracy
+        correct_predictions = await db.predictions.count_documents({"result": "correct"})
+        incorrect_predictions = await db.predictions.count_documents({"result": "incorrect"})
+        total_scored = correct_predictions + incorrect_predictions
+        accuracy_rate = (correct_predictions / total_scored * 100) if total_scored > 0 else 0
+        
+        return {
+            "users": {
+                "total": total_users,
+                "dau": len(dau),
+                "wau": len(wau),
+                "mau": len(mau)
+            },
+            "predictions": {
+                "total": total_predictions,
+                "today": predictions_today,
+                "this_week": predictions_this_week,
+                "accuracy_rate": round(accuracy_rate, 1)
+            },
+            "teams": {
+                "total": total_teams
+            },
+            "engagement": {
+                "predictions_per_user": round(total_predictions / total_users, 1) if total_users > 0 else 0,
+                "active_user_rate": round(len(mau) / total_users * 100, 1) if total_users > 0 else 0
+            }
+        }
+    except Exception as e:
+        logger.error(f"Analytics overview error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/admin/analytics/user-activity")
+async def get_user_activity_trends():
+    """Get user activity trends over time"""
+    try:
+        now = datetime.now(timezone.utc)
+        
+        # Get daily activity for the last 30 days
+        daily_activity = []
+        for i in range(30, -1, -1):
+            day = now - timedelta(days=i)
+            day_start = day.replace(hour=0, minute=0, second=0, microsecond=0)
+            day_end = day_start + timedelta(days=1)
+            
+            # Users active that day
+            active_users = await db.predictions.distinct("user_id", {
+                "created_at": {
+                    "$gte": day_start.isoformat(),
+                    "$lt": day_end.isoformat()
+                }
+            })
+            
+            # Predictions made that day
+            predictions_count = await db.predictions.count_documents({
+                "created_at": {
+                    "$gte": day_start.isoformat(),
+                    "$lt": day_end.isoformat()
+                }
+            })
+            
+            # New signups that day
+            new_users = await db.users.count_documents({
+                "created_at": {
+                    "$gte": day_start.isoformat(),
+                    "$lt": day_end.isoformat()
+                }
+            })
+            
+            daily_activity.append({
+                "date": day_start.strftime("%Y-%m-%d"),
+                "day_name": day_start.strftime("%a"),
+                "active_users": len(active_users),
+                "predictions": predictions_count,
+                "new_signups": new_users
+            })
+        
+        return {"daily_activity": daily_activity}
+    except Exception as e:
+        logger.error(f"User activity error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/admin/analytics/league-popularity")
+async def get_league_popularity():
+    """Get prediction counts by league"""
+    try:
+        # Aggregate predictions by league
+        pipeline = [
+            {"$group": {
+                "_id": "$league_name",
+                "prediction_count": {"$sum": 1},
+                "unique_users": {"$addToSet": "$user_id"}
+            }},
+            {"$project": {
+                "league": "$_id",
+                "prediction_count": 1,
+                "unique_users_count": {"$size": "$unique_users"}
+            }},
+            {"$sort": {"prediction_count": -1}}
+        ]
+        
+        results = await db.predictions.aggregate(pipeline).to_list(50)
+        
+        league_stats = []
+        for r in results:
+            if r.get('league'):
+                league_stats.append({
+                    "league": r['league'],
+                    "predictions": r['prediction_count'],
+                    "users": r['unique_users_count']
+                })
+        
+        return {"league_popularity": league_stats}
+    except Exception as e:
+        logger.error(f"League popularity error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/admin/analytics/user-retention")
+async def get_user_retention():
+    """Get user retention metrics"""
+    try:
+        now = datetime.now(timezone.utc)
+        
+        # Get all users with their creation date and last activity
+        users = await db.users.find({}, {"_id": 0, "id": 1, "username": 1, "created_at": 1}).to_list(10000)
+        
+        retention_data = {
+            "total_users": len(users),
+            "active_last_7_days": 0,
+            "active_last_30_days": 0,
+            "inactive_users": 0,
+            "user_cohorts": []
+        }
+        
+        week_ago = now - timedelta(days=7)
+        month_ago = now - timedelta(days=30)
+        
+        for user in users:
+            user_id = user['id']
+            
+            # Find user's last prediction
+            last_prediction = await db.predictions.find_one(
+                {"user_id": user_id},
+                {"_id": 0, "created_at": 1},
+                sort=[("created_at", -1)]
+            )
+            
+            if last_prediction:
+                last_active = last_prediction.get('created_at', '')
+                if last_active >= week_ago.isoformat():
+                    retention_data["active_last_7_days"] += 1
+                if last_active >= month_ago.isoformat():
+                    retention_data["active_last_30_days"] += 1
+                else:
+                    retention_data["inactive_users"] += 1
+            else:
+                retention_data["inactive_users"] += 1
+        
+        # Calculate retention rates
+        total = retention_data["total_users"]
+        if total > 0:
+            retention_data["retention_7_day"] = round(retention_data["active_last_7_days"] / total * 100, 1)
+            retention_data["retention_30_day"] = round(retention_data["active_last_30_days"] / total * 100, 1)
+            retention_data["churn_rate"] = round(retention_data["inactive_users"] / total * 100, 1)
+        
+        return retention_data
+    except Exception as e:
+        logger.error(f"User retention error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/admin/analytics/top-users")
+async def get_top_users():
+    """Get top users by various metrics"""
+    try:
+        # Top predictors (most predictions)
+        pipeline = [
+            {"$group": {
+                "_id": "$user_id",
+                "username": {"$first": "$username"},
+                "total_predictions": {"$sum": 1},
+                "correct_predictions": {
+                    "$sum": {"$cond": [{"$eq": ["$result", "correct"]}, 1, 0]}
+                }
+            }},
+            {"$project": {
+                "user_id": "$_id",
+                "username": 1,
+                "total_predictions": 1,
+                "correct_predictions": 1,
+                "accuracy": {
+                    "$cond": [
+                        {"$gt": ["$total_predictions", 0]},
+                        {"$multiply": [{"$divide": ["$correct_predictions", "$total_predictions"]}, 100]},
+                        0
+                    ]
+                }
+            }},
+            {"$sort": {"total_predictions": -1}},
+            {"$limit": 10}
+        ]
+        
+        top_predictors = await db.predictions.aggregate(pipeline).to_list(10)
+        
+        # Format results
+        for user in top_predictors:
+            user['accuracy'] = round(user.get('accuracy', 0), 1)
+        
+        # Top accuracy (minimum 10 predictions)
+        accuracy_pipeline = [
+            {"$group": {
+                "_id": "$user_id",
+                "username": {"$first": "$username"},
+                "total_predictions": {"$sum": 1},
+                "correct_predictions": {
+                    "$sum": {"$cond": [{"$eq": ["$result", "correct"]}, 1, 0]}
+                }
+            }},
+            {"$match": {"total_predictions": {"$gte": 10}}},
+            {"$project": {
+                "user_id": "$_id",
+                "username": 1,
+                "total_predictions": 1,
+                "correct_predictions": 1,
+                "accuracy": {
+                    "$multiply": [{"$divide": ["$correct_predictions", "$total_predictions"]}, 100]
+                }
+            }},
+            {"$sort": {"accuracy": -1}},
+            {"$limit": 10}
+        ]
+        
+        top_accuracy = await db.predictions.aggregate(accuracy_pipeline).to_list(10)
+        
+        for user in top_accuracy:
+            user['accuracy'] = round(user.get('accuracy', 0), 1)
+        
+        return {
+            "top_predictors": top_predictors,
+            "top_accuracy": top_accuracy
+        }
+    except Exception as e:
+        logger.error(f"Top users error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/admin/analytics/feature-usage")
+async def get_feature_usage():
+    """Get feature usage statistics"""
+    try:
+        # Count various feature usages
+        total_posts = await db.posts.count_documents({})
+        total_comments = await db.comments.count_documents({}) if 'comments' in await db.list_collection_names() else 0
+        total_team_messages = await db.team_messages.count_documents({})
+        total_nominations = await db.nominations.count_documents({}) if 'nominations' in await db.list_collection_names() else 0
+        
+        # Predictions by league type
+        fa_cup_predictions = await db.predictions.count_documents({"league_name": "FA Cup"})
+        world_cup_predictions = await db.predictions.count_documents({"league_name": {"$regex": "World Cup", "$options": "i"}})
+        premier_league_predictions = await db.predictions.count_documents({"league_name": {"$regex": "Premier", "$options": "i"}})
+        
+        return {
+            "community": {
+                "posts": total_posts,
+                "comments": total_comments,
+                "team_messages": total_team_messages
+            },
+            "predictions_by_competition": {
+                "premier_league": premier_league_predictions,
+                "fa_cup": fa_cup_predictions,
+                "world_cup": world_cup_predictions
+            },
+            "nominations": total_nominations
+        }
+    except Exception as e:
+        logger.error(f"Feature usage error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/admin/analytics/peak-times")
+async def get_peak_usage_times():
+    """Get peak usage times (hour of day analysis)"""
+    try:
+        # Aggregate predictions by hour
+        pipeline = [
+            {"$project": {
+                "hour": {"$hour": {"$dateFromString": {"dateString": "$created_at"}}}
+            }},
+            {"$group": {
+                "_id": "$hour",
+                "count": {"$sum": 1}
+            }},
+            {"$sort": {"_id": 1}}
+        ]
+        
+        hourly_data = await db.predictions.aggregate(pipeline).to_list(24)
+        
+        # Fill in missing hours with 0
+        hour_counts = {h['_id']: h['count'] for h in hourly_data}
+        peak_times = []
+        for hour in range(24):
+            peak_times.append({
+                "hour": hour,
+                "label": f"{hour:02d}:00",
+                "predictions": hour_counts.get(hour, 0)
+            })
+        
+        # Find peak hour
+        peak_hour = max(peak_times, key=lambda x: x['predictions']) if peak_times else None
+        
+        return {
+            "hourly_distribution": peak_times,
+            "peak_hour": peak_hour
+        }
+    except Exception as e:
+        logger.error(f"Peak times error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
