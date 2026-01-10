@@ -1089,6 +1089,7 @@ function App() {
                                   const userPrediction = userPred?.prediction;
                                   const isFinished = fixture.status === 'FINISHED' || fixture.status === 'FINISHED_AET';
                                   const isAbandoned = fixture.status === 'ABANDONED';
+                                  const isPostponed = fixture.status === 'POSTPONED';
                                   const hasScore = fixture.score && fixture.score.home !== null && fixture.score.home !== undefined;
                                   const hasPenaltyWinner = fixture.penalty_winner;
                                   
