@@ -1082,9 +1082,10 @@ function App() {
                                 {(() => {
                                   const isLocked = isPredictionLocked(fixture.utc_date);
                                   const userPrediction = userPred?.prediction;
-                                  const isFinished = fixture.status === 'FINISHED';
+                                  const isFinished = fixture.status === 'FINISHED' || fixture.status === 'FINISHED_AET';
                                   const isAbandoned = fixture.status === 'ABANDONED';
                                   const hasScore = fixture.score && fixture.score.home !== null && fixture.score.home !== undefined;
+                                  const hasPenaltyWinner = fixture.penalty_winner;
                                   
                                   return (
                                     <div className="space-y-2 mt-4">
@@ -1094,6 +1095,7 @@ function App() {
                                           <p className="text-xs text-blue-600 font-semibold mb-1">⚽ FINAL SCORE</p>
                                           <p className="text-2xl font-bold text-blue-900">
                                             {fixture.score.home} - {fixture.score.away}
+                                            {hasPenaltyWinner && <span className="text-sm ml-2">(Pens: {hasPenaltyWinner === 'home' ? fixture.home_team : fixture.away_team} win)</span>}
                                           </p>
                                         </div>
                                       )}
