@@ -881,6 +881,24 @@ async def update_match_results():
         transformed = service.transform_to_standard_format(all_fixtures)
         
         for fixture in transformed:
+            # Check if this is a rescheduled match (was POSTPONED, now SCHEDULED or TIMED)
+            existing_fixture = await db.fixtures.find_one({"fixture_id": fixture['fixture_id']})
+            if existing_fixture and existing_fixture.get('status') == 'POSTPONED' and fixture['status'] in ['SCHEDULED', 'TIMED', 'NOT_STARTED']:
+                # This match was rescheduled! Notify users
+                logger.info(f"📅 Detected rescheduled match: {fixture['home_team']} vs {fixture['away_team']}")
+                new_date = fixture.get('utc_date')
+                if isinstance(new_date, str):
+                    from datetime import datetime as dt
+                    new_date = dt.fromisoformat(new_date.replace('Z', '+00:00'))
+                
+                await notify_users_of_rescheduled_match(
+                    fixture_id=fixture['fixture_id'],
+                    home_team=fixture['home_team'],
+                    away_team=fixture['away_team'],
+                    new_date=new_date,
+                    league_name=fixture.get('league_name', 'League')
+                )
+            
             # Only process finished matches with scores
             if fixture['status'] == 'FINISHED' and fixture.get('home_score') is not None:
                 # Update fixture in database
