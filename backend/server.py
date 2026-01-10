@@ -1770,6 +1770,7 @@ async def create_or_update_prediction(pred: PredictionCreate):
 async def get_user_predictions(user_id: str):
     """Get all predictions for a user with fixture details"""
     # Use aggregation to join predictions with fixtures
+    # Use $lookup with preserveNullAndEmptyArrays to keep predictions even if fixture not found
     pipeline = [
         {"$match": {"user_id": user_id}},
         {"$lookup": {
@@ -1778,12 +1779,48 @@ async def get_user_predictions(user_id: str):
             "foreignField": "fixture_id",
             "as": "fixture_data"
         }},
-        {"$unwind": "$fixture_data"},
-        {"$sort": {"fixture_data.match_date": 1}}
+        {"$unwind": {
+            "path": "$fixture_data",
+            "preserveNullAndEmptyArrays": True  # Keep predictions even without fixture match
+        }},
+        {"$addFields": {
+            # Use fixture data if available, otherwise use prediction's own fields
+            "home_team": {"$ifNull": ["$fixture_data.home_team", "$home_team"]},
+            "away_team": {"$ifNull": ["$fixture_data.away_team", "$away_team"]},
+            "league_name": {"$ifNull": ["$fixture_data.league_name", "$league"]},
+            "league": {"$ifNull": ["$fixture_data.league_name", "$league"]},
+            "status": {"$ifNull": ["$fixture_data.status", "$status"]},
+            "home_score": {"$ifNull": ["$fixture_data.home_score", "$home_score"]},
+            "away_score": {"$ifNull": ["$fixture_data.away_score", "$away_score"]},
+            "utc_date": {"$ifNull": ["$fixture_data.utc_date", "$match_date"]},
+            "score": {
+                "home": {"$ifNull": ["$fixture_data.home_score", "$home_score"]},
+                "away": {"$ifNull": ["$fixture_data.away_score", "$away_score"]}
+            }
+        }},
+        {"$project": {
+            "fixture_data": 0  # Remove the joined data from output
+        }},
+        {"$sort": {"match_date": -1}}  # Most recent first
     ]
     
     results = await db.predictions.aggregate(pipeline).to_list(length=1000)
-    return [Prediction(**{**r, "_id": str(r["_id"])}) if "_id" in r else Prediction(**r) for r in results]
+    
+    # Convert _id to string if present
+    cleaned_results = []
+    for r in results:
+        if "_id" in r:
+            r["_id"] = str(r["_id"])
+        try:
+            cleaned_results.append(Prediction(**r))
+        except Exception as e:
+            # If validation fails, return raw data with minimal cleaning
+            logger.warning(f"Prediction validation error: {e}")
+            if "_id" in r:
+                del r["_id"]
+            cleaned_results.append(r)
+    
+    return cleaned_results
 
 
 
