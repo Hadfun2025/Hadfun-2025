@@ -1147,57 +1147,57 @@ function App() {
                                         <Button
                                           data-testid={`predict-home-${fixture.fixture_id}`}
                                           onClick={() =>
-                                            !isLocked && !isAbandoned && handlePredict(
+                                            !isLocked && !isAbandoned && !isPostponed && handlePredict(
                                               fixture.fixture_id,
                                               'home',
                                               fixture.league_id,
                                               fixture.utc_date
                                             )
                                           }
-                                          disabled={isLocked || isAbandoned}
+                                          disabled={isLocked || isAbandoned || isPostponed}
                                           className={`${
                                             userPrediction === 'home' 
                                               ? 'bg-green-700 ring-4 ring-green-300 font-bold' 
                                               : 'bg-green-600 hover:bg-green-700'
-                                          } ${isLocked || isAbandoned ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                          } ${isLocked || isAbandoned || isPostponed ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         >
                                           {userPrediction === 'home' ? '✓ ' : ''}{t.predict.home}
                                         </Button>
                                         <Button
                                           data-testid={`predict-away-${fixture.fixture_id}`}
                                           onClick={() =>
-                                            !isLocked && !isAbandoned && handlePredict(
+                                            !isLocked && !isAbandoned && !isPostponed && handlePredict(
                                               fixture.fixture_id,
                                               'away',
                                               fixture.league_id,
                                               fixture.utc_date
                                             )
                                           }
-                                          disabled={isLocked || isAbandoned}
+                                          disabled={isLocked || isAbandoned || isPostponed}
                                           className={`${
                                             userPrediction === 'away' 
                                               ? 'bg-red-700 ring-4 ring-red-300 font-bold' 
                                               : 'bg-red-600 hover:bg-red-700'
-                                          } ${isLocked || isAbandoned ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                          } ${isLocked || isAbandoned || isPostponed ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         >
                                           {userPrediction === 'away' ? '✓ ' : ''}{t.predict.away}
                                         </Button>
                                         <Button
                                           data-testid={`predict-draw-${fixture.fixture_id}`}
                                           onClick={() =>
-                                            !isLocked && !isAbandoned && handlePredict(
+                                            !isLocked && !isAbandoned && !isPostponed && handlePredict(
                                               fixture.fixture_id,
                                               'draw',
                                               fixture.league_id,
                                               fixture.utc_date
                                             )
                                           }
-                                          disabled={isLocked || isAbandoned}
+                                          disabled={isLocked || isAbandoned || isPostponed}
                                           className={`${
                                             userPrediction === 'draw' 
                                               ? 'bg-amber-600 ring-4 ring-amber-300 font-bold' 
                                               : 'bg-amber-500 hover:bg-amber-600'
-                                          } ${isLocked || isAbandoned ? 'opacity-50 cursor-not-allowed' : ''} text-white`}
+                                          } ${isLocked || isAbandoned || isPostponed ? 'opacity-50 cursor-not-allowed' : ''} text-white`}
                                         >
                                           {userPrediction === 'draw' ? '✓ ' : ''}{t.predict.draw}
                                         </Button>
