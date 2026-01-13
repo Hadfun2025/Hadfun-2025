@@ -14,6 +14,24 @@ export const translations = {
       points: "points",
       language: "Language"
     },
+    // Legal Footer
+    footer: {
+      legalText: "HadFun is free-to-play. No purchase is required to play. Optional charity donations are separate from gameplay and do not affect results.",
+      shortInfo: "Free-to-play. Donations are optional and don't affect results."
+    },
+    // Onboarding
+    onboarding: {
+      title: "Welcome to HadFun",
+      intro: "HadFun is free-to-play. You can make predictions, compete with friends and chat in leagues — just for fun.",
+      charityInfo: "You can also support charity with optional donations, but donating is not required and does not affect scores, rankings, or results.",
+      keyPoints: "Key Points:",
+      point1: "100% free to play",
+      point2: "No payment required",
+      point3: "Donations are optional & separate from gameplay",
+      point4: "For entertainment only",
+      acceptButton: "I understand – Let's play",
+      termsNote: "By continuing, you agree to our Terms of Service and Privacy Policy."
+    },
     // Tabs
     tabs: {
       fixtures: "Fixtures",
@@ -39,7 +57,7 @@ export const translations = {
       profileSetupRequired: "Profile setup required for posting and commenting",
       refreshPage: "Refresh Page",
       predictionBanner: "HadFun Football Predictions",
-      predictionSubtitle: "Make predictions, win prizes, compete with friends",
+      predictionSubtitle: "Make predictions, compete with friends - free to play!",
       goToPredictions: "Go to Predictions →",
       // Create Post
       createPost: "Create a Post",
