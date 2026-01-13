@@ -1013,10 +1013,15 @@ function App() {
                     const isTournament = tournamentLeagues.some(t => group.leagueName.includes(t));
                     
                     group.fixtures.sort((a, b) => {
+                      // Handle null dates - put them at the end
+                      if (!a.utc_date && !b.utc_date) return 0;
+                      if (!a.utc_date) return 1;
+                      if (!b.utc_date) return -1;
+                      
                       const dateA = new Date(a.utc_date);
                       const dateB = new Date(b.utc_date);
-                      // Tournaments: earliest first, Regular leagues: most recent first
-                      return isTournament ? dateA - dateB : dateB - dateA;
+                      // Tournaments: earliest first, Regular leagues: earliest first within matchday
+                      return dateA - dateB;
                     });
                   });
 
