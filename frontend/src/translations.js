@@ -2066,6 +2066,29 @@ export const translations = {
       lastUpdated: "Dernière mise à jour",
       terms: "Conditions d'Utilisation",
       termsIntro: "En accédant ou en utilisant HadFun, vous acceptez ces Conditions d'Utilisation. HadFun est une plateforme de prédiction de football et de communauté sociale qui combine divertissement sportif et dons caritatifs.",
+      disclaimer: {
+        title: "HadFun – Avertissement",
+        intro: "HadFun est un jeu social de prédiction de football uniquement pour le divertissement.",
+        points: [
+          "Les joueurs s'affrontent en comparant leurs scores de prédictions au sein de leur propre équipe.",
+          "HadFun n'est pas une société de paris, un casino ou une \"banque\".",
+          "HadFun ne fixe pas de cotes, et les utilisateurs ne jouent pas contre l'application.",
+          "Les équipes peuvent jouer gratuitement."
+        ],
+        optionalStakesTitle: "Mises Optionnelles (Si Votre Équipe Le Choisit)",
+        optionalStakesPoints: [
+          "Certaines équipes peuvent choisir de jouer avec une mise optionnelle allant jusqu'à 5 £ par joueur.",
+          "Toute mise est un accord privé entre les membres de l'équipe.",
+          "HadFun ne facture pas de commission, de frais ou ne prend aucun pourcentage."
+        ],
+        noMoneyTitle: "Aucune Manipulation d'Argent",
+        noMoneyText: "HadFun ne détient, ne collecte, ne traite ni ne distribue d'argent. Tous les paiements, prix ou dons caritatifs sont gérés directement par les utilisateurs.",
+        teamSizeTitle: "Taille de l'Équipe",
+        teamSizeText: "Les équipes sont limitées à un maximum de 30 membres.",
+        fairPlayTitle: "Fair Play",
+        fairPlayText: "HadFun est une application communautaire conviviale. Les abus ou comportements inappropriés peuvent entraîner une exclusion de la plateforme.",
+        agreement: "En utilisant HadFun, vous acceptez de jouer de manière responsable et acceptez cet avertissement."
+      },
       termsPoints: [
         "Éligibilité: Vous devez avoir 13+ pour utiliser la plateforme, 18+ pour les compétitions payantes et les dons. Consentement parental requis pour les utilisateurs de 13-17 ans.",
         "Sécurité du Compte: Vous êtes responsable de la confidentialité de vos identifiants. Un compte par personne - pas de doublons autorisés.",
