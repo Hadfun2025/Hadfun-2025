@@ -498,29 +498,26 @@ export const translations = {
       title: "Terms of Service & Privacy Policy",
       lastUpdated: "Last Updated",
       terms: "Terms of Service",
-      termsIntro: "By accessing or using HadFun, you agree to be bound by these Terms of Service. HadFun is a football prediction and social community platform that combines sports entertainment with charitable giving.",
-      disclaimer: {
-        title: "HadFun – App Disclaimer",
-        intro: "HadFun is a social football prediction game for entertainment only.",
-        points: [
-          "Players compete by comparing prediction scores within their own team.",
-          "HadFun is not a betting company, casino, or \"house\".",
-          "HadFun does not set odds, and users are not playing against the app.",
-          "Teams can play for free."
-        ],
-        optionalStakesTitle: "Optional Stakes (If Your Team Chooses)",
-        optionalStakesPoints: [
-          "Some teams may choose to play with an optional stake of up to £5 per player.",
-          "Any stake is a private agreement between team members.",
-          "HadFun does not charge commission, fees, or take any cut."
-        ],
-        noMoneyTitle: "No Money Handling",
-        noMoneyText: "HadFun does not hold, collect, process, or distribute money. Any payments, prizes, or charity donations are handled directly by users.",
-        teamSizeTitle: "Team Size",
-        teamSizeText: "Teams are limited to a maximum of 30 members.",
-        fairPlayTitle: "Fair Play",
-        fairPlayText: "HadFun is a friendly community app. Abuse or inappropriate behaviour may lead to removal from the platform.",
-        agreement: "By using HadFun you agree to play responsibly and accept this disclaimer."
+      termsIntro: "By accessing or using HadFun, you agree to be bound by these Terms of Service. HadFun is a free-to-play football prediction game for entertainment and social interaction.",
+      // Free-to-Play Disclaimer (NEW)
+      freePlayDisclaimer: {
+        title: "HadFun – Free-to-Play & Charity Donations",
+        intro: "HadFun is a free-to-play football prediction game created purely for fun and social interaction.",
+        point1: "No payment is required to play HadFun.",
+        point2: "HadFun does not operate as a lottery or a betting service.",
+        point3: "HadFun does not offer cash prizes based on match outcomes or predictions.",
+        charityTitle: "Charity Support",
+        charityIntro: "HadFun allows users to optionally donate to selected charities.",
+        charityPoint1: "Donations are voluntary",
+        charityPoint2: "Donations are separate from gameplay",
+        charityPoint3: "Donating does not affect scores, rankings, results, or chances of winning",
+        importantTitle: "Important Notice",
+        importantText: "HadFun is intended as entertainment only. Please play responsibly. If you choose to donate, please donate only what you can afford."
+      },
+      // Not Gambling Statement (NEW)
+      notGambling: {
+        title: "Not Gambling / Not Betting",
+        text: "HadFun is a free-to-play prediction game. No purchase is required. We do not offer betting, wagering, or prize-based gambling."
       },
       termsPoints: [
         "Eligibility: You must be 13+ to use the platform, 18+ for paid competitions and charity donations. Parental consent required for users 13-17.",
