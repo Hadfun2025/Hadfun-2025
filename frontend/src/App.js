@@ -969,10 +969,21 @@ function App() {
                     grouped[key].fixtures.push(fixture);
                   });
 
-                  // Sort groups by league and earliest date (chronological order)
-                  // Determine if league is a tournament (World Cup, FA Cup) - show chronologically
-                  // Regular leagues (Premier League, etc.) - show most recent first
+                  // Sort groups by league and matchday number
+                  // Regular leagues (Premier League, etc.) - show in ascending matchday order (21, 22, 23, 24)
+                  // Tournaments (World Cup, FA Cup) - show chronologically
                   const tournamentLeagues = ['World Cup', 'FA Cup', 'UEFA Champions League', 'UEFA Europa League', 'UEFA Conference League'];
+                  
+                  // Helper to extract matchday number
+                  const getMatchdayNum = (matchday) => {
+                    if (!matchday) return 0;
+                    const parts = String(matchday).split(/\s+/);
+                    for (let i = parts.length - 1; i >= 0; i--) {
+                      const num = parseInt(parts[i], 10);
+                      if (!isNaN(num)) return num;
+                    }
+                    return 0;
+                  };
                   
                   const sortedGroups = Object.values(grouped).sort((a, b) => {
                     if (a.leagueName !== b.leagueName) {
@@ -983,15 +994,17 @@ function App() {
                     const isTournament = tournamentLeagues.some(t => a.leagueName.includes(t));
                     
                     if (isTournament) {
-                      // Tournaments: chronological order (Group Stage 1, 2, 3 or Round 1, 2, etc.)
-                      const earliestDateA = new Date(Math.min(...a.fixtures.map(f => new Date(f.utc_date))));
-                      const earliestDateB = new Date(Math.min(...b.fixtures.map(f => new Date(f.utc_date))));
-                      return earliestDateA - earliestDateB; // Ascending: earliest matchday first
+                      // Tournaments: chronological order by date (earliest first)
+                      const getEarliestDate = (fixtures) => {
+                        const dates = fixtures.filter(f => f.utc_date).map(f => new Date(f.utc_date).getTime());
+                        return dates.length > 0 ? Math.min(...dates) : Infinity;
+                      };
+                      return getEarliestDate(a.fixtures) - getEarliestDate(b.fixtures);
                     } else {
-                      // Regular leagues: most recent matchday first
-                      const latestDateA = new Date(Math.max(...a.fixtures.map(f => new Date(f.utc_date))));
-                      const latestDateB = new Date(Math.max(...b.fixtures.map(f => new Date(f.utc_date))));
-                      return latestDateB - latestDateA; // Descending: newest matchday first
+                      // Regular leagues: sort by matchday NUMBER ascending (21, 22, 23, 24)
+                      const matchdayA = getMatchdayNum(a.matchday);
+                      const matchdayB = getMatchdayNum(b.matchday);
+                      return matchdayA - matchdayB; // Ascending order
                     }
                   });
 
