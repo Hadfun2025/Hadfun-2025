@@ -1241,8 +1241,9 @@ async def get_fixtures(
                 
                 logger.info(f"📅 Fetching fixtures without date filter (days_ahead={days_ahead})")
         
-        # Get fixtures from database - sort by date ascending (upcoming first)
-        fixtures_cursor = db.fixtures.find(query).sort("utc_date", 1)  # Ascending - upcoming first
+        # Get fixtures from database - sort by date DESCENDING (most recent first)
+        # This shows the latest matchday at the top, older matchdays as you scroll
+        fixtures_cursor = db.fixtures.find(query).sort("utc_date", -1)  # Descending - newest first
         fixtures = await fixtures_cursor.to_list(length=None)
         
         logger.info(f"📊 Fetched {len(fixtures)} total fixtures")
