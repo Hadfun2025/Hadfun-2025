@@ -1250,7 +1250,6 @@ async def get_fixtures(
         fixtures = await fixtures_cursor.to_list(length=None)
         
         # Sort fixtures by matchday number ASCENDING (21, 22, 23, 24)
-        # This ensures you see the most recent completed matchday first, then upcoming
         def get_matchday_num(f):
             md = f.get('matchday', '0')
             # Extract number from matchday string (e.g., "21" or "Regular Season - 21")
@@ -1263,11 +1262,8 @@ async def get_fixtures(
             except:
                 return 0
         
-        # Sort by matchday ascending, then by date ascending within each matchday
-        fixtures.sort(key=lambda f: (
-            -get_matchday_num(f),  # Negative for descending matchday (24, 23, 22, 21)
-            f.get('utc_date') or datetime.min  # Then by date ascending within matchday
-        ), reverse=True)  # Reverse to get ascending matchday order (21, 22, 23, 24)
+        # Simple ascending sort by matchday number (21, 22, 23, 24)
+        fixtures.sort(key=lambda f: get_matchday_num(f))
         
         logger.info(f"📊 Fetched {len(fixtures)} total fixtures, sorted by matchday ascending")
         
