@@ -1227,24 +1227,40 @@ async def get_fixtures(
                 query["utc_date"] = {"$gte": now.replace(tzinfo=None)}
             else:
                 # For full season (365 days), go back to start of season
-                # For "Next X weeks" view (days_ahead < 180), show all fixtures
-                # NOTE: Date filtering removed - some future matchdays have null dates
-                # All fixtures will be returned, sorted with most recent dated fixtures first
+                # For "Next X weeks" view (days_ahead < 180), filter out old fixtures
                 if days_ahead >= 180:  # Full season or long range
-                    # No date filter for full season - show everything including fixtures without dates
-                    pass  # No utc_date filter
+                    # No date filter for full season - show everything
+                    pass
                 else:
                     # For "Next 2 weeks" or "Next 4 weeks" view
-                    # Don't filter by date - include fixtures without dates (future matchdays)
-                    pass  # No utc_date filter
+                    # Filter out old fixtures but keep fixtures without dates (future matchdays)
+                    now = datetime.now(timezone.utc).replace(tzinfo=None)
+                    cutoff_date = now - timedelta(days=7)  # Show last 7 days of results
+                    
+                    # Query: either no date (future matchday) OR date >= cutoff
+                    query["$or"] = [
+                        {"utc_date": None},  # Future matchdays without dates
+                        {"utc_date": {"$gte": cutoff_date}}  # Recent/upcoming with dates
+                    ]
                 
-                logger.info(f"📅 Fetching all fixtures (days_ahead={days_ahead})")
+                logger.info(f"📅 Fetching fixtures with date filter (days_ahead={days_ahead})")
         
-        # Get fixtures from database - sort by date DESCENDING (most recent first)
-        # NOTE: Some fixtures may have null utc_date (e.g., future matchdays not yet scheduled)
-        # We include ALL fixtures and sort nulls last
-        fixtures_cursor = db.fixtures.find(query).sort("utc_date", -1)  # Descending - newest first
+        # Get fixtures from database
+        # Sort by matchday (extracted number) to get proper order: 21, 22, 23, 24
+        fixtures_cursor = db.fixtures.find(query)
         fixtures = await fixtures_cursor.to_list(length=None)
+        
+        # Sort fixtures: by matchday number ascending (21, 22, 23, 24)
+        def get_matchday_num(f):
+            md = f.get('matchday', '0')
+            # Extract number from matchday string (e.g., "21" or "Regular Season - 21")
+            try:
+                parts = str(md).split()
+                return int(parts[-1]) if parts else 0
+            except:
+                return 0
+        
+        fixtures.sort(key=lambda f: (get_matchday_num(f), f.get('utc_date') or datetime.max))
         
         logger.info(f"📊 Fetched {len(fixtures)} total fixtures")
         
