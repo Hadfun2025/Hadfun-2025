@@ -4068,54 +4068,43 @@ async def get_fixture_stats():
     finished = await db.fixtures.count_documents({"status": "FINISHED"})
     postponed = await db.fixtures.count_documents({"status": "POSTPONED"})
     
-    # Count upcoming (next 4 weeks)
-    upcoming = await db.fixtures.count_documents({
-        "utc_date": {"$gte": today, "$lte": today + timedelta(days=28)}
-    })
-    
-    # Count recent (last 7 days)
-    recent = await db.fixtures.count_documents({
-        "utc_date": {"$gte": today - timedelta(days=7), "$lt": today}
-    })
-    
-    # Get date range of all fixtures
-    oldest = await db.fixtures.find_one({"utc_date": {"$ne": None}}, sort=[("utc_date", 1)])
-    newest = await db.fixtures.find_one({"utc_date": {"$ne": None}}, sort=[("utc_date", -1)])
+    # Get a sample fixture to check date format
+    sample = await db.fixtures.find_one({"utc_date": {"$ne": None}})
+    sample_date = sample.get('utc_date') if sample else None
+    sample_date_type = type(sample_date).__name__ if sample_date else "None"
     
     # Get unique leagues
     leagues = await db.fixtures.distinct("league_name")
     
-    # Sample of upcoming fixtures
-    upcoming_samples = await db.fixtures.find(
-        {"utc_date": {"$gte": today}},
-        {"_id": 0, "home_team": 1, "away_team": 1, "utc_date": 1, "league_name": 1, "matchday": 1}
-    ).sort("utc_date", 1).limit(10).to_list(10)
+    # Get ALL fixtures for Premier League (league_id 39) to check dates
+    pl_fixtures = await db.fixtures.find(
+        {"league_id": 39},
+        {"_id": 0, "home_team": 1, "away_team": 1, "utc_date": 1, "matchday": 1, "status": 1}
+    ).sort("utc_date", -1).limit(20).to_list(20)
     
     return {
         "server_time": now.isoformat(),
+        "server_date": now.strftime("%Y-%m-%d"),
         "total_fixtures": total,
         "by_status": {
             "scheduled": scheduled,
             "finished": finished,
             "postponed": postponed
         },
-        "by_timeframe": {
-            "upcoming_4_weeks": upcoming,
-            "recent_7_days": recent
-        },
-        "date_range": {
-            "oldest": str(oldest.get('utc_date')) if oldest else None,
-            "newest": str(newest.get('utc_date')) if newest else None
+        "date_format_check": {
+            "sample_date_value": str(sample_date),
+            "sample_date_type": sample_date_type
         },
         "leagues_in_db": leagues,
-        "upcoming_fixtures_sample": [
+        "premier_league_fixtures": [
             {
-                "date": str(f.get('utc_date'))[:16] if f.get('utc_date') else "N/A",
+                "date": str(f.get('utc_date')),
+                "date_type": type(f.get('utc_date')).__name__,
                 "match": f"{f.get('home_team')} vs {f.get('away_team')}",
-                "league": f.get('league_name'),
-                "matchday": f.get('matchday')
+                "matchday": f.get('matchday'),
+                "status": f.get('status')
             }
-            for f in upcoming_samples
+            for f in pl_fixtures
         ]
     }
 
