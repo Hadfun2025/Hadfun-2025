@@ -4247,6 +4247,73 @@ async def fix_missing_fixture_dates(league_id: int = 39):
     }
 
 
+@api_router.post("/admin/set-matchday-dates")
+async def set_matchday_dates(league_id: int, matchday: str, start_date: str, time: str = "15:00"):
+    """
+    Manually set dates for all fixtures in a matchday.
+    Distributes fixtures across the weekend (Sat/Sun) starting from start_date.
+    
+    Example: /api/admin/set-matchday-dates?league_id=39&matchday=22&start_date=2026-01-14&time=15:00
+    
+    This will set:
+    - 4 fixtures on Jan 14 (Tue) at various times
+    - 4 fixtures on Jan 15 (Wed) at various times
+    - 2 fixtures on Jan 16 (Thu) at various times
+    """
+    from datetime import datetime, timedelta
+    
+    try:
+        base_date = datetime.strptime(start_date, "%Y-%m-%d")
+        base_time = datetime.strptime(time, "%H:%M")
+    except ValueError as e:
+        return {"error": f"Invalid date format: {e}. Use YYYY-MM-DD for date and HH:MM for time"}
+    
+    # Find fixtures for this matchday
+    fixtures = await db.fixtures.find(
+        {"league_id": league_id, "matchday": matchday},
+        {"_id": 0, "fixture_id": 1, "home_team": 1, "away_team": 1}
+    ).to_list(20)
+    
+    if not fixtures:
+        return {"error": f"No fixtures found for league {league_id}, matchday {matchday}"}
+    
+    # Typical Premier League schedule:
+    # Day 1 (Sat): 12:30, 15:00 x3, 17:30
+    # Day 2 (Sun): 14:00, 14:00, 16:30
+    # Day 3 (Mon): 20:00
+    schedule = [
+        (0, "12:30"), (0, "15:00"), (0, "15:00"), (0, "15:00"), (0, "17:30"),
+        (1, "14:00"), (1, "14:00"), (1, "16:30"),
+        (2, "20:00"), (2, "20:00")
+    ]
+    
+    updated = []
+    for i, fixture in enumerate(fixtures):
+        day_offset, kick_off = schedule[i % len(schedule)]
+        hour, minute = map(int, kick_off.split(":"))
+        
+        fixture_date = base_date + timedelta(days=day_offset)
+        fixture_datetime = fixture_date.replace(hour=hour, minute=minute)
+        
+        result = await db.fixtures.update_one(
+            {"fixture_id": fixture["fixture_id"]},
+            {"$set": {"utc_date": fixture_datetime}}
+        )
+        
+        if result.modified_count > 0:
+            updated.append({
+                "match": f"{fixture['home_team']} vs {fixture['away_team']}",
+                "date": fixture_datetime.strftime("%Y-%m-%d %H:%M")
+            })
+    
+    return {
+        "message": f"Updated {len(updated)} fixtures with dates",
+        "matchday": matchday,
+        "league_id": league_id,
+        "updated_fixtures": updated
+    }
+
+
 async def create_notification(user_id: str, notification_type: str, title: str, message: str, data: dict = None):
     """Helper function to create a notification"""
     from uuid import uuid4
