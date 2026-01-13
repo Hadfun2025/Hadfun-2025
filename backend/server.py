@@ -1242,18 +1242,50 @@ async def get_fixtures(
                 
                 logger.info(f"📅 Date range query: {start_date} to {end_date} (days_ahead={days_ahead})")
                 
-                # Filter by date - use actual datetime objects for MongoDB comparison
-                # MongoDB stores utc_date as Date objects, so we compare Date to Date
-                query["utc_date"] = {
-                    "$gte": start_date,
-                    "$lte": end_date,
-                    "$ne": None
-                }
+                # Don't filter by date in the query - dates may be stored in different formats
+                # We'll filter in code after fetching. For now, just ensure utc_date exists.
+                # This is a workaround for mixed date formats in the database.
+                query["utc_date"] = {"$ne": None}
         
         # Get fixtures from database - sort by date descending (most recent first)
         # This shows upcoming/recent matches at the top, older matches as you scroll down
         fixtures_cursor = db.fixtures.find(query).sort("utc_date", -1)  # Descending order
         fixtures = await fixtures_cursor.to_list(length=None)  # Convert to list asynchronously
+        
+        # Filter by date range in code (handles both datetime and string formats)
+        if not matchday and not upcoming_only:
+            now = datetime.now(timezone.utc)
+            if days_ahead >= 180:
+                start_date = datetime(2024, 1, 1, tzinfo=timezone.utc)
+                end_date = now + timedelta(days=days_ahead)
+            else:
+                start_date = now - timedelta(days=7)
+                end_date = now + timedelta(days=days_ahead)
+            
+            filtered_fixtures = []
+            for fixture in fixtures:
+                utc_date = fixture.get('utc_date')
+                if utc_date is None:
+                    continue
+                    
+                # Convert to datetime if it's a string
+                if isinstance(utc_date, str):
+                    try:
+                        # Handle ISO format strings
+                        utc_date = datetime.fromisoformat(utc_date.replace('Z', '+00:00'))
+                    except:
+                        continue
+                
+                # Ensure timezone aware for comparison
+                if utc_date.tzinfo is None:
+                    utc_date = utc_date.replace(tzinfo=timezone.utc)
+                
+                # Check if within date range
+                if start_date <= utc_date <= end_date:
+                    filtered_fixtures.append(fixture)
+            
+            fixtures = filtered_fixtures
+            logger.info(f"📅 After date filtering: {len(fixtures)} fixtures (from {len(fixtures)} total)")
         
         # Convert MongoDB _id and datetime objects to strings
         for fixture in fixtures:
