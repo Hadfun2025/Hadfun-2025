@@ -4080,69 +4080,63 @@ async def test_time_range_filter(league_id: int = 39, days_ahead: int = 28):
     from datetime import datetime, timedelta, timezone
     
     now = datetime.now(timezone.utc)
-    start_date = now - timedelta(days=7)
-    end_date = now + timedelta(days=days_ahead)
     
-    # Get ALL fixtures for this league (no date filter)
+    # Get ALL fixtures for this league - no filters at all
     all_fixtures = await db.fixtures.find(
-        {"league_id": league_id, "utc_date": {"$ne": None}},
+        {"league_id": league_id},
         {"_id": 0, "home_team": 1, "away_team": 1, "utc_date": 1, "matchday": 1, "status": 1}
-    ).sort("utc_date", 1).to_list(1000)
+    ).sort("matchday", 1).to_list(1000)
     
-    # Now filter by date in code (same logic as get_fixtures)
-    filtered = []
-    debug_info = []
+    # Group by matchday
+    by_matchday = {}
+    fixtures_without_date = []
     
     for f in all_fixtures:
+        md = f.get('matchday', 'Unknown')
         utc_date = f.get('utc_date')
         
-        # Convert to timezone aware if needed
-        if isinstance(utc_date, str):
-            try:
-                utc_date = datetime.fromisoformat(utc_date.replace('Z', '+00:00'))
-            except:
-                debug_info.append({"match": f"{f.get('home_team')} vs {f.get('away_team')}", "error": "Failed to parse date string"})
-                continue
+        if md not in by_matchday:
+            by_matchday[md] = {
+                'count': 0,
+                'has_date': 0,
+                'no_date': 0,
+                'sample_date': None,
+                'status': set()
+            }
         
-        if utc_date is None:
-            continue
-            
-        if utc_date.tzinfo is None:
-            utc_date = utc_date.replace(tzinfo=timezone.utc)
+        by_matchday[md]['count'] += 1
+        by_matchday[md]['status'].add(f.get('status', 'Unknown'))
         
-        in_range = start_date <= utc_date <= end_date
-        
-        if in_range:
-            filtered.append({
-                "date": str(f.get('utc_date')),
-                "match": f"{f.get('home_team')} vs {f.get('away_team')}",
-                "matchday": f.get('matchday'),
-                "status": f.get('status')
-            })
+        if utc_date is not None:
+            by_matchday[md]['has_date'] += 1
+            if by_matchday[md]['sample_date'] is None:
+                by_matchday[md]['sample_date'] = str(utc_date)
         else:
-            # Add first few out-of-range to debug
-            if len(debug_info) < 10:
-                debug_info.append({
-                    "match": f"{f.get('home_team')} vs {f.get('away_team')}",
-                    "date": str(f.get('utc_date')),
-                    "matchday": f.get('matchday'),
-                    "reason": f"Outside range: {utc_date} not in [{start_date}, {end_date}]"
-                })
+            by_matchday[md]['no_date'] += 1
+            fixtures_without_date.append({
+                'matchday': md,
+                'match': f"{f.get('home_team')} vs {f.get('away_team')}",
+                'status': f.get('status')
+            })
+    
+    # Convert sets to lists for JSON serialization
+    matchday_summary = {}
+    for md, data in by_matchday.items():
+        matchday_summary[md] = {
+            'count': data['count'],
+            'has_date': data['has_date'],
+            'no_date': data['no_date'],
+            'sample_date': data['sample_date'],
+            'statuses': list(data['status'])
+        }
     
     return {
-        "query_params": {
-            "league_id": league_id,
-            "days_ahead": days_ahead,
-            "server_time": now.isoformat(),
-            "start_date": start_date.isoformat(),
-            "end_date": end_date.isoformat()
-        },
-        "results": {
-            "total_fixtures_in_league": len(all_fixtures),
-            "fixtures_in_date_range": len(filtered),
-            "filtered_fixtures": filtered[:20]
-        },
-        "debug_out_of_range": debug_info
+        "league_id": league_id,
+        "server_time": now.isoformat(),
+        "total_fixtures": len(all_fixtures),
+        "fixtures_without_utc_date": len(fixtures_without_date),
+        "matchday_summary": matchday_summary,
+        "fixtures_missing_dates": fixtures_without_date[:20]
     }
 
 
