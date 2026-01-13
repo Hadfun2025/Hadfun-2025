@@ -623,8 +623,11 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen football-bg football-pattern">
+    <div className="min-h-screen football-bg football-pattern flex flex-col">
       <Toaster />
+      
+      {/* Onboarding Modal for First-Time Users */}
+      <OnboardingModal />
       
       {/* Navigation Bar */}
       <Navbar 
@@ -637,7 +640,7 @@ function App() {
       />
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 flex-grow">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="w-full overflow-x-auto pb-2">
             <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:max-w-6xl lg:mx-auto lg:grid-cols-6 bg-gradient-to-r from-indigo-100 to-blue-100 p-1 rounded-lg shadow-md">
