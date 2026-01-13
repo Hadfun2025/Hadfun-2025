@@ -118,18 +118,18 @@ export const translations = {
       importSuccess: "Content imported successfully!",
       importError: "Failed to import from Facebook",
       // Community Care Feature
-      communityCareBanner: "Charity Begins at Home - Community Care",
-      communityCareDesc: "HadFun isn't just about predictions - it's about building a caring community. Through our Community Care feature, team members can nominate teammates facing hardship. When someone wins, they can choose to share their winnings with those who need support.",
+      communityCareBanner: "Community Care - Supporting Each Other",
+      communityCareDesc: "HadFun isn't just about predictions - it's about building a caring community. Through our Community Care feature, team members can nominate teammates facing hardship for support from optional charity donations.",
       howItWorks: "How it works:",
-      howItWorksDesc: "Nominate teammates in need. Winners see nominations and can choose to donate.",
+      howItWorksDesc: "Nominate teammates in need. The community can support them through optional donations.",
       completelyOptional: "Completely optional:",
       completelyOptionalDesc: "No pressure on anyone. Every act of kindness is celebrated.",
       findInTeam: "Find Community Care in your team page to nominate someone or view donation history."
     },
     // Community Care (Team Page)
     communityCare: {
-      title: "Community Care - Charity Begins at Home",
-      subtitle: "Supporting teammates through hardship. When someone wins, they can choose to share their winnings with a teammate in need. No pressure - entirely their choice.",
+      title: "Community Care - Supporting Each Other",
+      subtitle: "Supporting teammates through hardship. Community members can choose to donate to help those in need. No pressure - entirely optional.",
       nominateButton: "Nominate a Teammate for Support",
       nominateTitle: "Nominate Someone",
       nominateDesc: "Know a teammate facing hardship? Nominate them respectfully and with compassion.",
@@ -147,13 +147,13 @@ export const translations = {
       nominatedBy: "Nominated by",
       anonymous: "Anonymous",
       actsOfKindness: "Acts of Kindness",
-      noDonationsYet: "No donations yet. When a winner shares their winnings, it will appear here.",
+      noDonationsYet: "No donations yet. Optional contributions will appear here.",
       donated: "donated",
       to: "to",
       howItWorksTitle: "How It Works",
       howItWorksPoint1: "Any member can nominate a teammate facing hardship",
-      howItWorksPoint2: "Winners see nominations when they win the weekly pot",
-      howItWorksPoint3: "Winners can choose to donate any amount (no pressure!)",
+      howItWorksPoint2: "Community members can make optional donations to help",
+      howItWorksPoint3: "Donations are completely voluntary (no pressure!)",
       howItWorksPoint4: "All donations are recorded to celebrate community spirit"
     },
     // Fixtures
