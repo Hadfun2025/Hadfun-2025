@@ -1228,18 +1228,17 @@ async def get_fixtures(
             else:
                 # For full season (365 days), go back to start of season
                 # For "Next X weeks" view (days_ahead < 180), show all fixtures
-                # NOTE: Date filtering removed temporarily to fix display issues
-                # All fixtures with dates will be returned, frontend can filter if needed
+                # NOTE: Date filtering removed - some future matchdays have null dates
+                # All fixtures will be returned, sorted with most recent dated fixtures first
                 if days_ahead >= 180:  # Full season or long range
-                    # No date filter for full season - show everything
-                    query["utc_date"] = {"$ne": None}
+                    # No date filter for full season - show everything including fixtures without dates
+                    pass  # No utc_date filter
                 else:
                     # For "Next 2 weeks" or "Next 4 weeks" view
-                    # Just ensure the fixture has a date - don't filter by range
-                    # This ensures all upcoming fixtures show regardless of date format issues
-                    query["utc_date"] = {"$ne": None}
+                    # Don't filter by date - include fixtures without dates (future matchdays)
+                    pass  # No utc_date filter
                 
-                logger.info(f"📅 Fetching fixtures without date filter (days_ahead={days_ahead})")
+                logger.info(f"📅 Fetching all fixtures (days_ahead={days_ahead})")
         
         # Get fixtures from database - sort by date DESCENDING (most recent first)
         # NOTE: Some fixtures may have null utc_date (e.g., future matchdays not yet scheduled)
