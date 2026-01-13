@@ -4109,6 +4109,81 @@ async def get_fixture_stats():
     }
 
 
+@api_router.get("/admin/test-time-range")
+async def test_time_range_filter(league_id: int = 39, days_ahead: int = 28):
+    """
+    Test the exact same query the frontend uses for time range filtering.
+    This helps debug why fixtures aren't showing.
+    """
+    from datetime import datetime, timedelta, timezone
+    
+    now = datetime.now(timezone.utc)
+    start_date = now - timedelta(days=7)
+    end_date = now + timedelta(days=days_ahead)
+    
+    # Get ALL fixtures for this league (no date filter)
+    all_fixtures = await db.fixtures.find(
+        {"league_id": league_id, "utc_date": {"$ne": None}},
+        {"_id": 0, "home_team": 1, "away_team": 1, "utc_date": 1, "matchday": 1, "status": 1}
+    ).sort("utc_date", 1).to_list(1000)
+    
+    # Now filter by date in code (same logic as get_fixtures)
+    filtered = []
+    debug_info = []
+    
+    for f in all_fixtures:
+        utc_date = f.get('utc_date')
+        
+        # Convert to timezone aware if needed
+        if isinstance(utc_date, str):
+            try:
+                utc_date = datetime.fromisoformat(utc_date.replace('Z', '+00:00'))
+            except:
+                debug_info.append({"match": f"{f.get('home_team')} vs {f.get('away_team')}", "error": "Failed to parse date string"})
+                continue
+        
+        if utc_date is None:
+            continue
+            
+        if utc_date.tzinfo is None:
+            utc_date = utc_date.replace(tzinfo=timezone.utc)
+        
+        in_range = start_date <= utc_date <= end_date
+        
+        if in_range:
+            filtered.append({
+                "date": str(f.get('utc_date')),
+                "match": f"{f.get('home_team')} vs {f.get('away_team')}",
+                "matchday": f.get('matchday'),
+                "status": f.get('status')
+            })
+        else:
+            # Add first few out-of-range to debug
+            if len(debug_info) < 10:
+                debug_info.append({
+                    "match": f"{f.get('home_team')} vs {f.get('away_team')}",
+                    "date": str(f.get('utc_date')),
+                    "matchday": f.get('matchday'),
+                    "reason": f"Outside range: {utc_date} not in [{start_date}, {end_date}]"
+                })
+    
+    return {
+        "query_params": {
+            "league_id": league_id,
+            "days_ahead": days_ahead,
+            "server_time": now.isoformat(),
+            "start_date": start_date.isoformat(),
+            "end_date": end_date.isoformat()
+        },
+        "results": {
+            "total_fixtures_in_league": len(all_fixtures),
+            "fixtures_in_date_range": len(filtered),
+            "filtered_fixtures": filtered[:20]
+        },
+        "debug_out_of_range": debug_info
+    }
+
+
 async def create_notification(user_id: str, notification_type: str, title: str, message: str, data: dict = None):
     """Helper function to create a notification"""
     from uuid import uuid4
