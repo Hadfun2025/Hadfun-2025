@@ -4140,6 +4140,113 @@ async def test_time_range_filter(league_id: int = 39, days_ahead: int = 28):
     }
 
 
+@api_router.get("/admin/fix-missing-dates")
+async def fix_missing_fixture_dates(league_id: int = 39):
+    """
+    Fetch fixtures with missing dates from API-Football and update them.
+    This fixes matchday 22, 23, 24 etc. that have null utc_date.
+    """
+    import os
+    import httpx
+    
+    api_key = os.environ.get("API_FOOTBALL_KEY")
+    if not api_key:
+        return {"error": "API_FOOTBALL_KEY not configured"}
+    
+    # Find fixtures with missing dates
+    fixtures_without_dates = await db.fixtures.find(
+        {"league_id": league_id, "utc_date": None},
+        {"_id": 0, "fixture_id": 1, "home_team": 1, "away_team": 1, "matchday": 1}
+    ).to_list(100)
+    
+    if not fixtures_without_dates:
+        return {"message": "No fixtures with missing dates found", "league_id": league_id}
+    
+    # Get unique matchdays that need fixing
+    matchdays_to_fix = set(f.get('matchday') for f in fixtures_without_dates)
+    
+    updated_count = 0
+    errors = []
+    
+    # Fetch from API-Football for each matchday
+    async with httpx.AsyncClient() as client:
+        for matchday in matchdays_to_fix:
+            try:
+                # Extract round number from matchday string (e.g., "22" from "Regular Season - 22")
+                round_num = matchday.split()[-1] if matchday else None
+                if not round_num:
+                    continue
+                
+                # Fetch fixtures for this round from API-Football
+                response = await client.get(
+                    "https://api-football-v1.p.rapidapi.com/v3/fixtures",
+                    params={
+                        "league": league_id,
+                        "season": 2025,  # Current season
+                        "round": f"Regular Season - {round_num}"
+                    },
+                    headers={
+                        "X-RapidAPI-Key": api_key,
+                        "X-RapidAPI-Host": "api-football-v1.p.rapidapi.com"
+                    },
+                    timeout=30
+                )
+                
+                if response.status_code != 200:
+                    errors.append(f"API error for matchday {matchday}: {response.status_code}")
+                    continue
+                
+                data = response.json()
+                api_fixtures = data.get("response", [])
+                
+                for api_fixture in api_fixtures:
+                    fixture_data = api_fixture.get("fixture", {})
+                    api_fixture_id = fixture_data.get("id")
+                    date_str = fixture_data.get("date")
+                    
+                    if not date_str:
+                        continue
+                    
+                    # Parse the date
+                    try:
+                        from datetime import datetime
+                        utc_date = datetime.fromisoformat(date_str.replace('Z', '+00:00')).replace(tzinfo=None)
+                    except:
+                        continue
+                    
+                    # Update fixture in database by matching teams and matchday
+                    teams = api_fixture.get("teams", {})
+                    home_team = teams.get("home", {}).get("name")
+                    away_team = teams.get("away", {}).get("name")
+                    
+                    result = await db.fixtures.update_one(
+                        {
+                            "league_id": league_id,
+                            "home_team": home_team,
+                            "away_team": away_team,
+                            "matchday": matchday
+                        },
+                        {"$set": {
+                            "utc_date": utc_date,
+                            "fixture_id": api_fixture_id  # Also update to real fixture_id
+                        }}
+                    )
+                    
+                    if result.modified_count > 0:
+                        updated_count += 1
+                        logger.info(f"✅ Updated date for {home_team} vs {away_team}: {utc_date}")
+                
+            except Exception as e:
+                errors.append(f"Error processing matchday {matchday}: {str(e)}")
+    
+    return {
+        "message": f"Updated {updated_count} fixtures with dates",
+        "league_id": league_id,
+        "matchdays_processed": list(matchdays_to_fix),
+        "errors": errors if errors else None
+    }
+
+
 async def create_notification(user_id: str, notification_type: str, title: str, message: str, data: dict = None):
     """Helper function to create a notification"""
     from uuid import uuid4
