@@ -233,11 +233,11 @@ export const translations = {
     },
     // Main App Messages
     messages: {
-      playForFunActivated: "Playing for fun mode activated! Make your predictions.",
-      enteredPot: "✓ You're entered in this week's pot!",
-      makePredictions: "Make your predictions before Wednesday 11:59 PM to compete for the prize.",
+      playForFunActivated: "Free-to-play mode activated! Make your predictions.",
+      enteredPot: "✓ You're in this week's challenge!",
+      makePredictions: "Make your predictions before Wednesday 11:59 PM.",
       playForFunTitle: "⚽ Play for fun with friends and family!",
-      playForFunDesc: "Predict match results, track scores, and see who's the best predictor. Optional weekly pot available if your group wants to add stakes.",
+      playForFunDesc: "Predict match results, track scores, and see who's the best predictor. 100% free to play!",
       noPredictionsYet: "No predictions yet. Start predicting!",
       noFixtures: "No fixtures available for this league.",
       selectLeague: "Select a league to view fixtures",
@@ -247,8 +247,8 @@ export const translations = {
       predictionError: "Failed to save prediction",
       selectLeagues: "Select Leagues",
       chooseLeagues: "Choose which leagues to display",
-      notEntered: "Not Entered",
-      joinCompetition: "Join this week's competition",
+      notEntered: "Not Joined",
+      joinCompetition: "Join this week's challenge",
       viewAllPredictions: "View all your predictions and results"
     },
     // Weekly Challenge Card (renamed from Weekly Pot Card)
