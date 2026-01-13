@@ -3116,6 +3116,29 @@ export const translations = {
       lastUpdated: "Laatst bijgewerkt",
       terms: "Gebruiksvoorwaarden",
       termsIntro: "Door HadFun te openen of te gebruiken, ga je akkoord met deze Gebruiksvoorwaarden. HadFun is een voetbalvoorspellings- en sociale gemeenschapsplatform dat sportentertainment combineert met liefdadigheidsdonaties.",
+      disclaimer: {
+        title: "HadFun – Disclaimer",
+        intro: "HadFun is een sociaal voetbalvoorspellingsspel alleen voor entertainment.",
+        points: [
+          "Spelers strijden door voorspellingsscores binnen hun eigen team te vergelijken.",
+          "HadFun is geen gokbedrijf, casino of \"huis\".",
+          "HadFun stelt geen odds vast, en gebruikers spelen niet tegen de app.",
+          "Teams kunnen gratis spelen."
+        ],
+        optionalStakesTitle: "Optionele Inzetten (Als Je Team Kiest)",
+        optionalStakesPoints: [
+          "Sommige teams kunnen kiezen om te spelen met een optionele inzet van maximaal £5 per speler.",
+          "Elke inzet is een privéovereenkomst tussen teamleden.",
+          "HadFun rekent geen commissie, kosten of neemt geen percentage."
+        ],
+        noMoneyTitle: "Geen Geldhandeling",
+        noMoneyText: "HadFun houdt, verzamelt, verwerkt of distribueert geen geld. Alle betalingen, prijzen of liefdadigheidsdonaties worden rechtstreeks door gebruikers afgehandeld.",
+        teamSizeTitle: "Teamgrootte",
+        teamSizeText: "Teams zijn beperkt tot maximaal 30 leden.",
+        fairPlayTitle: "Fair Play",
+        fairPlayText: "HadFun is een vriendelijke community-app. Misbruik of ongepast gedrag kan leiden tot verwijdering van het platform.",
+        agreement: "Door HadFun te gebruiken ga je akkoord om verantwoordelijk te spelen en accepteer je deze disclaimer."
+      },
       termsPoints: [
         "Geschiktheid: Je moet 13+ zijn om het platform te gebruiken, 18+ voor betaalde competities en donaties. Ouderlijke toestemming vereist voor gebruikers van 13-17 jaar.",
         "Accountbeveiliging: Je bent verantwoordelijk voor het vertrouwelijk houden van je inloggegevens. Één account per persoon - geen duplicaten toegestaan.",
