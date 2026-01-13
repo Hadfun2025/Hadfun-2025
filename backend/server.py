@@ -3963,27 +3963,34 @@ async def update_fixture_status(fixture_id: int, status: str):
 @api_router.get("/admin/fix-postponed-fixtures")
 async def fix_postponed_fixtures():
     """
-    One-time fix: Update Salford City vs Swindon Town to POSTPONED status.
-    Call this endpoint after deployment to fix the production database.
+    One-time fix: Update Salford City vs Swindon Town to POSTPONED status with rescheduled date.
+    The match was postponed from Jan 10 and rescheduled to Jan 20, 2026.
     """
+    from datetime import datetime as dt
+    
+    # Rescheduled date: Tuesday, January 20, 2026
+    rescheduled_date = dt(2026, 1, 20, 19, 45)  # 7:45 PM typical FA Cup kick-off
+    
     # Update the specific fixture that should be POSTPONED
     result = await db.fixtures.update_one(
         {"fixture_id": 9000011},  # Salford City vs Swindon Town
         {"$set": {
             "status": "POSTPONED",
             "home_score": None,
-            "away_score": None
+            "away_score": None,
+            "rescheduled_to": rescheduled_date
         }}
     )
     
     if result.matched_count == 0:
         return {"success": False, "message": "Fixture 9000011 not found in database"}
     
-    logger.info("✅ Fixed Salford City vs Swindon Town fixture to POSTPONED")
+    logger.info("✅ Fixed Salford City vs Swindon Town fixture to POSTPONED with rescheduled date")
     return {
         "success": True,
         "message": "Salford City vs Swindon Town has been marked as POSTPONED",
         "fixture_id": 9000011,
+        "rescheduled_to": "Tuesday 20 January 2026 at 19:45",
         "modified": result.modified_count
     }
 
