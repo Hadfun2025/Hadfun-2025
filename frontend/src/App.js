@@ -1139,7 +1139,11 @@ function App() {
                                         <div className="text-center p-3 bg-gray-100 rounded-lg mb-4 border border-gray-300">
                                           <p className="text-xs text-gray-600 font-semibold mb-1">📅 MATCH POSTPONED</p>
                                           <p className="text-sm text-gray-600">
-                                            This match has been postponed. A new date will be announced.
+                                            {fixture.rescheduled_to ? (
+                                              <>Rescheduled to: <strong>{new Date(fixture.rescheduled_to).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</strong></>
+                                            ) : (
+                                              "This match has been postponed. A new date will be announced."
+                                            )}
                                           </p>
                                         </div>
                                       )}
