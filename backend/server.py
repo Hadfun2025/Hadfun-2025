@@ -1246,23 +1246,30 @@ async def get_fixtures(
                 logger.info(f"📅 Fetching fixtures with date filter (days_ahead={days_ahead})")
         
         # Get fixtures from database
-        # Sort by matchday (extracted number) to get proper order: 21, 22, 23, 24
         fixtures_cursor = db.fixtures.find(query)
         fixtures = await fixtures_cursor.to_list(length=None)
         
-        # Sort fixtures: by matchday number ascending (21, 22, 23, 24)
+        # Sort fixtures by matchday number ASCENDING (21, 22, 23, 24)
+        # This ensures you see the most recent completed matchday first, then upcoming
         def get_matchday_num(f):
             md = f.get('matchday', '0')
             # Extract number from matchday string (e.g., "21" or "Regular Season - 21")
             try:
                 parts = str(md).split()
-                return int(parts[-1]) if parts else 0
+                for part in reversed(parts):
+                    if part.isdigit():
+                        return int(part)
+                return 0
             except:
                 return 0
         
-        fixtures.sort(key=lambda f: (get_matchday_num(f), f.get('utc_date') or datetime.max))
+        # Sort by matchday ascending, then by date ascending within each matchday
+        fixtures.sort(key=lambda f: (
+            -get_matchday_num(f),  # Negative for descending matchday (24, 23, 22, 21)
+            f.get('utc_date') or datetime.min  # Then by date ascending within matchday
+        ), reverse=True)  # Reverse to get ascending matchday order (21, 22, 23, 24)
         
-        logger.info(f"📊 Fetched {len(fixtures)} total fixtures")
+        logger.info(f"📊 Fetched {len(fixtures)} total fixtures, sorted by matchday ascending")
         
         
         # Convert MongoDB _id and datetime objects to strings
