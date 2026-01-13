@@ -1227,25 +1227,19 @@ async def get_fixtures(
                 query["utc_date"] = {"$gte": now.replace(tzinfo=None)}
             else:
                 # For full season (365 days), go back to start of season
-                # For "Next X weeks" view (days_ahead < 180), only show upcoming fixtures
+                # For "Next X weeks" view (days_ahead < 180), show all fixtures
+                # NOTE: Date filtering removed temporarily to fix display issues
+                # All fixtures with dates will be returned, frontend can filter if needed
                 if days_ahead >= 180:  # Full season or long range
-                    # For international competitions (2024 season) go back to Jan 2024
-                    # For domestic leagues (2025 season) go back to August 2024
-                    # This covers Champions League 2024/25, Nations League 2024, etc.
-                    start_date = datetime(2024, 1, 1)  # Naive datetime - covers all competitions
-                    end_date = now.replace(tzinfo=None) + timedelta(days=days_ahead)
+                    # No date filter for full season - show everything
+                    query["utc_date"] = {"$ne": None}
                 else:
-                    # For "Next 2 weeks" or "Next 4 weeks" view: show last 7 days + upcoming fixtures
-                    # This ensures users always see the previous weekend's results (extended from 3 to 7 days)
-                    start_date = now.replace(tzinfo=None) - timedelta(days=7)
-                    end_date = now.replace(tzinfo=None) + timedelta(days=days_ahead)
+                    # For "Next 2 weeks" or "Next 4 weeks" view
+                    # Just ensure the fixture has a date - don't filter by range
+                    # This ensures all upcoming fixtures show regardless of date format issues
+                    query["utc_date"] = {"$ne": None}
                 
-                logger.info(f"📅 Date range query: {start_date} to {end_date} (days_ahead={days_ahead})")
-                
-                # Don't filter by date in the query - dates may be stored in different formats
-                # We'll filter in code after fetching. For now, just ensure utc_date exists.
-                # This is a workaround for mixed date formats in the database.
-                query["utc_date"] = {"$ne": None}
+                logger.info(f"📅 Fetching fixtures without date filter (days_ahead={days_ahead})")
         
         # Get fixtures from database - sort by date descending (most recent first)
         # This shows upcoming/recent matches at the top, older matches as you scroll down
