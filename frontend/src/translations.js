@@ -3548,6 +3548,29 @@ export const translations = {
       lastUpdated: "Son Güncelleme",
       terms: "Hizmet Şartları",
       termsIntro: "HadFun'a erişerek veya kullanarak, bu Hizmet Şartlarını kabul etmiş olursunuz. HadFun, spor eğlencesini hayır amaçlı bağışlarla birleştiren bir futbol tahmini ve sosyal topluluk platformudur.",
+      disclaimer: {
+        title: "HadFun – Sorumluluk Reddi",
+        intro: "HadFun sadece eğlence amaçlı bir sosyal futbol tahmin oyunudur.",
+        points: [
+          "Oyuncular kendi takımları içinde tahmin puanlarını karşılaştırarak yarışır.",
+          "HadFun bir bahis şirketi, kumarhane veya \"ev\" değildir.",
+          "HadFun oran belirlemez ve kullanıcılar uygulamaya karşı oynamaz.",
+          "Takımlar ücretsiz oynayabilir."
+        ],
+        optionalStakesTitle: "İsteğe Bağlı Bahisler (Takımınız Seçerse)",
+        optionalStakesPoints: [
+          "Bazı takımlar oyuncu başına maksimum £5'e kadar isteğe bağlı bir bahisle oynamayı seçebilir.",
+          "Herhangi bir bahis, takım üyeleri arasındaki özel bir anlaşmadır.",
+          "HadFun komisyon, ücret veya herhangi bir pay almaz."
+        ],
+        noMoneyTitle: "Para İşlemi Yok",
+        noMoneyText: "HadFun para tutmaz, toplamaz, işlemez veya dağıtmaz. Tüm ödemeler, ödüller veya hayır bağışları doğrudan kullanıcılar tarafından yönetilir.",
+        teamSizeTitle: "Takım Boyutu",
+        teamSizeText: "Takımlar maksimum 30 üye ile sınırlıdır.",
+        fairPlayTitle: "Adil Oyun",
+        fairPlayText: "HadFun dostane bir topluluk uygulamasıdır. Suistimal veya uygunsuz davranış platformdan uzaklaştırılmaya yol açabilir.",
+        agreement: "HadFun'u kullanarak sorumlu bir şekilde oynamayı ve bu sorumluluk reddini kabul etmiş olursunuz."
+      },
       termsPoints: [
         "Uygunluk: Platform için 13+, ücretli yarışmalar ve bağışlar için 18+ olmalısınız. 13-17 yaş arası kullanıcılar için ebeveyn onayı gereklidir.",
         "Hesap Güvenliği: Kimlik bilgilerinizin gizliliğini korumaktan siz sorumlusunuz. Kişi başına bir hesap - yineleme yasaktır.",
