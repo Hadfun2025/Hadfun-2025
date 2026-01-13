@@ -481,6 +481,29 @@ export const translations = {
       lastUpdated: "Last Updated",
       terms: "Terms of Service",
       termsIntro: "By accessing or using HadFun, you agree to be bound by these Terms of Service. HadFun is a football prediction and social community platform that combines sports entertainment with charitable giving.",
+      disclaimer: {
+        title: "HadFun – App Disclaimer",
+        intro: "HadFun is a social football prediction game for entertainment only.",
+        points: [
+          "Players compete by comparing prediction scores within their own team.",
+          "HadFun is not a betting company, casino, or \"house\".",
+          "HadFun does not set odds, and users are not playing against the app.",
+          "Teams can play for free."
+        ],
+        optionalStakesTitle: "Optional Stakes (If Your Team Chooses)",
+        optionalStakesPoints: [
+          "Some teams may choose to play with an optional stake of up to £5 per player.",
+          "Any stake is a private agreement between team members.",
+          "HadFun does not charge commission, fees, or take any cut."
+        ],
+        noMoneyTitle: "No Money Handling",
+        noMoneyText: "HadFun does not hold, collect, process, or distribute money. Any payments, prizes, or charity donations are handled directly by users.",
+        teamSizeTitle: "Team Size",
+        teamSizeText: "Teams are limited to a maximum of 30 members.",
+        fairPlayTitle: "Fair Play",
+        fairPlayText: "HadFun is a friendly community app. Abuse or inappropriate behaviour may lead to removal from the platform.",
+        agreement: "By using HadFun you agree to play responsibly and accept this disclaimer."
+      },
       termsPoints: [
         "Eligibility: You must be 13+ to use the platform, 18+ for paid competitions and charity donations. Parental consent required for users 13-17.",
         "Account Security: You're responsible for maintaining confidentiality of your credentials. One account per person - no duplicates allowed.",
