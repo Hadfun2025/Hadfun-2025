@@ -1016,6 +1016,29 @@ export const translations = {
       lastUpdated: "Última Actualización",
       terms: "Términos de Servicio",
       termsIntro: "Al acceder o usar HadFun, aceptas estos Términos de Servicio. HadFun es una plataforma de predicción de fútbol y comunidad social que combina entretenimiento deportivo con donaciones benéficas.",
+      disclaimer: {
+        title: "HadFun – Aviso Legal",
+        intro: "HadFun es un juego social de predicción de fútbol solo para entretenimiento.",
+        points: [
+          "Los jugadores compiten comparando puntuaciones de predicciones dentro de su propio equipo.",
+          "HadFun no es una casa de apuestas, casino o \"banca\".",
+          "HadFun no establece cuotas, y los usuarios no juegan contra la aplicación.",
+          "Los equipos pueden jugar gratis."
+        ],
+        optionalStakesTitle: "Apuestas Opcionales (Si Tu Equipo Lo Decide)",
+        optionalStakesPoints: [
+          "Algunos equipos pueden optar por jugar con una apuesta opcional de hasta £5 por jugador.",
+          "Cualquier apuesta es un acuerdo privado entre miembros del equipo.",
+          "HadFun no cobra comisión, tarifas ni ningún porcentaje."
+        ],
+        noMoneyTitle: "Sin Manejo de Dinero",
+        noMoneyText: "HadFun no retiene, recoge, procesa ni distribuye dinero. Cualquier pago, premio o donación benéfica es manejado directamente por los usuarios.",
+        teamSizeTitle: "Tamaño del Equipo",
+        teamSizeText: "Los equipos están limitados a un máximo de 30 miembros.",
+        fairPlayTitle: "Juego Limpio",
+        fairPlayText: "HadFun es una aplicación comunitaria amigable. El abuso o comportamiento inapropiado puede llevar a la eliminación de la plataforma.",
+        agreement: "Al usar HadFun aceptas jugar responsablemente y aceptas este aviso legal."
+      },
       termsPoints: [
         "Elegibilidad: Debes tener 13+ para usar la plataforma, 18+ para competiciones pagadas y donaciones. Consentimiento parental requerido para usuarios de 13-17 años.",
         "Seguridad de Cuenta: Eres responsable de mantener la confidencialidad de tus credenciales. Una cuenta por persona - no se permiten duplicados.",
