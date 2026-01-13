@@ -3980,6 +3980,29 @@ export const translations = {
       lastUpdated: "Última Atualização",
       terms: "Termos de Serviço",
       termsIntro: "Ao acessar ou usar o HadFun, você concorda com estes Termos de Serviço. HadFun é uma plataforma de previsão de futebol e comunidade social que combina entretenimento esportivo com doações beneficentes.",
+      disclaimer: {
+        title: "HadFun – Aviso Legal",
+        intro: "HadFun é um jogo social de previsão de futebol apenas para entretenimento.",
+        points: [
+          "Os jogadores competem comparando pontuações de previsões dentro de sua própria equipe.",
+          "HadFun não é uma casa de apostas, cassino ou \"banca\".",
+          "HadFun não define odds, e os usuários não jogam contra o aplicativo.",
+          "As equipes podem jogar gratuitamente."
+        ],
+        optionalStakesTitle: "Apostas Opcionais (Se Sua Equipe Escolher)",
+        optionalStakesPoints: [
+          "Algumas equipes podem optar por jogar com uma aposta opcional de até £5 por jogador.",
+          "Qualquer aposta é um acordo privado entre os membros da equipe.",
+          "HadFun não cobra comissão, taxas ou qualquer porcentagem."
+        ],
+        noMoneyTitle: "Sem Manuseio de Dinheiro",
+        noMoneyText: "HadFun não detém, coleta, processa ou distribui dinheiro. Quaisquer pagamentos, prêmios ou doações de caridade são tratados diretamente pelos usuários.",
+        teamSizeTitle: "Tamanho da Equipe",
+        teamSizeText: "As equipes são limitadas a no máximo 30 membros.",
+        fairPlayTitle: "Fair Play",
+        fairPlayText: "HadFun é um aplicativo comunitário amigável. Abuso ou comportamento inadequado pode levar à remoção da plataforma.",
+        agreement: "Ao usar o HadFun, você concorda em jogar de forma responsável e aceita este aviso legal."
+      },
       termsPoints: [
         "Elegibilidade: Você deve ter 13+ para usar a plataforma, 18+ para competições pagas e doações. Consentimento parental necessário para usuários entre 13-17 anos.",
         "Segurança da Conta: Você é responsável por manter a confidencialidade de suas credenciais. Uma conta por pessoa - sem duplicatas.",
