@@ -3988,6 +3988,48 @@ async def fix_postponed_fixtures():
     }
 
 
+@api_router.get("/admin/set-rescheduled-date")
+async def set_rescheduled_date(fixture_id: int, new_date: str):
+    """
+    Set a rescheduled date for a postponed fixture.
+    
+    Example: /api/admin/set-rescheduled-date?fixture_id=9000011&new_date=2026-01-28T15:00:00
+    
+    This will update the fixture to show the new rescheduled date.
+    """
+    from datetime import datetime as dt
+    
+    try:
+        # Parse the new date
+        if 'T' in new_date:
+            rescheduled_date = dt.fromisoformat(new_date.replace('Z', ''))
+        else:
+            rescheduled_date = dt.strptime(new_date, "%Y-%m-%d")
+            rescheduled_date = rescheduled_date.replace(hour=15, minute=0)  # Default to 3pm
+    except ValueError as e:
+        return {"error": f"Invalid date format: {e}. Use YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS"}
+    
+    # Update the fixture with rescheduled date
+    result = await db.fixtures.update_one(
+        {"fixture_id": fixture_id},
+        {"$set": {
+            "rescheduled_to": rescheduled_date,
+            "status": "POSTPONED"  # Ensure it's marked as postponed
+        }}
+    )
+    
+    if result.matched_count == 0:
+        return {"error": f"Fixture {fixture_id} not found"}
+    
+    logger.info(f"✅ Set rescheduled date for fixture {fixture_id} to {rescheduled_date}")
+    return {
+        "success": True,
+        "message": f"Fixture {fixture_id} rescheduled to {rescheduled_date.strftime('%a %d %b %Y at %H:%M')}",
+        "fixture_id": fixture_id,
+        "rescheduled_to": rescheduled_date.isoformat()
+    }
+
+
 @api_router.get("/admin/debug-predictions/{user_id}")
 async def debug_user_predictions(user_id: str):
     """
