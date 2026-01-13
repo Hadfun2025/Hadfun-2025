@@ -1541,6 +1541,29 @@ export const translations = {
       lastUpdated: "Zuletzt aktualisiert",
       terms: "Nutzungsbedingungen",
       termsIntro: "Durch den Zugriff auf oder die Nutzung von HadFun stimmen Sie diesen Nutzungsbedingungen zu. HadFun ist eine Fußball-Vorhersage- und Social-Community-Plattform, die Sportunterhaltung mit Wohltätigkeit verbindet.",
+      disclaimer: {
+        title: "HadFun – Haftungsausschluss",
+        intro: "HadFun ist ein soziales Fußball-Tippspiel nur zur Unterhaltung.",
+        points: [
+          "Spieler konkurrieren, indem sie Vorhersage-Ergebnisse innerhalb ihres eigenen Teams vergleichen.",
+          "HadFun ist kein Wettbüro, Casino oder \"Haus\".",
+          "HadFun legt keine Quoten fest, und Benutzer spielen nicht gegen die App.",
+          "Teams können kostenlos spielen."
+        ],
+        optionalStakesTitle: "Optionale Einsätze (Wenn Ihr Team Es Wünscht)",
+        optionalStakesPoints: [
+          "Einige Teams können sich entscheiden, mit einem optionalen Einsatz von bis zu £5 pro Spieler zu spielen.",
+          "Jeder Einsatz ist eine private Vereinbarung zwischen Teammitgliedern.",
+          "HadFun erhebt keine Provision, Gebühren oder nimmt keinen Anteil."
+        ],
+        noMoneyTitle: "Keine Geldabwicklung",
+        noMoneyText: "HadFun hält, sammelt, verarbeitet oder verteilt kein Geld. Alle Zahlungen, Preise oder Wohltätigkeitsspenden werden direkt von den Benutzern abgewickelt.",
+        teamSizeTitle: "Teamgröße",
+        teamSizeText: "Teams sind auf maximal 30 Mitglieder begrenzt.",
+        fairPlayTitle: "Fair Play",
+        fairPlayText: "HadFun ist eine freundliche Community-App. Missbrauch oder unangemessenes Verhalten kann zur Entfernung von der Plattform führen.",
+        agreement: "Durch die Nutzung von HadFun stimmen Sie zu, verantwortungsvoll zu spielen und akzeptieren diesen Haftungsausschluss."
+      },
       termsPoints: [
         "Berechtigung: Sie müssen 13+ sein, um die Plattform zu nutzen, 18+ für bezahlte Wettbewerbe und Spenden. Elterliche Zustimmung erforderlich für Benutzer zwischen 13-17 Jahren.",
         "Kontosicherheit: Sie sind verantwortlich für die Vertraulichkeit Ihrer Anmeldedaten. Ein Konto pro Person - keine Duplikate erlaubt.",
