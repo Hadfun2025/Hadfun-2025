@@ -2591,6 +2591,29 @@ export const translations = {
       lastUpdated: "Ultimo aggiornamento",
       terms: "Termini di Servizio",
       termsIntro: "Accedendo o utilizzando HadFun, accetti questi Termini di Servizio. HadFun è una piattaforma di previsione calcistica e comunità sociale che combina intrattenimento sportivo con donazioni benefiche.",
+      disclaimer: {
+        title: "HadFun – Avviso Legale",
+        intro: "HadFun è un gioco sociale di previsioni calcistiche solo per intrattenimento.",
+        points: [
+          "I giocatori competono confrontando i punteggi delle previsioni all'interno del proprio team.",
+          "HadFun non è una società di scommesse, un casinò o una \"casa\".",
+          "HadFun non stabilisce quote e gli utenti non giocano contro l'app.",
+          "I team possono giocare gratuitamente."
+        ],
+        optionalStakesTitle: "Puntate Opzionali (Se Il Tuo Team Lo Sceglie)",
+        optionalStakesPoints: [
+          "Alcuni team potrebbero scegliere di giocare con una puntata opzionale fino a £5 per giocatore.",
+          "Qualsiasi puntata è un accordo privato tra i membri del team.",
+          "HadFun non addebita commissioni, tariffe o prende alcuna percentuale."
+        ],
+        noMoneyTitle: "Nessuna Gestione di Denaro",
+        noMoneyText: "HadFun non detiene, raccoglie, elabora o distribuisce denaro. Qualsiasi pagamento, premio o donazione benefica viene gestito direttamente dagli utenti.",
+        teamSizeTitle: "Dimensione del Team",
+        teamSizeText: "I team sono limitati a un massimo di 30 membri.",
+        fairPlayTitle: "Fair Play",
+        fairPlayText: "HadFun è un'app comunitaria amichevole. Abusi o comportamenti inappropriati possono portare alla rimozione dalla piattaforma.",
+        agreement: "Utilizzando HadFun accetti di giocare responsabilmente e accetti questo avviso legale."
+      },
       termsPoints: [
         "Idoneità: Devi avere 13+ per usare la piattaforma, 18+ per competizioni a pagamento e donazioni. Consenso parentale richiesto per utenti 13-17 anni.",
         "Sicurezza Account: Sei responsabile della riservatezza delle tue credenziali. Un account per persona - nessun duplicato consentito.",
