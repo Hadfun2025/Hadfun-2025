@@ -25,6 +25,8 @@ import { SocialFeed } from '@/components/SocialFeed';
 import { WorldCupGroups } from '@/components/WorldCupGroups';
 import { AdminDashboard } from '@/components/AdminDashboard';
 import { useLanguage } from '@/LanguageContext';
+import { LegalFooter } from '@/components/LegalFooter';
+import { OnboardingModal } from '@/components/OnboardingModal';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
