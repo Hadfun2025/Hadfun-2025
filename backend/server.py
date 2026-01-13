@@ -4017,6 +4017,77 @@ async def debug_user_predictions(user_id: str):
     }
 
 
+@api_router.get("/admin/fixture-stats")
+async def get_fixture_stats():
+    """
+    Get summary statistics of fixtures in the database.
+    Useful for debugging why fixtures might not be showing.
+    """
+    from datetime import datetime, timedelta, timezone
+    
+    now = datetime.now(timezone.utc)
+    today = now.replace(tzinfo=None)
+    
+    # Count total fixtures
+    total = await db.fixtures.count_documents({})
+    
+    # Count by status
+    scheduled = await db.fixtures.count_documents({"status": "SCHEDULED"})
+    finished = await db.fixtures.count_documents({"status": "FINISHED"})
+    postponed = await db.fixtures.count_documents({"status": "POSTPONED"})
+    
+    # Count upcoming (next 4 weeks)
+    upcoming = await db.fixtures.count_documents({
+        "utc_date": {"$gte": today, "$lte": today + timedelta(days=28)}
+    })
+    
+    # Count recent (last 7 days)
+    recent = await db.fixtures.count_documents({
+        "utc_date": {"$gte": today - timedelta(days=7), "$lt": today}
+    })
+    
+    # Get date range of all fixtures
+    oldest = await db.fixtures.find_one({"utc_date": {"$ne": None}}, sort=[("utc_date", 1)])
+    newest = await db.fixtures.find_one({"utc_date": {"$ne": None}}, sort=[("utc_date", -1)])
+    
+    # Get unique leagues
+    leagues = await db.fixtures.distinct("league_name")
+    
+    # Sample of upcoming fixtures
+    upcoming_samples = await db.fixtures.find(
+        {"utc_date": {"$gte": today}},
+        {"_id": 0, "home_team": 1, "away_team": 1, "utc_date": 1, "league_name": 1, "matchday": 1}
+    ).sort("utc_date", 1).limit(10).to_list(10)
+    
+    return {
+        "server_time": now.isoformat(),
+        "total_fixtures": total,
+        "by_status": {
+            "scheduled": scheduled,
+            "finished": finished,
+            "postponed": postponed
+        },
+        "by_timeframe": {
+            "upcoming_4_weeks": upcoming,
+            "recent_7_days": recent
+        },
+        "date_range": {
+            "oldest": str(oldest.get('utc_date')) if oldest else None,
+            "newest": str(newest.get('utc_date')) if newest else None
+        },
+        "leagues_in_db": leagues,
+        "upcoming_fixtures_sample": [
+            {
+                "date": str(f.get('utc_date'))[:16] if f.get('utc_date') else "N/A",
+                "match": f"{f.get('home_team')} vs {f.get('away_team')}",
+                "league": f.get('league_name'),
+                "matchday": f.get('matchday')
+            }
+            for f in upcoming_samples
+        ]
+    }
+
+
 async def create_notification(user_id: str, notification_type: str, title: str, message: str, data: dict = None):
     """Helper function to create a notification"""
     from uuid import uuid4
