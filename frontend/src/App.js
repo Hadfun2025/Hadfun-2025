@@ -1625,6 +1625,9 @@ function App() {
           <BarChart3 className="h-6 w-6" />
         </button>
       )}
+      
+      {/* Legal Footer */}
+      <LegalFooter />
     </div>
   );
 }
