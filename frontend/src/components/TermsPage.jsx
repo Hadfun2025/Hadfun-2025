@@ -57,6 +57,53 @@ export function TermsPage({ onBack }) {
             </p>
           </div>
 
+          {/* App Disclaimer */}
+          <div className="bg-amber-50 border-2 border-amber-400 rounded-lg p-6">
+            <h2 className="text-2xl font-bold text-amber-700 mb-4 flex items-center gap-2">
+              <span>✅</span> HadFun – App Disclaimer
+            </h2>
+            
+            <p className="text-gray-800 font-medium mb-4">
+              HadFun is a social football prediction game for entertainment only.
+            </p>
+            
+            <ul className="space-y-2 text-gray-700 mb-6">
+              <li>• Players compete by comparing prediction scores within their own team.</li>
+              <li>• HadFun is <strong>not</strong> a betting company, casino, or "house".</li>
+              <li>• HadFun does not set odds, and users are not playing against the app.</li>
+              <li>• Teams can play for free.</li>
+            </ul>
+
+            <h3 className="font-bold text-amber-700 mb-2">Optional Stakes (If Your Team Chooses)</h3>
+            <ul className="space-y-2 text-gray-700 mb-6">
+              <li>• Some teams may choose to play with an optional stake of up to £5 per player.</li>
+              <li>• Any stake is a private agreement between team members.</li>
+              <li>• HadFun does not charge commission, fees, or take any cut.</li>
+            </ul>
+
+            <h3 className="font-bold text-amber-700 mb-2">No Money Handling</h3>
+            <p className="text-gray-700 mb-6">
+              HadFun does not hold, collect, process, or distribute money. 
+              Any payments, prizes, or charity donations are handled directly by users.
+            </p>
+
+            <h3 className="font-bold text-amber-700 mb-2">Team Size</h3>
+            <p className="text-gray-700 mb-6">
+              Teams are limited to a maximum of 30 members.
+            </p>
+
+            <h3 className="font-bold text-amber-700 mb-2">Fair Play</h3>
+            <p className="text-gray-700 mb-6">
+              HadFun is a friendly community app. Abuse or inappropriate behaviour may lead to removal from the platform.
+            </p>
+
+            <div className="bg-amber-100 rounded p-4 mt-4">
+              <p className="text-amber-900 font-semibold text-center">
+                By using HadFun you agree to play responsibly and accept this disclaimer.
+              </p>
+            </div>
+          </div>
+
           {/* Terms and Conditions */}
           <div>
             <h2 className="text-2xl font-bold text-purple-600 mb-4 flex items-center gap-2">
