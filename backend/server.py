@@ -1247,40 +1247,6 @@ async def get_fixtures(
         
         logger.info(f"📊 Fetched {len(fixtures)} total fixtures")
         
-        # Filter by date range in code (handles both datetime and string formats)
-        if not matchday and not upcoming_only:
-            now = datetime.now(timezone.utc)
-            if days_ahead >= 180:
-                start_date = datetime(2024, 1, 1, tzinfo=timezone.utc)
-                end_date = now + timedelta(days=days_ahead)
-            else:
-                start_date = now - timedelta(days=7)
-                end_date = now + timedelta(days=days_ahead)
-            
-            filtered_fixtures = []
-            for fixture in fixtures:
-                utc_date = fixture.get('utc_date')
-                if utc_date is None:
-                    continue
-                    
-                # Convert to datetime if it's a string
-                if isinstance(utc_date, str):
-                    try:
-                        # Handle ISO format strings
-                        utc_date = datetime.fromisoformat(utc_date.replace('Z', '+00:00'))
-                    except:
-                        continue
-                
-                # Ensure timezone aware for comparison
-                if utc_date.tzinfo is None:
-                    utc_date = utc_date.replace(tzinfo=timezone.utc)
-                
-                # Check if within date range
-                if start_date <= utc_date <= end_date:
-                    filtered_fixtures.append(fixture)
-            
-            fixtures = filtered_fixtures
-            logger.info(f"📅 After date filtering: {len(fixtures)} fixtures (from {len(fixtures)} total)")
         
         # Convert MongoDB _id and datetime objects to strings
         for fixture in fixtures:
