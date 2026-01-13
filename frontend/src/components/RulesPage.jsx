@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Trophy, Users, Calendar, Coins } from 'lucide-react';
+import { ArrowLeft, Trophy, Users, Calendar, Heart } from 'lucide-react';
 import { useLanguage } from '../LanguageContext';
 
 export function RulesPage({ onBack }) {
@@ -11,28 +11,43 @@ export function RulesPage({ onBack }) {
       {/* Header with Back Button */}
       <Button onClick={onBack} variant="outline" className="mb-4">
         <ArrowLeft className="w-4 h-4 mr-2" />
-        {t.rules.backButton}
+        {t.rules?.backButton || "Back to App"}
       </Button>
 
       <Card className="shadow-lg">
         <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white">
           <CardTitle className="text-3xl flex items-center gap-3">
             <Trophy className="w-8 h-8" />
-            {t.rules.title}
+            {t.rules?.title || "How to Play HadFun"}
           </CardTitle>
-          <p className="text-green-100 text-lg mt-2">{t.rules.subtitle}</p>
+          <p className="text-green-100 text-lg mt-2">{t.rules?.subtitle || "Your guide to football predictions"}</p>
         </CardHeader>
         
         <CardContent className="space-y-6 pt-6">
-          {/* Free to Play */}
-          <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded">
-            <h2 className="text-2xl font-bold text-blue-900 mb-2 flex items-center gap-2">
-              <Trophy className="w-6 h-6" />
-              {t.rules.freeToPlay}
+          
+          {/* Free to Play Banner */}
+          <div className="bg-green-50 border-2 border-green-500 rounded-lg p-6">
+            <h2 className="text-2xl font-bold text-green-700 mb-3 flex items-center gap-2">
+              <span>✅</span> {t.rules?.freeToPlayTitle || "100% Free to Play"}
             </h2>
-            <p className="text-blue-800 font-semibold">{t.rules.noSubscriptions}</p>
-            <p className="text-gray-700 mt-2">
-              {t.rules.freePlayDesc}
+            <p className="text-gray-700 mb-4">
+              {t.rules?.freeToPlayDesc || "HadFun is completely free to play. No payment is ever required to make predictions, compete with friends, or appear on leaderboards."}
+            </p>
+            <ul className="space-y-2 text-gray-700">
+              <li>• {t.rules?.freePoint1 || "No subscription fees"}</li>
+              <li>• {t.rules?.freePoint2 || "No entry fees for competitions"}</li>
+              <li>• {t.rules?.freePoint3 || "No hidden costs"}</li>
+              <li>• {t.rules?.freePoint4 || "Play as often as you like"}</li>
+            </ul>
+          </div>
+
+          {/* Not Gambling Statement */}
+          <div className="bg-red-50 border-2 border-red-400 rounded-lg p-4">
+            <h3 className="text-lg font-bold text-red-700 mb-2 flex items-center gap-2">
+              <span>🚫</span> {t.rules?.notGamblingTitle || "Not Gambling"}
+            </h3>
+            <p className="text-gray-700">
+              {t.rules?.notGamblingText || "HadFun is a free-to-play prediction game. No purchase is required. We do not offer betting, wagering, or prize-based gambling."}
             </p>
           </div>
 
@@ -40,17 +55,17 @@ export function RulesPage({ onBack }) {
           <div>
             <h2 className="text-2xl font-bold text-emerald-600 mb-3 flex items-center gap-2">
               <Calendar className="w-6 h-6" />
-              {t.rules.howItWorks}
+              {t.rules?.howItWorks || "How It Works"}
             </h2>
             <div className="space-y-3 text-gray-700">
               <p className="leading-relaxed">
-                <strong>{t.rules.theObject}</strong> {t.rules.objectDesc}
+                <strong>{t.rules?.theObject || "The Object:"}</strong> {t.rules?.objectDesc || "Predict match outcomes (Home Win, Away Win, or Draw) and earn points for correct predictions."}
               </p>
               <p className="leading-relaxed">
-                <strong>{t.rules.predictions}</strong> {t.rules.predictionsDesc}
+                <strong>{t.rules?.predictions || "Predictions:"}</strong> {t.rules?.predictionsDesc || "Submit your predictions before match kick-off. You can change predictions until the deadline (Wednesday 11:59 PM for weekend matches)."}
               </p>
               <p className="leading-relaxed">
-                <strong>{t.rules.scoring}</strong> {t.rules.scoringDesc}
+                <strong>{t.rules?.scoring || "Scoring:"}</strong> {t.rules?.scoringDesc || "Earn 1 point for each correct prediction. Track your score on the leaderboard."}
               </p>
             </div>
           </div>
@@ -59,153 +74,101 @@ export function RulesPage({ onBack }) {
           <div>
             <h2 className="text-2xl font-bold text-emerald-600 mb-3 flex items-center gap-2">
               <Users className="w-6 h-6" />
-              {t.rules.teamsPrivateForum}
+              {t.rules?.teamsPrivateForum || "Teams & Private Forum"}
             </h2>
             <div className="space-y-3 text-gray-700">
               <p className="leading-relaxed">
-                {t.rules.forumDesc}
+                {t.rules?.forumDesc || "Create or join a private team to compete with friends, family, or colleagues. Each team has its own private leaderboard and chat forum."}
               </p>
               <p className="leading-relaxed">
-                <strong>{t.rules.creatingTeam}</strong> {t.rules.creatingDesc}
+                <strong>{t.rules?.creatingTeam || "Creating a Team:"}</strong> {t.rules?.creatingDesc || "You become the admin and receive a unique join code to share with friends."}
               </p>
               <p className="leading-relaxed">
-                <strong>{t.rules.joiningTeam}</strong> {t.rules.joiningDesc}
+                <strong>{t.rules?.joiningTeam || "Joining a Team:"}</strong> {t.rules?.joiningDesc || "Enter the join code shared by your friend to join their team."}
+              </p>
+              <p className="leading-relaxed">
+                <strong>{t.rules?.teamSize || "Team Size:"}</strong> {t.rules?.teamSizeDesc || "Teams are limited to a maximum of 30 members."}
               </p>
             </div>
           </div>
 
-          {/* Play Modes */}
-          <div>
-            <h2 className="text-2xl font-bold text-emerald-600 mb-3 flex items-center gap-2">
-              <Coins className="w-6 h-6" />
-              {t.rules.twoWaysToPlay}
+          {/* Weekly Challenge */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h2 className="text-xl font-bold text-blue-900 mb-3 flex items-center gap-2">
+              <Trophy className="w-5 h-5" />
+              {t.rules?.weeklyChallengeTitle || "Weekly Challenge"}
             </h2>
-            
-            {/* Free Mode */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-              <h3 className="text-xl font-bold text-blue-900 mb-2">{t.rules.playForFreeTitle}</h3>
-              <ul className="list-disc list-inside space-y-2 text-gray-700">
-                {t.rules.playForFreeList.map((item, index) => (
-                  <li key={index}>{item}</li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Paid Mode */}
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <h3 className="text-xl font-bold text-green-900 mb-2">{t.rules.weeklyPotTitle}</h3>
-              <ul className="list-disc list-inside space-y-2 text-gray-700 mb-3">
-                {t.rules.weeklyPotList.map((item, index) => (
-                  <li key={index}>{item}</li>
-                ))}
-              </ul>
-              <p className="text-sm text-gray-600 italic">
-                <strong>Note:</strong> {t.rules.weeklyPotNote}
-              </p>
-            </div>
-          </div>
-
-          {/* Payment Details */}
-          <div className="bg-amber-50 border-l-4 border-amber-600 p-4 rounded">
-            <h3 className="text-xl font-bold text-amber-900 mb-2">{t.rules.paymentInfo}</h3>
-            <ul className="list-disc list-inside space-y-2 text-gray-700">
-              {t.rules.paymentList.map((item, index) => (
-                <li key={index}>{item}</li>
-              ))}
+            <p className="text-gray-700 mb-3">
+              {t.rules?.weeklyChallengeDesc || "Each week, compete to be the top predictor in your team. The player with the most correct predictions earns bragging rights!"}
+            </p>
+            <ul className="list-disc list-inside space-y-1 text-gray-700">
+              <li>{t.rules?.challengePoint1 || "Compete for fun with friends"}</li>
+              <li>{t.rules?.challengePoint2 || "Track weekly and all-time scores"}</li>
+              <li>{t.rules?.challengePoint3 || "See who's the best predictor"}</li>
+              <li>{t.rules?.challengePoint4 || "No entry fee required"}</li>
             </ul>
           </div>
 
-          {/* Charity & Social Impact */}
-          <div className="bg-gradient-to-r from-pink-50 to-purple-50 border-l-4 border-pink-500 p-4 rounded">
-            <h3 className="text-xl font-bold text-pink-900 mb-3 flex items-center gap-2">
-              ❤️ {t.rules?.charityTitle || 'Football With Purpose: Supporting Each Other & Charities'}
-            </h3>
-            <div className="space-y-4 text-gray-700">
-              <p className="leading-relaxed font-medium text-pink-900">
-                {t.rules?.charityIntro || "At HadFun, we believe in playing with purpose - whether that's supporting charities or supporting each other. After all, charity begins at home!"}
-              </p>
-              
-              {/* Community Support Feature */}
-              <div className="bg-white/70 rounded-lg p-4 border-2 border-pink-300">
-                <h4 className="font-bold text-pink-900 mb-2 flex items-center gap-2">
-                  🤝 {t.community?.communityCareBanner || 'Charity Begins at Home - Community Care'}
-                </h4>
-                <p className="leading-relaxed mb-3">
-                  {t.community?.communityCareDesc || 'HadFun isn\'t just about predictions - it\'s about building a caring community. Through our Community Care feature, team members can nominate teammates facing hardship. When someone wins, they can choose to share their winnings with those who need support.'}
-                </p>
-                <ul className="list-disc list-inside space-y-1 ml-4 text-sm">
-                  <li>{t.rules?.charityPoint1 || 'Nominate teammates respectfully and compassionately'}</li>
-                  <li>{t.rules?.charityPoint2 || 'Winners see nominations when they win'}</li>
-                  <li>{t.rules?.charityPoint3 || 'Completely optional - no pressure on anyone'}</li>
-                  <li>{t.rules?.charityPoint4 || 'All acts of kindness are celebrated in your team'}</li>
-                </ul>
-              </div>
-              
-              {/* External Charities */}
-              <div>
-                <h4 className="font-bold text-pink-900 mb-2">{t.rules?.externalCharityTitle || '🌍 Support External Charities'}</h4>
-                <p className="leading-relaxed mb-2">
-                  {t.rules?.externalCharityDesc || "Teams can also choose to donate winnings to external charities they're passionate about!"}
-                </p>
-                <ul className="list-disc list-inside space-y-1 ml-4 text-sm">
-                  <li>{t.rules?.externalCharityPoint1 || 'Teams decide together which charity to support'}</li>
-                  <li>{t.rules?.externalCharityPoint2 || 'Switch charities weekly or stay committed to one cause'}</li>
-                  <li>{t.rules?.externalCharityPoint3 || 'Split winnings between team members and charity'}</li>
-                  <li>{t.rules?.externalCharityPoint4 || 'Or keep the pot within the team - your choice!'}</li>
-                </ul>
-              </div>
-              
-              <p className="text-sm text-pink-800 italic mt-3 bg-white/50 p-3 rounded">
-                {t.rules?.charityClosing || 'Your Team, Your Choice: Whether you support teammates, donate to charities, or keep winnings amongst yourselves - it\'s entirely up to your team. HadFun provides the platform and community features; you decide how to use them with purpose!'}
-              </p>
+          {/* Optional Charity Donations */}
+          <div className="bg-gradient-to-r from-pink-50 to-purple-50 border-2 border-pink-400 rounded-lg p-6">
+            <h2 className="text-2xl font-bold text-pink-700 mb-3 flex items-center gap-2">
+              <Heart className="w-6 h-6" />
+              {t.rules?.charityTitle || "Optional Charity Donations"}
+            </h2>
+            <p className="text-gray-700 mb-4">
+              {t.rules?.charityIntro || "HadFun allows you to optionally support charities you care about. Donations are completely separate from gameplay."}
+            </p>
+            
+            <div className="bg-white/70 rounded-lg p-4 mb-4">
+              <h3 className="font-bold text-pink-800 mb-2">{t.rules?.charityHowTitle || "How Charity Donations Work:"}</h3>
+              <ul className="space-y-2 text-gray-700">
+                <li>✅ {t.rules?.charityHow1 || "Donations are 100% voluntary"}</li>
+                <li>✅ {t.rules?.charityHow2 || "Choose from verified charities"}</li>
+                <li>✅ {t.rules?.charityHow3 || "100% of your donation goes to charity"}</li>
+                <li>✅ {t.rules?.charityHow4 || "Donate any amount you choose"}</li>
+              </ul>
+            </div>
+
+            <div className="bg-amber-100 rounded-lg p-4">
+              <h3 className="font-bold text-amber-800 mb-2">{t.rules?.importantTitle || "Important:"}</h3>
+              <ul className="space-y-1 text-gray-700 text-sm">
+                <li>❌ {t.rules?.donationRule1 || "Donations do NOT affect your score"}</li>
+                <li>❌ {t.rules?.donationRule2 || "Donations do NOT affect rankings"}</li>
+                <li>❌ {t.rules?.donationRule3 || "Donations do NOT give any gameplay advantage"}</li>
+                <li>❌ {t.rules?.donationRule4 || "Donations are NOT required to play"}</li>
+              </ul>
             </div>
           </div>
 
-          {/* Flexibility */}
-          <div>
-            <h2 className="text-2xl font-bold text-emerald-600 mb-3">{t.rules.flexibility}</h2>
-            <div className="space-y-3 text-gray-700">
-              <p className="leading-relaxed">
-                <strong>{t.rules.noSubscriptionsDesc}</strong>
-              </p>
-              <p className="leading-relaxed">
-                <strong>{t.rules.multipleLeagues}</strong> {t.rules.multipleLeaguesDesc}
-              </p>
-              <p className="leading-relaxed">
-                <strong>{t.rules.multiLanguage}</strong> {t.rules.multiLanguageDesc}
-              </p>
-            </div>
-          </div>
-
-          {/* Available Leagues */}
-          <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg p-4">
-            <h3 className="text-xl font-bold text-indigo-900 mb-3">{t.rules.availableLeagues}</h3>
-            <div className="grid grid-cols-2 gap-3 text-gray-700">
-              {t.rules.leagues.map((league, index) => (
-                <div key={index}>• {league}</div>
-              ))}
-            </div>
-          </div>
-
-          {/* Call to Action */}
-          <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg p-6 text-center">
-            <h2 className="text-3xl font-bold mb-2">{t.rules.callToAction}</h2>
-            <p className="text-green-100 text-lg">
-              {t.rules.callToActionDesc}
+          {/* Fair Play */}
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <h2 className="text-xl font-bold text-gray-800 mb-2">{t.rules?.fairPlayTitle || "Fair Play"}</h2>
+            <p className="text-gray-700">
+              {t.rules?.fairPlayDesc || "HadFun is a friendly community. Treat all users with respect. Abuse, harassment, or inappropriate behaviour may result in removal from the platform."}
             </p>
           </div>
 
-          {/* Contact */}
-          <div className="border-t pt-4 text-center">
-            <p className="text-gray-600 text-sm">
-              {t.rules.questions}{' '}
-              <a href={`mailto:${t.rules.emailContact}`} className="text-emerald-600 hover:underline font-semibold">
-                {t.rules.emailContact}
-              </a>
+          {/* Entertainment Disclaimer */}
+          <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+            <p className="text-blue-800 font-medium">
+              {t.rules?.entertainmentDisclaimer || "HadFun is intended for entertainment purposes only. Please play responsibly. If you choose to donate, please only donate what you can afford."}
             </p>
+          </div>
+
+          {/* Back Button */}
+          <div className="flex justify-center pt-4">
+            <Button onClick={onBack} className="bg-emerald-600 hover:bg-emerald-700">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              {t.rules?.backButton || "Back to App"}
+            </Button>
           </div>
         </CardContent>
       </Card>
+      
+      {/* Legal Footer */}
+      <div className="mt-6 text-center text-sm text-gray-500 border-t pt-4">
+        <p>{t.footer?.legalText || "HadFun is free-to-play. No purchase is required to play. Optional charity donations are separate from gameplay and do not affect results."}</p>
+      </div>
     </div>
   );
 }
