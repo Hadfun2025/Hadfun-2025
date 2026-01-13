@@ -171,40 +171,40 @@ export const translations = {
       draw: "Draw",
       predicted: "Predicted"
     },
-    // Weekly Pot
+    // Weekly Challenge (renamed from Weekly Pot)
     pot: {
-      title: "Weekly Pot",
-      subtitle: "Join this week's competition",
-      entered: "Entered",
-      notEntered: "Not Entered",
-      alreadyEntered: "You're entered in this week's pot!",
-      makePredict: "Make your predictions before Wednesday 11:59 PM to compete for the prize.",
+      title: "Weekly Challenge",
+      subtitle: "Join this week's prediction challenge",
+      entered: "Joined",
+      notEntered: "Not Joined",
+      alreadyEntered: "You're in this week's challenge!",
+      makePredict: "Make your predictions before Wednesday 11:59 PM to compete.",
       joinMessage: "Play for fun with friends and family!",
-      joinSubtext: "Predict match results, track scores, and see who's the best predictor. Optional weekly pot available if your group wants to add stakes.",
-      chooseButton: "Choose How to Play",
-      checkingPayment: "Checking payment status..."
+      joinSubtext: "Predict match results, track scores, and see who's the best predictor. 100% free to play!",
+      chooseButton: "Join Challenge",
+      checkingPayment: "Loading..."
     },
-    // Payment Modal
+    // Charity Donation Modal (renamed from Payment Modal)
     payment: {
-      title: "Choose Your Play Mode",
-      subtitle: "Play for fun, or add optional stakes for your group",
-      playForFree: "Play for Free",
-      recommended: "Recommended",
+      title: "Support a Charity",
+      subtitle: "Make an optional donation - does not affect gameplay",
+      playForFree: "Continue Free",
+      recommended: "Popular",
       popular: "Popular",
-      stake: "Stake",
+      stake: "Donate",
       processing: "Processing",
-      sharedFees: "shared fees",
+      sharedFees: "processing fees",
       total: "Total",
-      justForFun: "Just for fun - no stakes needed!",
-      howItWorks: "How it works:",
-      feesShared: "Payment processing fees shared 50/50",
-      adminFee: "10% admin fee deducted from pot",
-      winnerTakesAll: "Winner takes all remaining pot",
-      tiesRollover: "Ties result in pot rollover",
+      justForFun: "Free to play - donations are optional!",
+      howItWorks: "About donations:",
+      feesShared: "Small payment processing fee applies",
+      adminFee: "100% of your donation goes to charity",
+      winnerTakesAll: "Donations do not affect scores or rankings",
+      tiesRollover: "Thank you for supporting a good cause",
       deadline: "Predictions close Wednesday 11:59 PM",
       cancel: "Cancel",
-      pay: "Pay",
-      playForFunBtn: "Play for Fun"
+      pay: "Donate",
+      playForFunBtn: "Continue Free"
     },
     // Leaderboard
     leaderboard: {
